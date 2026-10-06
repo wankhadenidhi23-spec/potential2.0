@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard - POTential</title>
+
+    <link rel="stylesheet" href="student-dashboard.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            POTential
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-link active">
+                🏠 Home
+            </a>
+
+            <a href="browse-jobs.html" class="nav-link">
+                🔍 Find Opportunities
+            </a>
+
+            <a href="my-applications.html" class="nav-link">
+                📄 My Applications
+            </a>
+
+            <a href="student-profile.html" class="nav-link">
+                👤 Profile
+            </a>
+
+            <a href="#" class="nav-link">
+                ⚙️ Settings
+            </a>
+
+        </nav>
+
+        <a href="#" class="nav-link logout" id="logoutButton">
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+
+            <div>
+                <h1>Student Dashboard</h1>
+
+                <p>
+                    Welcome back! Find your next opportunity.
+                </p>
+            </div>
+
+            <div class="profile">
+
+                <div class="profile-icon" id="profileIcon">
+                    👤
+                </div>
+
+                <span id="profileName">
+                    Student
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- Welcome Section -->
+        <section class="welcome">
+
+           <h2>
+   HELLO, <span id="welcomeName">Student</span> ✨
+</h2>
+
+            <p>
+                Explore opportunities and take the next step
+                towards your career.
+            </p>
+
+        </section>
+
+
+        <!-- Statistics -->
+        <section class="stats">
+
+            <div class="stat-card">
+
+                <h3>
+                    Applications
+                </h3>
+
+                <p id="applicationsCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Pending
+                </h3>
+
+                <p id="pendingCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Accepted
+                </h3>
+
+                <p id="acceptedCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Rejected
+                </h3>
+
+                <p id="rejectedCount">
+                    0
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- Recommended Opportunities -->
+        <section class="opportunities">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Recommended Opportunities
+                    </h2>
+
+                    <p>
+                        Opportunities you may be interested in.
+                    </p>
+
+                </div>
+
+
+                <a href="browse-jobs.html">
+                    View All
+                </a>
+
+            </div>
+
+
+            <!-- Dynamic Opportunity Cards -->
+            <div
+                class="opportunity-grid"
+                id="opportunityContainer"
+            >
+
+                <p>
+                    Loading opportunities...
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../supabase-config.js"></script>
+
+    <script src="../supabase-client.js"></script>
+
+
+    <script>
+
+        /* ==========================================
+           GET CURRENT LOGGED-IN USER
+        ========================================== */
+
+        async function getCurrentUser() {
+
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.getUser();
+
+
+            if (error) {
+
+                console.error(
+                    "Error getting user:",
+                    error
+                );
+
+                return null;
+            }
+
+
+            if (!data.user) {
+
+                console.log(
+                    "No logged-in user."
+                );
+
+                return null;
+            }
+
+
+            return data.user;
+        }
+
+
+
+        /* ==========================================
+           LOAD STUDENT PROFILE
+        ========================================== */
+
+        async function loadStudentProfile(user) {
+
+            const {
+                data: profile,
+                error
+            } = await supabaseClient
+                .from("profiles")
+                .select("full_name")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+
+            if (error) {
+
+                console.error(
+                    "Error loading profile:",
+                    error
+                );
+
+                return;
+            }
+
+
+            if (profile && profile.full_name) {
+
+                document.getElementById(
+                    "profileName"
+                ).textContent =
+                    profile.full_name;
+                    
+
+                document.getElementById(
+                    "profileIcon"
+                ).textContent =
+                    profile.full_name
+                        .charAt(0)
+                        .toUpperCase();
+                
+                document.getElementById(
+    "welcomeName"
+).textContent =
+    profile.full_name;
+
+            }
+
+        }
+
+
+
+        /* ==========================================
+           LOAD APPLICATION STATISTICS
+        ========================================== */
+
+        async function loadApplicationStats(user) {
+
+            const {
+                data: applications,
+                error
+            } = await supabaseClient
+                .from("applications")
+                .select("status")
+                .eq("student_id", user.id);
+
+
+            if (error) {
+
+                console.error(
+                    "Error loading application statistics:",
+                    error
+                );
+
+                return;
+            }
+
+
+            const applicationList =
+                applications || [];
+
+
+            const total =
+                applicationList.length;
+
+
+            const pending =
+                applicationList.filter(
+                    app =>
+                        (app.status || "")
+                            .toLowerCase() === "pending"
+                ).length;
+
+
+            const accepted =
+                applicationList.filter(
+                    app =>
+                        (app.status || "")
+                            .toLowerCase() === "accepted"
+                ).length;
+
+
+            const rejected =
+                applicationList.filter(
+                    app =>
+                        (app.status || "")
+                            .toLowerCase() === "rejected"
+                ).length;
+
+
+            document.getElementById(
+                "applicationsCount"
+            ).textContent = total;
+
+
+            document.getElementById(
+                "pendingCount"
+            ).textContent = pending;
+
+
+            document.getElementById(
+                "acceptedCount"
+            ).textContent = accepted;
+
+
+            document.getElementById(
+                "rejectedCount"
+            ).textContent = rejected;
+
+        }
+
+
+
+        /* ==========================================
+           LOAD RECOMMENDED OPPORTUNITIES
+        ========================================== */
+
+        async function loadRecommendedJobs() {
+
+            const container =
+                document.getElementById(
+                    "opportunityContainer"
+                );
+
+
+            const {
+                data: jobs,
+                error
+            } = await supabaseClient
+                .from("jobs")
+                .select("*")
+                .eq("status", "open")
+                .order("created_at", {
+                    ascending: false
+                })
+                .limit(3);
+
+
+            if (error) {
+
+                console.error(
+                    "Error loading opportunities:",
+                    error
+                );
+
+
+                container.innerHTML = `
+                    <p>
+                        Unable to load opportunities.
+                    </p>
+                `;
+
+                return;
+            }
+
+
+            if (!jobs || jobs.length === 0) {
+
+                container.innerHTML = `
+                    <p>
+                        No opportunities available right now.
+                    </p>
+                `;
+
+                return;
+            }
+
+
+            container.innerHTML = "";
+
+
+            jobs.forEach(function (job) {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.className =
+                    "opportunity-card";
+
+
+                card.innerHTML = `
+
+                    <span class="tag">
+                        ${job.job_type || "Opportunity"}
+                    </span>
+
+                    <h3>
+                        ${job.title || "Opportunity"}
+                    </h3>
+
+                    <p>
+                        📍 ${job.location || "Not specified"}
+                    </p>
+
+                    <p>
+                        💰 ${job.salary || "Not specified"}
+                    </p>
+
+                    <p>
+                        📅 Deadline:
+                        ${job.deadline || "Not specified"}
+                    </p>
+
+                    <button class="view-details-button">
+                        View Details
+                    </button>
+
+                `;
+
+
+                const button =
+                    card.querySelector(
+                        ".view-details-button"
+                    );
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        localStorage.setItem(
+                            "selectedJobId",
+                            job.id
+                        );
+
+
+                        window.location.href =
+                            "opportunity-details.html";
+
+                    }
+                );
+
+
+                container.appendChild(card);
+
+            });
+
+        }
+
+
+
+        /* ==========================================
+           LOGOUT
+        ========================================== */
+
+        document
+            .getElementById("logoutButton")
+            .addEventListener(
+                "click",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient.auth.signOut();
+
+
+                    if (error) {
+
+                        console.error(
+                            "Logout error:",
+                            error
+                        );
+
+
+                        alert(
+                            "Unable to logout."
+                        );
+
+                        return;
+                    }
+
+
+                    window.location.href =
+                        "../auth.html";
+
+                }
+            );
+
+
+
+        /* ==========================================
+           PAGE LOAD
+        ========================================== */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async function () {
+
+                const user =
+                    await getCurrentUser();
+
+
+                if (!user) {
+
+                    window.location.href =
+                        "../auth.html";
+
+                    return;
+                }
+
+
+                await loadStudentProfile(
+                    user
+                );
+
+
+                await loadApplicationStats(
+                    user
+                );
+
+
+                await loadRecommendedJobs();
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

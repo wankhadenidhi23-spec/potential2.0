@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - POTential</title>
+
+    <link rel="stylesheet" href="student-dashboard.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            POTential
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-link">
+                🏠 Dashboard
+            </a>
+
+            <a href="browse-jobs.html" class="nav-link">
+                🔍 Find Opportunities
+            </a>
+
+            <a href="my-applications.html" class="nav-link active">
+                📄 My Applications
+            </a>
+
+            <a href="#" class="nav-link">
+                👤 Profile
+            </a>
+
+            <a href="#" class="nav-link">
+                ⚙️ Settings
+            </a>
+
+        </nav>
+
+        <a href="#" class="nav-link logout">
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <h2>My Applications</h2>
+
+            <div class="user-info">
+    <div class="user-avatar" id="userAvatar">S</div>
+    <span id="userName">Student</span>
+</div>
+        </header>
+
+
+        <!-- Page Content -->
+        <section class="welcome">
+            <h1>My Applications</h1>
+            <p>Track the opportunities you have applied for.</p>
+        </section>
+
+
+        <!-- Applications -->
+        <section class="opportunities">
+
+            <div class="section-header">
+                <h2>Your Applications</h2>
+            </div>
+
+
+            <div class="opportunity-grid" id="applicationsContainer">
+
+            
+            </div>
+
+        </section>
+
+    </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase-config.js"></script>
+<script src="../supabase-client.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", async function () {
+
+    const container = document.getElementById("applicationsContainer");
+
+    // Get logged-in student
+    const { data: { user }, error: authError } =
+        await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+        container.innerHTML = "<p>Please login first.</p>";
+        return;
+    }
+
+    console.log("Logged-in Student ID:", user.id);
+
+    // Get student's applications
+   const { data: applications, error } = await supabaseClient
+    .from("applications")
+    .select(`
+        *,
+        jobs (
+            title
+        )
+    `)
+    .eq("student_id", user.id);
+
+    if (error) {
+        console.error("Applications error:", error);
+        container.innerHTML = "<p>Unable to load applications.</p>";
+        return;
+    }
+
+    console.log("MY APPLICATIONS:", applications);
+
+    if (!applications || applications.length === 0) {
+        container.innerHTML = "<p>You have not applied for any opportunities yet.</p>";
+        return;
+    }
+
+    container.innerHTML = "";
+
+    applications.forEach(function (application) {
+
+        const card = document.createElement("div");
+        card.className = "opportunity-card";
+
+        card.innerHTML = `
+    <h3>💼 ${application.jobs?.title || "Opportunity"}</h3>
+
+    <p>📄 Application ID: ${application.id}</p>
+
+    <p>📅 Applied: ${application.applied_at || "Not specified"}</p>
+
+    <span class="tag">${application.status || "Pending"}</span>
+`;
+
+        container.appendChild(card);
+    });
+
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+<script src="my-applications.js"></script>
+</body>
+</html>

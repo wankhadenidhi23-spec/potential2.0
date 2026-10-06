@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>POTential | Business Profile</title>
+
+    <link rel="stylesheet" href="business-profile.css">
+
+<style>
+.verification-card { margin-top: 25px; padding-top: 25px; border-top: 1px solid #e5e7eb; }
+.verification-status { display:inline-block; margin:8px 0 16px; padding:7px 12px; border-radius:20px; font-size:13px; font-weight:700; background:#f3f4f6; color:#374151; }
+.verification-status.pending { background:#fef3c7; color:#92400e; }
+.verification-status.approved { background:#dcfce7; color:#166534; }
+.verification-status.rejected { background:#fee2e2; color:#991b1b; }
+.verification-help { color:#686d8c; font-size:14px; line-height:1.5; margin-bottom:15px; }
+.verification-upload { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.verification-upload input[type=file] { max-width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; background:white; }
+.verify-upload-btn { padding:11px 18px; border:none; border-radius:8px; background:#554ac8; color:white; cursor:pointer; font-size:14px; }
+.verify-upload-btn:disabled { opacity:.6; cursor:not-allowed; }
+.verification-message { margin-top:12px; font-size:14px; }
+</style>
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+    <a href="business-dashboard.html" class="logo">
+        POTential
+    </a>
+
+    <div class="nav-right">
+
+        <span id="businessNameTop" class="business-name">
+            Business
+        </span>
+
+        <button
+            type="button"
+            id="logoutBtn"
+            class="logout-btn">
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+<main class="profile-page">
+
+    <a
+        href="business-dashboard.html"
+        class="back-link">
+        ← Back to Dashboard
+    </a>
+
+
+    <!-- PROFILE HEADER -->
+
+    <section class="profile-hero">
+
+        <div class="hero-left">
+
+            <div
+                id="profileAvatar"
+                class="avatar">
+                B
+            </div>
+
+            <div>
+
+                <p class="eyebrow">
+                    BUSINESS PROFILE
+                </p>
+
+                <h1 id="heroBusinessName">
+                    Business Profile
+                </h1>
+
+                <p>
+                    Edit your existing business information.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="active-badge">
+
+            <span></span>
+
+            Active Business
+
+        </div>
+
+    </section>
+
+
+    <!-- PROFILE CARD -->
+
+    <section class="profile-card">
+
+        <div class="card-header">
+
+            <h2>
+                Business Information
+            </h2>
+
+            <p>
+                Update your existing business information.
+            </p>
+
+        </div>
+
+
+        <!-- LOADING -->
+
+        <div
+            id="loadingBox"
+            class="loading-box">
+
+            Loading business information...
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form
+            id="profileForm"
+            class="hidden">
+
+            <div class="form-grid">
+
+
+                <!-- BUSINESS NAME -->
+
+                <div class="form-group">
+
+                    <label for="businessName">
+                        Business Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="businessName"
+                        placeholder="Enter business name"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- BUSINESS TYPE -->
+
+                <div class="form-group">
+
+                    <label for="businessType">
+                        Business Type
+                    </label>
+
+                    <input
+                        type="text"
+                        id="businessType"
+                        placeholder="Example: Teaching"
+                    >
+
+                </div>
+
+
+                <!-- CITY -->
+
+                <div class="form-group">
+
+                    <label for="city">
+                        City
+                    </label>
+
+                    <input
+                        type="text"
+                        id="city"
+                        placeholder="Example: Amravati"
+                    >
+
+                </div>
+
+
+                <!-- PHONE -->
+
+                <div class="form-group">
+
+                    <label for="phone">
+                        Phone
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        placeholder="Enter phone number"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- MESSAGE -->
+
+            <div
+                id="profileMessage"
+                class="message">
+            </div>
+
+
+            <!-- BUTTONS -->
+
+            <div class="actions">
+
+                <a
+                    href="business-dashboard.html"
+                    class="cancel-btn">
+                    Cancel
+                </a>
+
+
+                <button
+                    type="submit"
+                    id="saveBtn"
+                    class="save-btn">
+
+                    <span id="saveText">
+                        Save Changes
+                    </span>
+
+                    <span>
+                        →
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+
+        <!-- ERROR -->
+
+        <div
+            id="errorBox"
+            class="error-box hidden">
+        </div>
+
+    </section>
+
+
+
+
+        <!-- VERIFICATION -->
+        <section class="profile-card verification-card">
+            <div class="card-header">
+                <h2>Business Verification</h2>
+                <p class="verification-help">Upload a clear business proof such as Udyam/MSME, Shop & Establishment, GST certificate, or another valid business registration document.</p>
+            </div>
+
+            <div id="businessVerificationStatus" class="verification-status">Not submitted</div>
+
+            <div class="verification-upload">
+                <input type="file" id="businessVerificationFile" accept="image/jpeg,image/png,application/pdf">
+                <button type="button" class="verify-upload-btn" id="businessVerificationUploadBtn">Upload Business Proof</button>
+            </div>
+            <div id="businessVerificationMessage" class="verification-message"></div>
+        </section>
+
+
+    <p class="footer-note">
+        POTential · Empowering Students. Building Stronger Communities.
+    </p>
+
+</main>
+
+
+<!-- SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../supabase-config.js"></script>
+<script src="business-profile.js"></script>
+
+
+</body>
+
+</html>

@@ -12,13 +12,24 @@ let currentBusiness = null;
 
 const $ = (id) => document.getElementById(id);
 
+
+/* =========================================================
+   GENERAL MESSAGE
+   ========================================================= */
+
 function showMessage(text, type = "") {
   const el = $("message");
+
   if (!el) return;
 
   el.textContent = text;
   el.className = "message " + type;
 }
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -30,7 +41,9 @@ function escapeHtml(value) {
 }
 
 
-/* ---------------- BUSINESS DETAILS ---------------- */
+/* =========================================================
+   BUSINESS DETAILS
+   ========================================================= */
 
 async function loadBusiness() {
 
@@ -39,20 +52,30 @@ async function loadBusiness() {
     error: userError,
   } = await supabaseClient.auth.getUser();
 
+
   if (userError || !user) {
+
     window.location.href = "auth.html";
+
     return false;
   }
 
+
   currentUser = user;
 
-  const { data: business, error } = await supabaseClient
+
+  const {
+    data: business,
+    error
+  } = await supabaseClient
     .from("businesses")
     .select("*")
     .eq("owner_id", user.id)
     .single();
 
+
   if (error || !business) {
+
     console.error(error);
 
     showMessage(
@@ -63,25 +86,45 @@ async function loadBusiness() {
     return false;
   }
 
+
   currentBusiness = business;
 
-  $("businessNameTop").textContent =
-    business.business_name || "Business";
 
-  $("businessName").textContent =
-    business.business_name || "Not provided";
+  if ($("businessNameTop")) {
+    $("businessNameTop").textContent =
+      business.business_name || "Business";
+  }
 
-  $("businessType").textContent =
-    business.business_type || "Not provided";
 
-  $("businessCity").textContent =
-    business.city || "Not provided";
+  if ($("businessName")) {
+    $("businessName").textContent =
+      business.business_name || "Not provided";
+  }
 
-  $("businessPhone").textContent =
-    business.phone || "Not provided";
 
-  $("welcomeText").textContent =
-    `Welcome, ${business.business_name}! Manage your opportunities here.`;
+  if ($("businessType")) {
+    $("businessType").textContent =
+      business.business_type || "Not provided";
+  }
+
+
+  if ($("businessCity")) {
+    $("businessCity").textContent =
+      business.city || "Not provided";
+  }
+
+
+  if ($("businessPhone")) {
+    $("businessPhone").textContent =
+      business.phone || "Not provided";
+  }
+
+
+  if ($("welcomeText")) {
+    $("welcomeText").textContent =
+      `Welcome, ${business.business_name}! Manage your opportunities here.`;
+  }
+
 
   return true;
 }
@@ -95,16 +138,21 @@ async function checkBusinessVerification() {
 
   const popup = $("verificationPopup");
 
+
   if (!popup || !currentUser) {
     return;
   }
+
 
   /*
     Get the latest business verification document
     from the existing verification_documents table.
   */
 
-  const { data, error } = await supabaseClient
+  const {
+    data,
+    error
+  } = await supabaseClient
     .from("verification_documents")
     .select("status, uploaded_at")
     .eq("user_id", currentUser.id)
@@ -113,6 +161,7 @@ async function checkBusinessVerification() {
       ascending: false
     })
     .limit(1);
+
 
   if (error) {
 
@@ -123,6 +172,7 @@ async function checkBusinessVerification() {
 
     return;
   }
+
 
   /*
     Get latest verification record.
@@ -169,7 +219,7 @@ async function checkBusinessVerification() {
     APPROVED
     ----------------
     If verification is approved,
-    do not show the popup.
+    hide the popup.
   */
 
   if (record.status === "approved") {
@@ -184,8 +234,7 @@ async function checkBusinessVerification() {
     REJECTED
     ----------------
     For now we don't show the popup automatically.
-    Existing rejection handling remains on
-    the Business Profile page.
+    Rejection handling remains on Business Profile.
   */
 
   if (record.status === "rejected") {
@@ -198,11 +247,14 @@ async function checkBusinessVerification() {
 }
 
 
-/* ---------------- POST JOB ---------------- */
+/* =========================================================
+   POST OPPORTUNITY
+   ========================================================= */
 
 async function postOpportunity(e) {
 
   e.preventDefault();
+
 
   if (!currentBusiness) {
 
@@ -214,13 +266,17 @@ async function postOpportunity(e) {
     return;
   }
 
+
   const jobData = {
 
-    business_id: currentBusiness.id,
+    business_id:
+      currentBusiness.id,
 
-    title: $("title").value.trim(),
+    title:
+      $("title").value.trim(),
 
-    description: $("description").value.trim(),
+    description:
+      $("description").value.trim(),
 
     required_skills:
       $("skills").value.trim(),
@@ -239,7 +295,8 @@ async function postOpportunity(e) {
     deadline:
       $("deadline").value || null,
 
-    status: "open",
+    status:
+      "open",
   };
 
 
@@ -291,6 +348,7 @@ async function postOpportunity(e) {
 
   $("opportunityForm").reset();
 
+
   showMessage(
     "Opportunity posted successfully!",
     "success"
@@ -301,7 +359,9 @@ async function postOpportunity(e) {
 }
 
 
-/* ---------------- MY JOBS ---------------- */
+/* =========================================================
+   MY OPPORTUNITIES
+   ========================================================= */
 
 async function loadMyJobs() {
 
@@ -309,8 +369,10 @@ async function loadMyJobs() {
     return;
   }
 
+
   const container =
     $("jobsContainer");
+
 
   if (!container) {
     return;
@@ -367,6 +429,7 @@ async function loadMyJobs() {
     const card =
       document.createElement("div");
 
+
     card.className =
       "job-card";
 
@@ -404,6 +467,7 @@ async function loadMyJobs() {
         </span>
 
       </div>
+
     `;
 
 
@@ -414,16 +478,20 @@ async function loadMyJobs() {
 }
 
 
-/* ---------------- APPLICATIONS ---------------- */
+/* =========================================================
+   APPLICATIONS
+   ========================================================= */
 
 async function loadApplications() {
 
   const container =
     $("applicationsContainer");
 
+
   if (!container) {
     return;
   }
+
 
   if (!currentBusiness) {
     return;
@@ -434,7 +502,9 @@ async function loadApplications() {
     "<p class='loading'>Loading applications...</p>";
 
 
-  /* GET BUSINESS JOBS */
+  /*
+    GET BUSINESS JOBS
+  */
 
   const {
     data: jobs,
@@ -474,7 +544,9 @@ async function loadApplications() {
     );
 
 
-  /* GET APPLICATIONS */
+  /*
+    GET APPLICATIONS
+  */
 
   const {
     data: applications,
@@ -519,7 +591,9 @@ async function loadApplications() {
   }
 
 
-  /* GET STUDENT IDS */
+  /*
+    GET STUDENT IDS
+  */
 
   const studentIds =
     applications.map(
@@ -527,7 +601,9 @@ async function loadApplications() {
     );
 
 
-  /* GET STUDENT NAMES FROM PROFILES */
+  /*
+    GET STUDENT NAMES FROM PROFILES
+  */
 
   const {
     data: students,
@@ -556,7 +632,9 @@ async function loadApplications() {
   container.innerHTML = "";
 
 
-  /* DISPLAY APPLICATIONS */
+  /*
+    DISPLAY APPLICATIONS
+  */
 
   applications.forEach(
     (app) => {
@@ -568,7 +646,9 @@ async function loadApplications() {
         );
 
 
-      /* FIND THE STUDENT PROFILE */
+      /*
+        FIND STUDENT PROFILE
+      */
 
       const student =
         students?.find(
@@ -578,7 +658,9 @@ async function loadApplications() {
         );
 
 
-      /* GET STUDENT NAME */
+      /*
+        GET STUDENT NAME
+      */
 
       const studentName =
         student?.full_name ||
@@ -605,7 +687,9 @@ async function loadApplications() {
       let actionButtons = "";
 
 
-      /* PENDING */
+      /*
+        PENDING
+      */
 
       if (status === "pending") {
 
@@ -631,12 +715,15 @@ async function loadApplications() {
             </button>
 
           </div>
+
         `;
 
       }
 
 
-      /* ACCEPTED */
+      /*
+        ACCEPTED
+      */
 
       else if (
         status === "accepted"
@@ -661,7 +748,9 @@ async function loadApplications() {
       }
 
 
-      /* REJECTED */
+      /*
+        REJECTED
+      */
 
       else if (
         status === "rejected"
@@ -686,7 +775,9 @@ async function loadApplications() {
       }
 
 
-      /* APPLICATION CARD */
+      /*
+        APPLICATION CARD
+      */
 
       card.innerHTML = `
 
@@ -756,7 +847,9 @@ async function loadApplications() {
 }
 
 
-/* ---------------- UPDATE APPLICATION STATUS ---------------- */
+/* =========================================================
+   UPDATE APPLICATION STATUS
+   ========================================================= */
 
 async function updateApplicationStatus(
   id,
@@ -803,7 +896,9 @@ async function updateApplicationStatus(
 }
 
 
-/* ---------------- LOGOUT ---------------- */
+/* =========================================================
+   LOGOUT
+   ========================================================= */
 
 async function logout() {
 
@@ -818,61 +913,93 @@ async function logout() {
    VERIFICATION POPUP EVENTS
    ========================================================= */
 
-const verificationPopup =
-  $("verificationPopup");
-
-const closeVerificationPopup =
-  $("closeVerificationPopup");
-
-const verifyBusinessBtn =
-  $("verifyBusinessBtn");
-
-
 /*
-  CLOSE POPUP
+  IMPORTANT:
+  We use document-level event handling here.
+
+  This makes the popup buttons work reliably even if
+  the popup becomes visible after the dashboard loads.
 */
 
-if (closeVerificationPopup) {
 
-  closeVerificationPopup.addEventListener(
-    "click",
-    () => {
+document.addEventListener(
+  "click",
+  function (event) {
 
-      verificationPopup.classList.remove(
-        "show"
+
+    /* ---------------------------------------------
+       CLOSE POPUP BUTTON
+       --------------------------------------------- */
+
+    const closeButton =
+      event.target.closest(
+        "#closeVerificationPopup"
       );
 
+
+    if (closeButton) {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+
+      const popup =
+        document.getElementById(
+          "verificationPopup"
+        );
+
+
+      if (popup) {
+
+        popup.classList.remove(
+          "show"
+        );
+
+      }
+
+
+      return;
     }
-  );
-
-}
 
 
-/*
-  GET VERIFIED BUTTON
-*/
+    /* ---------------------------------------------
+       GET MY BUSINESS VERIFIED BUTTON
+       --------------------------------------------- */
 
-if (verifyBusinessBtn) {
+    const verifyButton =
+      event.target.closest(
+        "#verifyBusinessBtn"
+      );
 
-  verifyBusinessBtn.addEventListener(
-    "click",
-    () => {
+
+    if (verifyButton) {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
 
       window.location.href =
         "business-profile.html";
 
+
+      return;
     }
-  );
 
-}
+  }
+);
 
 
-/* ---------------- START DASHBOARD ---------------- */
+/* =========================================================
+   START DASHBOARD
+   ========================================================= */
 
 async function startDashboard() {
 
   const ok =
     await loadBusiness();
+
 
   if (!ok) {
     return;
@@ -880,6 +1007,7 @@ async function startDashboard() {
 
 
   await loadMyJobs();
+
 
   await loadApplications();
 
@@ -894,7 +1022,14 @@ async function startDashboard() {
 }
 
 
-/* ---------------- EVENTS ---------------- */
+/* =========================================================
+   EVENTS
+   ========================================================= */
+
+
+/*
+  OPPORTUNITY FORM
+*/
 
 if ($("opportunityForm")) {
 
@@ -906,6 +1041,10 @@ if ($("opportunityForm")) {
 }
 
 
+/*
+  REFRESH JOBS
+*/
+
 if ($("refreshJobs")) {
 
   $("refreshJobs").addEventListener(
@@ -915,6 +1054,10 @@ if ($("refreshJobs")) {
 
 }
 
+
+/*
+  REFRESH APPLICATIONS
+*/
 
 if ($("refreshApplications")) {
 
@@ -926,6 +1069,10 @@ if ($("refreshApplications")) {
 }
 
 
+/*
+  LOGOUT
+*/
+
 if ($("logoutBtn")) {
 
   $("logoutBtn").addEventListener(
@@ -936,6 +1083,8 @@ if ($("logoutBtn")) {
 }
 
 
-/* ---------------- RUN ---------------- */
+/* =========================================================
+   RUN DASHBOARD
+   ========================================================= */
 
 startDashboard();

@@ -2,501 +2,843 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Student Profile - POTential</title>
 
-    <link rel="stylesheet" href="student-dashboard.css">
+    <link
+        rel="stylesheet"
+        href="student-dashboard.css"
+    >
 
     <style>
-        .profile-container {
-            background: white;
+
+        /* =========================================
+           PROFILE PAGE
+        ========================================= */
+
+        .profile-page {
             padding: 30px;
-            border-radius: 14px;
-            margin-top: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         }
+
 
         .profile-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            padding-bottom: 25px;
-            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 25px;
         }
 
+
+        .profile-header h1 {
+            margin: 0 0 8px;
+        }
+
+
+        .profile-header p {
+            color: #666;
+            margin: 0;
+        }
+
+
+        /* =========================================
+           PROFILE CARD
+        ========================================= */
+
+        .profile-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 25px;
+        }
+
+
+        .profile-card h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+
         .large-profile-icon {
-            width: 80px;
-            height: 80px;
+            width: 75px;
+            height: 75px;
             border-radius: 50%;
-            background: #eef2ff;
-            color: #4f46e5;
+
+            background: #eeeeff;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 35px;
+
+            font-size: 28px;
+            font-weight: 700;
+
+            color: #4f46e5;
         }
 
-        .profile-header h1 {
-            margin-bottom: 5px;
+
+        .profile-top h2 {
+            margin: 0 0 5px;
         }
 
-        .profile-header p {
-            color: #6b7280;
+
+        .profile-top p {
+            margin: 0;
+            color: #777;
         }
 
-        .profile-details {
+
+        /* =========================================
+           INFORMATION GRID
+        ========================================= */
+
+        .profile-info-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 25px;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
         }
 
-        .profile-field {
+
+        .info-box {
             background: #f5f7fb;
-            padding: 18px;
-            border-radius: 10px;
+
+            border-radius: 12px;
+
+            padding: 20px;
         }
 
-        .profile-field strong {
+
+        .info-box label {
             display: block;
-            margin-bottom: 7px;
-            color: #374151;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+
+            color: #27324a;
         }
 
-        .profile-field span {
-            color: #6b7280;
+
+        .info-value {
+            color: #64748b;
+
+            font-size: 16px;
+
             word-break: break-word;
         }
 
-        .skills {
-            margin-top: 25px;
-        }
 
-        .skills h3 {
-            margin-bottom: 12px;
-        }
+        /* =========================================
+           EDIT PROFILE
+        ========================================= */
 
-        .skill-tag {
-            display: inline-block;
-            background: #eef2ff;
-            color: #4f46e5;
-            padding: 8px 14px;
-            border-radius: 20px;
-            margin: 5px;
-            font-size: 14px;
-        }
+        .edit-section {
+            margin-top: 30px;
 
-        .edit-btn {
-            margin-top: 25px;
-            padding: 12px 22px;
-            border: none;
-            border-radius: 8px;
-            background: #4f46e5;
-            color: white;
-            cursor: pointer;
-            font-size: 15px;
-        }
-
-        .edit-btn:hover {
-            background: #4338ca;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 30px;
-            color: #6b7280;
-        }
-
-        .error-message {
-            text-align: center;
-            padding: 30px;
-            color: #dc2626;
-        }
-
-        /* Edit Profile Form */
-
-        .edit-form {
-            display: none;
-            margin-top: 25px;
             padding-top: 25px;
-            border-top: 1px solid #e5e7eb;
+
+            border-top: 1px solid #eeeeee;
         }
 
-        .edit-form h3 {
-            margin-bottom: 20px;
+
+        .edit-section h3 {
+            margin-top: 0;
         }
+
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
 
         .form-group {
-            margin-bottom: 18px;
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
         }
+
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
 
         .form-group label {
-            display: block;
-            margin-bottom: 7px;
             font-weight: 600;
-            color: #374151;
         }
+
 
         .form-group input,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
+
             width: 100%;
+
             box-sizing: border-box;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 15px;
+
+            padding: 12px 14px;
+
+            border: 1px solid #d5d9e2;
+
+            border-radius: 9px;
+
+            font-size: 14px;
+
             outline: none;
+
+            background: #ffffff;
         }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: #4f46e5;
-        }
 
         .form-group textarea {
-            min-height: 90px;
+            min-height: 100px;
+
             resize: vertical;
         }
 
-        .form-buttons {
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+
+            border-color: #4f46e5;
+
+            box-shadow:
+                0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+
+        .edit-buttons {
             display: flex;
-            gap: 10px;
+
+            gap: 12px;
+
             margin-top: 20px;
         }
 
-        .save-btn {
-            padding: 12px 22px;
+
+        .btn-primary {
             border: none;
-            border-radius: 8px;
+
+            padding: 12px 20px;
+
+            border-radius: 9px;
+
             background: #4f46e5;
+
             color: white;
+
+            font-weight: 600;
+
             cursor: pointer;
-            font-size: 15px;
         }
 
-        .save-btn:hover {
-            background: #4338ca;
-        }
 
-        .cancel-btn {
-            padding: 12px 22px;
-            border: none;
-            border-radius: 8px;
-            background: #e5e7eb;
-            color: #374151;
+        .btn-secondary {
+            border: 1px solid #ddd;
+
+            padding: 12px 20px;
+
+            border-radius: 9px;
+
+            background: white;
+
+            color: #333;
+
+            font-weight: 600;
+
             cursor: pointer;
-            font-size: 15px;
         }
 
-        .cancel-btn:hover {
-            background: #d1d5db;
-        }
 
-        .success-message {
-            display: none;
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 8px;
-            background: #dcfce7;
-            color: #166534;
-        }
-
+        /* =========================================
+           VERIFICATION
+        ========================================= */
 
         .verification-card {
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid #e5e7eb;
+            background: #ffffff;
+
+            border-radius: 16px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.06);
         }
 
-        .verification-status {
-            display: inline-block;
-            margin: 8px 0 18px;
-            padding: 7px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            background: #f3f4f6;
-            color: #374151;
+
+        .verification-card h2 {
+            margin-top: 0;
         }
 
-        .verification-status.pending { background: #fef3c7; color: #92400e; }
-        .verification-status.approved { background: #dcfce7; color: #166534; }
-        .verification-status.rejected { background: #fee2e2; color: #991b1b; }
 
-        .verification-help {
-            color: #6b7280;
-            font-size: 14px;
+        .verification-subtitle {
+            color: #666;
+
             line-height: 1.5;
-            margin-bottom: 15px;
+
+            margin-bottom: 25px;
         }
 
-        .verification-upload {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
 
-        .verification-upload input[type="file"] {
-            max-width: 100%;
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
+        .verification-select {
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #d5d9e2;
+
+            border-radius: 9px;
+
             background: white;
-        }
 
-        .verify-upload-btn {
-            padding: 11px 18px;
-            border: none;
-            border-radius: 8px;
-            background: #4f46e5;
-            color: white;
-            cursor: pointer;
             font-size: 14px;
+
+            margin-top: 8px;
         }
 
-        .verify-upload-btn:disabled {
-            opacity: .6;
+
+        .file-input {
+            margin-top: 18px;
+
+            padding: 12px;
+
+            border: 1px dashed #bfc5d2;
+
+            border-radius: 10px;
+
+            width: 100%;
+
+            box-sizing: border-box;
+        }
+
+
+        .upload-button {
+            margin-top: 18px;
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+
+        .upload-button:disabled {
+            opacity: 0.6;
+
             cursor: not-allowed;
         }
 
-        .verification-message {
-            margin-top: 12px;
-            font-size: 14px;
+
+        .verification-status-box {
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            display: none;
+
+            line-height: 1.5;
         }
 
-        @media (max-width: 700px) {
-            .profile-details {
+
+        .verification-status-box.pending {
+
+            display: block;
+
+            background: #fff7df;
+
+            color: #8a6500;
+        }
+
+
+        .verification-status-box.approved {
+
+            display: block;
+
+            background: #e8f8ee;
+
+            color: #16833b;
+        }
+
+
+        .verification-status-box.rejected {
+
+            display: block;
+
+            background: #ffecec;
+
+            color: #b42318;
+        }
+
+
+        .verification-status-box.none {
+
+            display: block;
+
+            background: #f4f5f7;
+
+            color: #555;
+        }
+
+
+        .security-note {
+
+            margin-top: 18px;
+
+            font-size: 13px;
+
+            color: #777;
+
+            text-align: center;
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 800px) {
+
+            .profile-info-grid,
+            .form-grid {
                 grid-template-columns: 1fr;
             }
 
-            .profile-header {
-                flex-direction: column;
-                align-items: flex-start;
+            .form-group.full-width {
+                grid-column: auto;
             }
+
+            .profile-page {
+                padding: 20px;
+            }
+
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-    <!-- Sidebar -->
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================= -->
+
     <aside class="sidebar">
 
         <div class="logo">
             POTential
         </div>
 
+
         <nav class="sidebar-nav">
 
-            <a href="student-dashboard.html" class="nav-link">
-                🏠 Dashboard
+            <a
+                href="student-dashboard.html"
+                class="nav-link"
+            >
+                🏠 Home
             </a>
 
-            <a href="browse-jobs.html" class="nav-link">
+
+            <a
+                href="browse-jobs.html"
+                class="nav-link"
+            >
                 🔍 Find Opportunities
             </a>
 
-            <a href="my-applications.html" class="nav-link">
+
+            <a
+                href="my-applications.html"
+                class="nav-link"
+            >
                 📄 My Applications
             </a>
 
-            <a href="student-profile.html" class="nav-link active">
+
+            <a
+                href="student-profile.html"
+                class="nav-link active"
+            >
                 👤 Profile
             </a>
 
-            <a href="#" class="nav-link">
+
+            <a
+                href="#"
+                class="nav-link"
+            >
                 ⚙️ Settings
             </a>
 
         </nav>
 
-        <a href="#" class="nav-link logout" id="logoutButton">
-    🚪 Logout
-</a>
+
+        <a
+            href="#"
+            class="nav-link logout"
+            id="logoutButton"
+        >
+            🚪 Logout
+        </a>
+
     </aside>
 
 
-    <!-- Main Content -->
+
+    <!-- =========================================
+         MAIN
+    ========================================= -->
+
     <main class="main-content">
 
-        <header class="topbar">
-
-            <h2>Student Profile</h2>
-
-            <div class="profile">
-                <div class="profile-icon" id="topProfileIcon">
-                    S
-                </div>
-
-                <span id="topProfileName">
-                    Student
-                </span>
-            </div>
-
-        </header>
+        <div class="profile-page">
 
 
-        <section class="profile-container">
+            <!-- HEADER -->
 
-            <!-- Loading -->
-            <div id="loadingMessage" class="loading">
-                Loading profile...
+            <div class="profile-header">
+
+                <h1>
+                    My Profile
+                </h1>
+
+                <p>
+                    Manage your personal information and
+                    student verification.
+                </p>
+
             </div>
 
 
-            <!-- Profile Content -->
-            <div id="profileContent" style="display: none;">
 
-                <div class="profile-header">
+            <!-- =====================================
+                 PERSONAL INFORMATION
+            ===================================== -->
 
-                    <div class="large-profile-icon" id="largeProfileIcon">
+            <section class="profile-card">
+
+                <div class="profile-top">
+
+                    <div
+                        class="large-profile-icon"
+                        id="profileIcon"
+                    >
                         👤
                     </div>
 
+
                     <div>
-                        <h1 id="profileName">
-                            Student
-                        </h1>
 
-                        <p id="profileRole">
+                        <h2 id="profileDisplayName">
                             Student
+                        </h2>
+
+                        <p>
+                            Student Profile
                         </p>
+
                     </div>
 
                 </div>
 
 
-                <!-- Profile Details -->
-                <div class="profile-details" id="profileDetails">
-                </div>
+                <h2>
+                    Personal Information
+                </h2>
 
 
-                <!-- Skills -->
-                <div class="skills">
-
-                    <h3>Skills</h3>
-
-                    <div id="skillsContainer">
-                    </div>
-
-                </div>
+                <div class="profile-info-grid">
 
 
-                <!-- Edit Button -->
-                <button class="edit-btn" id="editProfileButton">
-                    Edit Profile
-                </button>
-                <!-- Verification -->
-                <div class="verification-card">
-                    <h3>Identity Verification</h3>
-                    <p class="verification-help">
-                        Upload a clear photo or PDF of your College ID. Your document will be reviewed by the POTential admin team.
-                    </p>
-                    <div id="studentVerificationStatus" class="verification-status">Not submitted</div>
+                    <!-- FULL NAME -->
 
-                    <div class="verification-upload">
-                        <input type="file" id="studentVerificationFile" accept="image/jpeg,image/png,application/pdf">
-                        <button type="button" class="verify-upload-btn" id="studentVerificationUploadBtn">Upload College ID</button>
-                    </div>
-                    <div id="studentVerificationMessage" class="verification-message"></div>
-                </div>
+                    <div class="info-box">
 
-
-
-                <!-- Edit Form -->
-                <div class="edit-form" id="editForm">
-
-                    <h3>Edit Profile</h3>
-
-
-                    <div class="form-group">
-
-                        <label for="editFullName">
+                        <label>
                             Full Name
                         </label>
 
-                        <input
-                            type="text"
-                            id="editFullName"
-                            placeholder="Enter your full name"
+                        <div
+                            class="info-value"
+                            id="fullNameValue"
                         >
+                            Loading...
+                        </div>
 
                     </div>
 
 
-                    <div class="form-group">
 
-                        <label for="editCity">
+                    <!-- EMAIL -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Email
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="emailValue"
+                        >
+                            Loading...
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ROLE -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Role
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="roleValue"
+                        >
+                            Student
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CITY -->
+
+                    <div class="info-box">
+
+                        <label>
                             City
                         </label>
 
-                        <input
-                            type="text"
-                            id="editCity"
-                            placeholder="Enter your city"
+                        <div
+                            class="info-value"
+                            id="cityValue"
                         >
+                            Not specified
+                        </div>
 
                     </div>
 
 
-                    <div class="form-group">
 
-                        <label for="editAge">
-                            Age
-                        </label>
+                    <!-- AVAILABILITY -->
 
-                        <input
-                            type="number"
-                            id="editAge"
-                            placeholder="Enter your age"
-                        >
+                    <div class="info-box">
 
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="editAvailability">
+                        <label>
                             Availability
                         </label>
 
-                        <input
-                            type="text"
-                            id="editAvailability"
-                            placeholder="Example: Part-time / Internship"
+                        <div
+                            class="info-value"
+                            id="availabilityValue"
                         >
+                            Not specified
+                        </div>
 
                     </div>
 
 
-                    <div class="form-group">
 
-                        <label for="editSkills">
+                    <!-- AGE -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Age
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="ageValue"
+                        >
+                            Not specified
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- SKILLS -->
+
+                    <div
+                        class="info-box"
+                        style="grid-column: 1 / -1;"
+                    >
+
+                        <label>
                             Skills
                         </label>
 
-                        <textarea
-                            id="editSkills"
-                            placeholder="Example: Python, Java, HTML, CSS"
-                        ></textarea>
+                        <div
+                            class="info-value"
+                            id="skillsValue"
+                        >
+                            No skills added yet.
+                        </div>
 
                     </div>
 
 
-                    <div class="form-buttons">
+                </div>
+
+
+
+                <!-- =================================
+                     EDIT PROFILE
+                ================================== -->
+
+                <div class="edit-section">
+
+                    <h3>
+                        Edit Profile
+                    </h3>
+
+
+                    <div class="form-grid">
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editFullName"
+                                placeholder="Enter your full name"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label>
+                                City
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editCity"
+                                placeholder="Enter your city"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Availability
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editAvailability"
+                                placeholder="Example: Part-time"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Age
+                            </label>
+
+                            <input
+                                type="number"
+                                id="editAge"
+                                min="1"
+                                max="100"
+                                placeholder="Enter your age"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Skills
+                            </label>
+
+                            <textarea
+                                id="editSkills"
+                                placeholder="Example: Python, Java, Data Analysis"
+                            ></textarea>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="edit-buttons">
 
                         <button
-                            class="save-btn"
+                            type="button"
+                            class="btn-primary"
                             id="saveProfileButton"
                         >
                             Save Changes
                         </button>
 
+
                         <button
-                            class="cancel-btn"
+                            type="button"
+                            class="btn-secondary"
                             id="cancelEditButton"
                         >
                             Cancel
@@ -504,33 +846,124 @@
 
                     </div>
 
+                </div>
 
-                    <div
-                        class="success-message"
-                        id="successMessage"
-                    >
-                        Profile updated successfully!
-                    </div>
+            </section>
+
+
+
+            <!-- =====================================
+                 VERIFICATION
+            ===================================== -->
+
+            <section class="verification-card">
+
+                <h2>
+                    🎓 Student Verification
+                </h2>
+
+
+                <p class="verification-subtitle">
+
+                    Verify your student identity by submitting
+                    one of the supported documents. Verification
+                    will be completed only after Admin approval.
+
+                </p>
+
+
+
+                <!-- DOCUMENT TYPE -->
+
+                <label>
+
+                    <strong>
+                        Document Type
+                    </strong>
+
+                </label>
+
+
+                <select
+                    id="studentVerificationType"
+                    class="verification-select"
+                >
+
+                    <option value="">
+                        Select Document Type
+                    </option>
+
+                    <option value="college_id">
+                        🎓 College ID
+                    </option>
+
+                    <option value="resume">
+                        📄 Resume
+                    </option>
+
+                    <option value="skill_certificate">
+                        🏆 Skill Certificate
+                    </option>
+
+                </select>
+
+
+
+                <!-- FILE -->
+
+                <input
+                    type="file"
+                    id="verificationFile"
+                    class="file-input"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                >
+
+
+
+                <!-- UPLOAD -->
+
+                <button
+                    type="button"
+                    id="uploadVerificationButton"
+                    class="upload-button"
+                >
+
+                    Upload Document
+
+                </button>
+
+
+
+                <!-- STATUS -->
+
+                <div
+                    id="verificationStatus"
+                    class="verification-status-box"
+                >
+                </div>
+
+
+
+                <div class="security-note">
+
+                    🔒 Your documents are securely used only
+                    for student verification.
 
                 </div>
 
-            </div>
+            </section>
 
 
-            <!-- Error -->
-            <div
-                id="errorMessage"
-                class="error-message"
-                style="display: none;"
-            >
-            </div>
-
-        </section>
+        </div>
 
     </main>
 
 
-    <!-- Supabase -->
+
+    <!-- =========================================
+         SUPABASE
+    ========================================= -->
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script src="../supabase-config.js"></script>
@@ -538,488 +971,234 @@
     <script src="../supabase-client.js"></script>
 
 
+
     <script>
 
+        let currentUser = null;
         let currentProfile = null;
 
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            loadProfile
-        );
 
+        /* =========================================
+           GET CURRENT USER
+        ========================================= */
 
-        // ============================================
-        // LOAD PROFILE
-        // ============================================
-
-        async function loadProfile() {
-
-            const loadingMessage =
-                document.getElementById("loadingMessage");
-
-            const profileContent =
-                document.getElementById("profileContent");
-
-            const errorMessage =
-                document.getElementById("errorMessage");
-
+        async function getCurrentUser() {
 
             const {
-                data: { user },
-                error: authError
+                data,
+                error
             } = await supabaseClient.auth.getUser();
 
 
-            if (authError || !user) {
+            if (error) {
 
-                loadingMessage.style.display = "none";
+                console.error(
+                    "Error getting user:",
+                    error
+                );
 
-                errorMessage.style.display = "block";
-
-                errorMessage.textContent =
-                    "Please login first.";
-
-                return;
+                return null;
             }
 
 
-            console.log(
-                "Logged-in User ID:",
-                user.id
-            );
+            return data.user || null;
+        }
+
+
+
+        /* =========================================
+           LOAD PROFILE
+        ========================================= */
+
+        async function loadProfile() {
+
+            currentUser =
+                await getCurrentUser();
+
+
+            if (!currentUser) {
+
+                window.location.href =
+                    "../auth.html";
+
+                return;
+            }
 
 
             const {
                 data: profile,
-                error: profileError
-            } = await supabaseClient
-                .from("profiles")
-                .select("*")
-                .eq("user_id", user.id)
-                .maybeSingle();
+                error
+            } =
+                await supabaseClient
+                    .from("profiles")
+                    .select(
+                        "full_name, Email, Role, city, skills, availability, age"
+                    )
+                    .eq(
+                        "user_id",
+                        currentUser.id
+                    )
+                    .maybeSingle();
 
 
-            if (profileError) {
+            if (error) {
 
                 console.error(
                     "Profile loading error:",
-                    profileError
+                    error
                 );
 
-                loadingMessage.style.display = "none";
-
-                errorMessage.style.display = "block";
-
-                errorMessage.textContent =
-                    "Unable to load your profile.";
-
-                return;
-            }
-
-
-            if (!profile) {
-
-                loadingMessage.style.display = "none";
-
-                errorMessage.style.display = "block";
-
-                errorMessage.textContent =
-                    "Profile data not found.";
-
-                return;
-            }
-
-
-            currentProfile = profile;
-
-
-            console.log(
-                "Profile data:",
-                profile
-            );
-
-
-            displayProfile(profile);
-
-
-            fillEditForm(profile);
-
-
-            loadingMessage.style.display = "none";
-
-            profileContent.style.display = "block";
-
-
-            setupEditButtons();
-            await loadStudentVerification(user.id);
-        }
-
-
-        // ============================================
-        // DISPLAY PROFILE
-        // ============================================
-
-        function displayProfile(profile) {
-
-            const name =
-                profile.full_name || "Student";
-
-            const role =
-                profile.Role || "Student";
-
-
-            document.getElementById(
-                "profileName"
-            ).textContent = name;
-
-
-            document.getElementById(
-                "profileRole"
-            ).textContent = role;
-
-
-            document.getElementById(
-                "topProfileName"
-            ).textContent = name;
-
-
-            const firstLetter =
-                name.charAt(0).toUpperCase();
-
-
-            document.getElementById(
-                "topProfileIcon"
-            ).textContent = firstLetter;
-
-
-            document.getElementById(
-                "largeProfileIcon"
-            ).textContent = firstLetter;
-
-
-            const profileDetails =
-                document.getElementById(
-                    "profileDetails"
+                alert(
+                    "Unable to load your profile."
                 );
 
-
-            profileDetails.innerHTML = "";
-
-
-            Object.entries(profile).forEach(
-                function ([key, value]) {
-
-                    if (key === "skills") {
-                        return;
-                    }
-
-
-                    const field =
-                        document.createElement("div");
-
-                    field.className =
-                        "profile-field";
-
-
-                    const label =
-                        document.createElement("strong");
-
-
-                    const valueElement =
-                        document.createElement("span");
-
-
-                    let displayName = key;
-
-
-                    if (key === "full_name") {
-                        displayName = "Full Name";
-                    }
-
-                    else if (key === "Email") {
-                        displayName = "Email";
-                    }
-
-                    else if (key === "Role") {
-                        displayName = "Role";
-                    }
-
-                    else if (key === "Created_at") {
-                        displayName = "Created At";
-                    }
-
-                    else if (key === "user_id") {
-                        displayName = "User ID";
-                    }
-
-                    else if (key === "city") {
-                        displayName = "City";
-                    }
-
-                    else if (key === "availability") {
-                        displayName = "Availability";
-                    }
-
-                    else if (key === "age") {
-                        displayName = "Age";
-                    }
-
-                    else if (key === "id") {
-                        displayName = "Profile ID";
-                    }
-
-
-                    label.textContent =
-                        displayName;
-
-
-                    valueElement.textContent =
-                        value !== null &&
-                        value !== undefined &&
-                        value !== ""
-                            ? value
-                            : "Not specified";
-
-
-                    field.appendChild(label);
-
-                    field.appendChild(
-                        valueElement
-                    );
-
-                    profileDetails.appendChild(
-                        field
-                    );
-
-                }
-            );
-
-
-            displaySkills(profile.skills);
-        }
-
-
-        // ============================================
-        // DISPLAY SKILLS
-        // ============================================
-
-        function displaySkills(skills) {
-
-            const container =
-                document.getElementById(
-                    "skillsContainer"
-                );
-
-
-            container.innerHTML = "";
-
-
-            if (!skills) {
-
-                container.textContent =
-                    "No skills added yet.";
-
                 return;
             }
 
 
-            let skillsArray = [];
+            currentProfile =
+                profile || {};
 
 
-            if (Array.isArray(skills)) {
 
-                skillsArray = skills;
+            /* ===============================
+               DISPLAY PROFILE
+            =============================== */
 
-            }
-
-            else if (
-                typeof skills === "string"
-            ) {
-
-                skillsArray = skills
-                    .split(",")
-                    .map(
-                        skill => skill.trim()
-                    )
-                    .filter(
-                        skill => skill !== ""
-                    );
-
-            }
+            const fullName =
+                currentProfile.full_name ||
+                "Student";
 
 
-            if (skillsArray.length === 0) {
-
-                container.textContent =
-                    "No skills added yet.";
-
-                return;
-            }
+            document.getElementById(
+                "profileDisplayName"
+            ).textContent =
+                fullName;
 
 
-            skillsArray.forEach(
-                function (skill) {
-
-                    const tag =
-                        document.createElement(
-                            "span"
-                        );
-
-                    tag.className =
-                        "skill-tag";
-
-                    tag.textContent = skill;
-
-                    container.appendChild(tag);
-
-                }
-            );
-        }
+            document.getElementById(
+                "profileIcon"
+            ).textContent =
+                fullName
+                    .charAt(0)
+                    .toUpperCase();
 
 
-        // ============================================
-        // FILL EDIT FORM
-        // ============================================
+            document.getElementById(
+                "fullNameValue"
+            ).textContent =
+                fullName;
 
-        function fillEditForm(profile) {
+
+            document.getElementById(
+                "emailValue"
+            ).textContent =
+                currentProfile.Email ||
+                currentUser.email ||
+                "Not specified";
+
+
+            document.getElementById(
+                "roleValue"
+            ).textContent =
+                currentProfile.Role ||
+                "student";
+
+
+            document.getElementById(
+                "cityValue"
+            ).textContent =
+                currentProfile.city ||
+                "Not specified";
+
+
+            document.getElementById(
+                "availabilityValue"
+            ).textContent =
+                currentProfile.availability ||
+                "Not specified";
+
+
+            document.getElementById(
+                "ageValue"
+            ).textContent =
+                currentProfile.age ||
+                "Not specified";
+
+
+            document.getElementById(
+                "skillsValue"
+            ).textContent =
+                currentProfile.skills ||
+                "No skills added yet.";
+
+
+
+            /* ===============================
+               EDIT FORM
+            =============================== */
 
             document.getElementById(
                 "editFullName"
             ).value =
-                profile.full_name || "";
+                currentProfile.full_name || "";
 
 
             document.getElementById(
                 "editCity"
             ).value =
-                profile.city || "";
-
-
-            document.getElementById(
-                "editAge"
-            ).value =
-                profile.age || "";
+                currentProfile.city || "";
 
 
             document.getElementById(
                 "editAvailability"
             ).value =
-                profile.availability || "";
+                currentProfile.availability || "";
 
 
-            let skillsText = "";
-
-
-            if (Array.isArray(profile.skills)) {
-
-                skillsText =
-                    profile.skills.join(", ");
-
-            }
-
-            else if (
-                typeof profile.skills === "string"
-            ) {
-
-                skillsText =
-                    profile.skills;
-
-            }
+            document.getElementById(
+                "editAge"
+            ).value =
+                currentProfile.age || "";
 
 
             document.getElementById(
                 "editSkills"
             ).value =
-                skillsText;
+                currentProfile.skills || "";
+
+
+
+            /* ===============================
+               LOAD VERIFICATION
+            =============================== */
+
+            await loadStudentVerification(
+                currentUser.id
+            );
+
+
+            /* ===============================
+               DASHBOARD DOCUMENT SELECTION
+            =============================== */
+
+            applyDashboardVerificationSelection();
+
         }
 
 
-        // ============================================
-        // EDIT BUTTONS
-        // ============================================
 
-        function setupEditButtons() {
-
-            const editButton =
-                document.getElementById(
-                    "editProfileButton"
-                );
-
-
-            const editForm =
-                document.getElementById(
-                    "editForm"
-                );
-
-
-            const cancelButton =
-                document.getElementById(
-                    "cancelEditButton"
-                );
-
-
-            const saveButton =
-                document.getElementById(
-                    "saveProfileButton"
-                );
-
-
-            editButton.addEventListener(
-                "click",
-                function () {
-
-                    editForm.style.display =
-                        "block";
-
-                    editButton.style.display =
-                        "none";
-
-                }
-            );
-
-
-            cancelButton.addEventListener(
-                "click",
-                function () {
-
-                    fillEditForm(
-                        currentProfile
-                    );
-
-                    editForm.style.display =
-                        "none";
-
-                    editButton.style.display =
-                        "inline-block";
-
-                }
-            );
-
-
-            saveButton.addEventListener(
-                "click",
-                saveProfile
-            );
-        }
-
-
-        // ============================================
-        // SAVE PROFILE
-        // ============================================
+        /* =========================================
+           SAVE PROFILE
+        ========================================= */
 
         async function saveProfile() {
 
-            const saveButton =
-                document.getElementById(
-                    "saveProfileButton"
-                );
+            if (!currentUser) {
 
-
-            saveButton.disabled = true;
-
-            saveButton.textContent =
-                "Saving...";
+                return;
+            }
 
 
             const fullName =
@@ -1034,348 +1213,741 @@
                 ).value.trim();
 
 
-            const ageValue =
-                document.getElementById(
-                    "editAge"
-                ).value;
-
-
             const availability =
                 document.getElementById(
                     "editAvailability"
                 ).value.trim();
 
 
-            const skillsText =
+            const age =
+                document.getElementById(
+                    "editAge"
+                ).value;
+
+
+            const skills =
                 document.getElementById(
                     "editSkills"
                 ).value.trim();
 
 
-            let skillsValue = skillsText;
-
-
-            /*
-             * If existing skills are stored as an array,
-             * keep them as an array.
-             */
-            if (
-                currentProfile &&
-                Array.isArray(
-                    currentProfile.skills
-                )
-            ) {
-
-                skillsValue =
-                    skillsText
-                        .split(",")
-                        .map(
-                            skill => skill.trim()
-                        )
-                        .filter(
-                            skill => skill !== ""
-                        );
-            }
-
-
-            const {
-                data: { user },
-                error: authError
-            } = await supabaseClient.auth.getUser();
-
-
-            if (authError || !user) {
+            if (!fullName) {
 
                 alert(
-                    "Please login first."
+                    "Please enter your full name."
                 );
-
-                saveButton.disabled = false;
-
-                saveButton.textContent =
-                    "Save Changes";
 
                 return;
             }
 
 
-            const updateData = {
-
-                full_name:
-                    fullName || null,
-
-                city:
-                    city || null,
-
-                age:
-                    ageValue
-                        ? Number(ageValue)
-                        : null,
-
-                availability:
-                    availability || null,
-
-                skills:
-                    skillsValue || null
-
-            };
-
-
-            console.log(
-                "Updating profile:",
-                updateData
-            );
-
-
             const {
-                error: updateError
-            } = await supabaseClient
-                .from("profiles")
-                .update(updateData)
-                .eq("user_id", user.id);
+                error
+            } =
+                await supabaseClient
+                    .from("profiles")
+                    .update({
+
+                        full_name:
+                            fullName,
+
+                        city:
+                            city || null,
+
+                        availability:
+                            availability || null,
+
+                        age:
+                            age
+                                ? Number(age)
+                                : null,
+
+                        skills:
+                            skills || null
+
+                    })
+                    .eq(
+                        "user_id",
+                        currentUser.id
+                    );
 
 
-            if (updateError) {
+            if (error) {
 
                 console.error(
                     "Profile update error:",
-                    updateError
+                    error
                 );
 
                 alert(
-                    "Unable to update profile: " +
-                    updateError.message
+                    "Unable to update profile."
                 );
-
-                saveButton.disabled = false;
-
-                saveButton.textContent =
-                    "Save Changes";
 
                 return;
             }
 
 
-            // Reload profile from Supabase
-            const {
-                data: updatedProfile,
-                error: reloadError
-            } = await supabaseClient
-                .from("profiles")
-                .select("*")
-                .eq("user_id", user.id)
-                .maybeSingle();
+            alert(
+                "Profile updated successfully!"
+            );
 
 
-            if (reloadError) {
+            await loadProfile();
 
-                console.error(
-                    "Reload error:",
-                    reloadError
-                );
+        }
 
-                alert(
-                    "Profile updated, but page could not refresh."
-                );
 
+
+        /* =========================================
+           CANCEL EDIT
+        ========================================= */
+
+        function cancelEdit() {
+
+            if (!currentProfile) {
+
+                return;
             }
 
-            else {
 
-                currentProfile =
-                    updatedProfile;
+            document.getElementById(
+                "editFullName"
+            ).value =
+                currentProfile.full_name || "";
 
-                displayProfile(
-                    updatedProfile
+
+            document.getElementById(
+                "editCity"
+            ).value =
+                currentProfile.city || "";
+
+
+            document.getElementById(
+                "editAvailability"
+            ).value =
+                currentProfile.availability || "";
+
+
+            document.getElementById(
+                "editAge"
+            ).value =
+                currentProfile.age || "";
+
+
+            document.getElementById(
+                "editSkills"
+            ).value =
+                currentProfile.skills || "";
+
+        }
+
+
+
+        /* =========================================
+           LOAD VERIFICATION STATUS
+        ========================================= */
+
+        async function loadStudentVerification(
+            userId
+        ) {
+
+            const statusBox =
+                document.getElementById(
+                    "verificationStatus"
                 );
 
-                fillEditForm(
-                    updatedProfile
+
+            const {
+                data: documents,
+                error
+            } =
+                await supabaseClient
+                    .from(
+                        "verification_documents"
+                    )
+                    .select(
+                        "id, document_type, status, rejection_reason, uploaded_at"
+                    )
+                    .eq(
+                        "user_id",
+                        userId
+                    )
+                    .eq(
+                        "role",
+                        "student"
+                    )
+                    .order(
+                        "uploaded_at",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(1);
+
+
+            if (error) {
+
+                console.error(
+                    "Verification loading error:",
+                    error
+                );
+
+                statusBox.className =
+                    "verification-status-box none";
+
+                statusBox.textContent =
+                    "Unable to load verification status.";
+
+                return;
+            }
+
+
+            const verificationDocument =
+                documents &&
+                documents.length > 0
+                    ? documents[0]
+                    : null;
+
+
+
+            /* ===============================
+               NO DOCUMENT
+            =============================== */
+
+            if (!verificationDocument) {
+
+                statusBox.className =
+                    "verification-status-box none";
+
+                statusBox.textContent =
+                    "No verification document submitted yet.";
+
+                return;
+            }
+
+
+
+            const status =
+                (
+                    verificationDocument.status ||
+                    ""
+                ).toLowerCase();
+
+
+
+            /* ===============================
+               PENDING
+            =============================== */
+
+            if (status === "pending") {
+
+                statusBox.className =
+                    "verification-status-box pending";
+
+                statusBox.textContent =
+                    "⏳ Verification Pending — Your document has been submitted and is waiting for Admin approval.";
+
+                return;
+            }
+
+
+
+            /* ===============================
+               APPROVED
+            =============================== */
+
+            if (status === "approved") {
+
+                statusBox.className =
+                    "verification-status-box approved";
+
+                statusBox.textContent =
+                    "✓ Verified Student — Your document has been approved by Admin.";
+
+                return;
+            }
+
+
+
+            /* ===============================
+               REJECTED
+            =============================== */
+
+            if (status === "rejected") {
+
+                statusBox.className =
+                    "verification-status-box rejected";
+
+                let message =
+                    "❌ Verification Rejected";
+
+
+                if (
+                    verificationDocument.rejection_reason
+                ) {
+
+                    message +=
+                        " — " +
+                        verificationDocument.rejection_reason;
+                }
+
+
+                statusBox.textContent =
+                    message;
+
+                return;
+            }
+
+
+
+            /* ===============================
+               OTHER STATUS
+            =============================== */
+
+            statusBox.className =
+                "verification-status-box none";
+
+            statusBox.textContent =
+                "Verification status: " +
+                (
+                    verificationDocument.status ||
+                    "Unknown"
+                );
+
+        }
+
+
+
+        /* =========================================
+           APPLY DASHBOARD DOCUMENT TYPE
+        ========================================= */
+
+        function applyDashboardVerificationSelection() {
+
+            const savedType =
+                localStorage.getItem(
+                    "verificationDocumentType"
+                );
+
+
+            if (!savedType) {
+
+                return;
+            }
+
+
+            const dropdown =
+                document.getElementById(
+                    "studentVerificationType"
+                );
+
+
+            if (
+                dropdown.querySelector(
+                    `option[value="${savedType}"]`
+                )
+            ) {
+
+                dropdown.value =
+                    savedType;
+            }
+
+
+            /*
+             * Remove it after using it.
+             * This prevents an old selection from
+             * appearing every time Profile opens.
+             */
+
+            localStorage.removeItem(
+                "verificationDocumentType"
+            );
+
+        }
+
+
+
+        /* =========================================
+           UPLOAD VERIFICATION DOCUMENT
+        ========================================= */
+
+        async function uploadStudentVerification() {
+
+            if (!currentUser) {
+
+                alert(
+                    "Please login again."
+                );
+
+                return;
+            }
+
+
+            const documentType =
+                document.getElementById(
+                    "studentVerificationType"
+                ).value;
+
+
+            const file =
+                document.getElementById(
+                    "verificationFile"
+                ).files[0];
+
+
+            if (!documentType) {
+
+                alert(
+                    "Please select a document type."
+                );
+
+                return;
+            }
+
+
+            if (!file) {
+
+                alert(
+                    "Please select a document."
+                );
+
+                return;
+            }
+
+
+
+            /* ===============================
+               VALID DOCUMENT TYPES
+            =============================== */
+
+            const validTypes = [
+                "college_id",
+                "resume",
+                "skill_certificate"
+            ];
+
+
+            if (
+                !validTypes.includes(
+                    documentType
+                )
+            ) {
+
+                alert(
+                    "Invalid document type."
+                );
+
+                return;
+            }
+
+
+
+            /* ===============================
+               VALID FILE TYPES
+            =============================== */
+
+            const allowedTypes = [
+                "application/pdf",
+                "image/jpeg",
+                "image/png"
+            ];
+
+
+            if (
+                !allowedTypes.includes(
+                    file.type
+                )
+            ) {
+
+                alert(
+                    "Only PDF, JPG and PNG files are allowed."
+                );
+
+                return;
+            }
+
+
+
+            /* ===============================
+               FILE SIZE
+            =============================== */
+
+            const maxSize =
+                5 * 1024 * 1024;
+
+
+            if (
+                file.size > maxSize
+            ) {
+
+                alert(
+                    "File size must be 5 MB or less."
+                );
+
+                return;
+            }
+
+
+
+            const uploadButton =
+                document.getElementById(
+                    "uploadVerificationButton"
+                );
+
+
+            uploadButton.disabled =
+                true;
+
+
+            uploadButton.textContent =
+                "Uploading...";
+
+
+
+            try {
+
+                /* =========================
+                   FILE EXTENSION
+                ========================= */
+
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+
+                const safeType =
+                    documentType;
+
+
+                const filePath =
+                    `student/${currentUser.id}/${crypto.randomUUID()}-${safeType}.${extension}`;
+
+
+
+                /* =========================
+                   STORAGE UPLOAD
+                ========================= */
+
+                const {
+                    error:
+                        storageError
+                } =
+                    await supabaseClient
+                        .storage
+                        .from(
+                            "verification-documents"
+                        )
+                        .upload(
+                            filePath,
+                            file,
+                            {
+                                upsert: false
+                            }
+                        );
+
+
+                if (storageError) {
+
+                    throw storageError;
+                }
+
+
+
+                /* =========================
+                   DATABASE RECORD
+                ========================= */
+
+                const {
+                    error:
+                        databaseError
+                } =
+                    await supabaseClient
+                        .from(
+                            "verification_documents"
+                        )
+                        .insert({
+
+                            user_id:
+                                currentUser.id,
+
+                            role:
+                                "student",
+
+                            document_type:
+                                documentType,
+
+                            file_path:
+                                filePath,
+
+                            status:
+                                "pending"
+
+                        });
+
+
+                if (databaseError) {
+
+                    /*
+                     * Remove uploaded file if
+                     * database insert fails.
+                     */
+
+                    await supabaseClient
+                        .storage
+                        .from(
+                            "verification-documents"
+                        )
+                        .remove([
+                            filePath
+                        ]);
+
+
+                    throw databaseError;
+                }
+
+
+
+                /* =========================
+                   SUCCESS
+                ========================= */
+
+                alert(
+                    "Document uploaded successfully! It is now pending Admin approval."
                 );
 
 
                 document.getElementById(
-                    "successMessage"
-                ).style.display =
-                    "block";
+                    "verificationFile"
+                ).value = "";
 
 
-                setTimeout(
-                    function () {
-
-                        document.getElementById(
-                            "successMessage"
-                        ).style.display =
-                            "none";
-
-                    },
-                    3000
+                await loadStudentVerification(
+                    currentUser.id
                 );
-            }
 
 
-            document.getElementById(
-                "editForm"
-            ).style.display =
-                "none";
-
-
-            document.getElementById(
-                "editProfileButton"
-            ).style.display =
-                "inline-block";
-
-
-            saveButton.disabled = false;
-
-            saveButton.textContent =
-                "Save Changes";
-        }
-
-
-        // ============================================
-        // VERIFICATION DOCUMENT
-        // ============================================
-
-        async function loadStudentVerification(userId) {
-            const statusEl = document.getElementById("studentVerificationStatus");
-            const messageEl = document.getElementById("studentVerificationMessage");
-
-            const { data, error } = await supabaseClient
-                .from("verification_documents")
-                .select("id, document_type, status, rejection_reason, uploaded_at")
-                .eq("user_id", userId)
-                .eq("role", "student")
-                .order("uploaded_at", { ascending: false })
-                .limit(1);
-
-            if (error) {
-                console.error("Verification loading error:", error);
-                statusEl.textContent = "Unable to load status";
-                return;
-            }
-
-            const record = data && data.length ? data[0] : null;
-            if (!record) {
-                statusEl.textContent = "Not submitted";
-                statusEl.className = "verification-status";
-                return;
-            }
-
-            const status = record.status || "pending";
-            statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-            statusEl.className = "verification-status " + status;
-
-            if (status === "rejected" && record.rejection_reason) {
-                messageEl.textContent = "Rejected: " + record.rejection_reason;
-                messageEl.style.color = "#991b1b";
-            } else if (status === "approved") {
-                messageEl.textContent = "✓ Your College ID has been approved.";
-                messageEl.style.color = "#166534";
-            } else {
-                messageEl.textContent = "Your document is waiting for admin review.";
-                messageEl.style.color = "#92400e";
-            }
-        }
-
-        async function uploadStudentVerification() {
-            const fileInput = document.getElementById("studentVerificationFile");
-            const button = document.getElementById("studentVerificationUploadBtn");
-            const messageEl = document.getElementById("studentVerificationMessage");
-            const file = fileInput.files[0];
-
-            if (!file) {
-                messageEl.textContent = "Please select your College ID first.";
-                messageEl.style.color = "#991b1b";
-                return;
-            }
-
-            const allowed = ["application/pdf", "image/jpeg", "image/png"];
-            if (!allowed.includes(file.type)) {
-                messageEl.textContent = "Only PDF, JPG or PNG files are allowed.";
-                messageEl.style.color = "#991b1b";
-                return;
-            }
-
-            if (file.size > 5 * 1024 * 1024) {
-                messageEl.textContent = "File must be 5 MB or smaller.";
-                messageEl.style.color = "#991b1b";
-                return;
-            }
-
-            const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-            if (userError || !user) {
-                messageEl.textContent = "Please login again.";
-                messageEl.style.color = "#991b1b";
-                return;
-            }
-
-            button.disabled = true;
-            button.textContent = "Uploading...";
-            messageEl.textContent = "";
-
-            const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "bin";
-            const filePath = `student/${user.id}/${crypto.randomUUID()}-college-id.${extension}`;
-
-            try {
-                const { error: uploadError } = await supabaseClient.storage
-                    .from("verification-documents")
-                    .upload(filePath, file, {
-                        contentType: file.type,
-                        upsert: false
-                    });
-
-                if (uploadError) throw uploadError;
-
-                const { error: insertError } = await supabaseClient
-                    .from("verification_documents")
-                    .insert({
-                        user_id: user.id,
-                        role: "student",
-                        document_type: "college_id",
-                        file_path: filePath,
-                        status: "pending"
-                    });
-
-                if (insertError) {
-                    await supabaseClient.storage.from("verification-documents").remove([filePath]);
-                    throw insertError;
-                }
-
-                messageEl.textContent = "✓ College ID uploaded. Waiting for admin approval.";
-                messageEl.style.color = "#166534";
-                fileInput.value = "";
-                await loadStudentVerification(user.id);
             } catch (error) {
-                console.error("Verification upload error:", error);
-                messageEl.textContent = error.message || "Upload failed.";
-                messageEl.style.color = "#991b1b";
+
+                console.error(
+                    "Verification upload error:",
+                    error
+                );
+
+
+                alert(
+                    "Unable to upload document. Please try again."
+                );
+
             } finally {
-                button.disabled = false;
-                button.textContent = "Upload College ID";
+
+                uploadButton.disabled =
+                    false;
+
+                uploadButton.textContent =
+                    "Upload Document";
+
             }
+
         }
 
-        document.getElementById("studentVerificationUploadBtn")
-            .addEventListener("click", uploadStudentVerification);
+
+
+        /* =========================================
+           LOGOUT
+        ========================================= */
 
         document
-    .getElementById("logoutButton")
-    .addEventListener("click", async function (event) {
+            .getElementById(
+                "logoutButton"
+            )
+            .addEventListener(
+                "click",
+                async function (event) {
 
-        event.preventDefault();
+                    event.preventDefault();
 
-        const { error } =
-            await supabaseClient.auth.signOut();
 
-        if (error) {
-            console.error("Logout error:", error);
-            alert("Unable to logout.");
-            return;
-        }
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signOut();
 
-        window.location.href = "../auth.html";
-    });
+
+                    if (error) {
+
+                        console.error(
+                            "Logout error:",
+                            error
+                        );
+
+                        alert(
+                            "Unable to logout."
+                        );
+
+                        return;
+                    }
+
+
+                    window.location.href =
+                        "../auth.html";
+
+                }
+            );
+
+
+
+        /* =========================================
+           BUTTON EVENTS
+        ========================================= */
+
+        document
+            .getElementById(
+                "saveProfileButton"
+            )
+            .addEventListener(
+                "click",
+                saveProfile
+            );
+
+
+        document
+            .getElementById(
+                "cancelEditButton"
+            )
+            .addEventListener(
+                "click",
+                cancelEdit
+            );
+
+
+        document
+            .getElementById(
+                "uploadVerificationButton"
+            )
+            .addEventListener(
+                "click",
+                uploadStudentVerification
+            );
+
+
+
+        /* =========================================
+           PAGE LOAD
+        ========================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async function () {
+
+                await loadProfile();
+
+            }
+        );
+
     </script>
 
 </body>

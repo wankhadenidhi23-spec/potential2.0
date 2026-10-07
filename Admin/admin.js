@@ -1,1211 +1,817 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 // =====================================================
-// SUPABASE CONFIG
+// POTEntial ADMIN PANEL
+// Uses the existing POTEntial Supabase tables.
+// No table or column is created/renamed by this file.
 // =====================================================
+
 const SUPABASE_URL = "https://epedptuewukgferdpzjq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_PpDvDuEQDqNirED5FNEZsA_p7wHVl8s";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZWRwdHVld3VrZ2ZlcmRwempxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyODM2MTUsImV4cCI6MjEwNDg1OTYxNX0.nlxUzsAf9CHFapeWCRAfvzC0wqQtPnM3Z1Hd6FhTyRg";
-
-const supabase = createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-);
-
-
-// =====================================================
-// ELEMENTS
-// =====================================================
+const navLinks = document.querySelectorAll(".nav-link");
+const sections = document.querySelectorAll(".section");
+const pageName = document.getElementById("pageName");
+const refreshBtn = document.getElementById("refreshBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 const loginScreen = document.getElementById("loginScreen");
+const loginForm = document.getElementById("loginForm");
+const loginError = document.getElementById("loginError");
+const loginBtn = document.getElementById("loginBtn");
 const appRoot = document.getElementById("appRoot");
 
-const loginForm = document.getElementById("loginForm");
-const loginEmail = document.getElementById("loginEmail");
-const loginPassword = document.getElementById("loginPassword");
-const loginError = document.getElementById("loginError");
+const state = {
+    businesses: [],
+    students: [],
+    jobs: [],
+    applications: [],
+    currentUser: null,
+    activeSection: "overview"
+};
 
-const logoutBtn = document.getElementById("logoutBtn");
-const refreshBtn = document.getElementById("refreshBtn");
-
-
-// =====================================================
-// SHOW LOGIN
-// =====================================================
-function showLogin() {
-    loginScreen.style.display = "flex";
-    appRoot.style.display = "none";
+function escapeHTML(value) {
+    if (value === null || value === undefined) return "";
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
-
-// =====================================================
-// SHOW ADMIN DASHBOARD
-// =====================================================
-function showApp() {
-    loginScreen.style.display = "none";
-    appRoot.style.display = "flex";
+function formatDate(value) {
+    if (!value) return "-";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return escapeHTML(value);
+    return date.toLocaleString("en-IN", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });
 }
 
+function statusValue(row) {
+    return row?.approval_status ?? row?.verification_status ?? row?.status ?? "pending";
+}
 
-// =====================================================
-// ADMIN CHECK
-// =====================================================
+function statusHTML(value) {
+    const status = String(value || "pending").toLowerCase().replaceAll(" ", "-");
+    return `<span class="status ${escapeHTML(status)}">${escapeHTML(value || "Pending")}</span>`;
+}
+
+function messageRow(columns, message) {
+    return `<tr><td colspan="${columns}" class="loading">${escapeHTML(message)}</td></tr>`;
+}
+
+function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? 0;
+}
+
+function firstValue(row, keys, fallback = "-") {
+    for (const key of keys) {
+        if (row && row[key] !== null && row[key] !== undefined && row[key] !== "") return row[key];
+    }
+    return fallback;
+}
+
+function getDate(row) {
+    return firstValue(row, ["created_at", "applied_at", "uploaded_at", "updated_at"], null);
+}
+
+function normalizeStatus(value) {
+    return String(value || "pending").trim().toLowerCase();
+}
+
+function findStatusColumn(row) {
+    if (!row) return null;
+    for (const key of ["approval_status", "verification_status", "status"]) {
+        if (Object.prototype.hasOwnProperty.call(row, key)) return key;
+    }
+    return null;
+}
+
 async function isAdmin(userId) {
-
-    console.log("Checking Admin UID:", userId);
-
     const { data, error } = await supabase
         .from("profiles")
-        .select('"Id", "user_id", "Role"')
+        .select("Role")
         .eq("user_id", userId)
         .maybeSingle();
 
-    console.log("Admin Profile:", data);
-    console.log("Admin Check Error:", error);
-
     if (error) {
-        console.error("Admin check failed:", error);
+        console.error("Admin check error:", error);
         return false;
     }
-
-    if (!data) {
-        console.log("No profile found.");
-        return false;
-    }
-
-    const role = String(data.Role || "")
-        .trim()
-        .toLowerCase();
-
-    console.log("User Role:", role);
-
-    return role === "admin";
+    return String(data?.Role || "").toLowerCase() === "admin";
 }
 
+function showLogin(message = "") {
+    appRoot.style.display = "none";
+    loginScreen.style.display = "flex";
+    loginError.textContent = message;
+}
+
+function showApp() {
+    loginScreen.style.display = "none";
+    appRoot.style.display = "flex";
+    loadOverview();
+}
+
+function showToast(message, type = "success") {
+    let toast = document.getElementById("adminToast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "adminToast";
+        document.body.appendChild(toast);
+    }
+    toast.className = `admin-toast ${type}`;
+    toast.textContent = message;
+    requestAnimationFrame(() => toast.classList.add("show"));
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove("show"), 3200);
+}
+
+function injectTools() {
+    const configs = [
+        ["businesses", "businessTable", "Search businesses..."],
+        ["students", "studentTable", "Search students..."],
+        ["opportunities", "jobTable", "Search opportunities..."]
+    ];
+
+    for (const [sectionId, tableId, placeholder] of configs) {
+        const section = document.getElementById(sectionId);
+        const table = document.getElementById(tableId);
+        if (!section || !table || section.querySelector(".admin-tools")) continue;
+
+        const tools = document.createElement("div");
+        tools.className = "admin-tools";
+        tools.innerHTML = `<input class="admin-search" id="search-${sectionId}" placeholder="${placeholder}" autocomplete="off">`;
+        section.querySelector(".content-card")?.prepend(tools);
+
+        tools.querySelector("input").addEventListener("input", e => {
+            filterTable(table, e.target.value);
+        });
+    }
+}
+
+function filterTable(tbody, query) {
+    const q = String(query || "").trim().toLowerCase();
+    [...tbody.querySelectorAll("tr")].forEach(row => {
+        if (row.querySelector(".loading")) return;
+        row.style.display = !q || row.textContent.toLowerCase().includes(q) ? "" : "none";
+    });
+}
 
 // =====================================================
-// LOGIN
+// LOGIN / SESSION
 // =====================================================
-loginForm.addEventListener("submit", async (event) => {
 
+loginForm?.addEventListener("submit", async event => {
     event.preventDefault();
-
     loginError.textContent = "";
-
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value;
-
-    const loginBtn = document.getElementById("loginBtn");
-
     loginBtn.disabled = true;
     loginBtn.textContent = "Logging in...";
 
     try {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-        const { data, error } =
-            await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-
-        if (error) {
-            console.error("Login Error:", error);
-
-            loginError.textContent = error.message;
-
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
-
-            return;
-        }
-
-        if (!data || !data.user) {
-
-            loginError.textContent =
-                "Login failed. User information not found.";
-
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
-
-            return;
-        }
-
-        console.log("LOGIN USER ID:", data.user.id);
+        if (error) throw error;
+        if (!data?.user) throw new Error("User not found.");
 
         const admin = await isAdmin(data.user.id);
-
-        console.log("ADMIN CHECK:", admin);
-
         if (!admin) {
-
             await supabase.auth.signOut();
-
-            loginError.textContent =
-                "Access denied. This account is not an admin.";
-
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
-
-            return;
+            throw new Error("This account is not an admin.");
         }
 
-        // ⭐ IMPORTANT
-        // ADMIN LOGIN SUCCESS
+        state.currentUser = data.user;
+        loginForm.reset();
         showApp();
-
-        // Dashboard load
-        await loadDashboard();
-
-    } catch (err) {
-
-        console.error("Unexpected Login Error:", err);
-
-        loginError.textContent =
-            "Something went wrong. Please try again.";
-
+    } catch (error) {
+        console.error(error);
+        loginError.textContent = error?.message || "Login failed.";
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
     }
-
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Login";
 });
 
-
-// =====================================================
-// LOGOUT
-// =====================================================
-logoutBtn.addEventListener("click", async () => {
-
+logoutBtn?.addEventListener("click", async () => {
     await supabase.auth.signOut();
-
+    state.currentUser = null;
     showLogin();
-
-    loginEmail.value = "";
-    loginPassword.value = "";
-    loginError.textContent = "";
-
 });
-
 
 // =====================================================
 // NAVIGATION
 // =====================================================
-document.querySelectorAll(".nav-link").forEach(link => {
 
-    link.addEventListener("click", async (event) => {
+navLinks.forEach(link => link.addEventListener("click", event => {
+    event.preventDefault();
+    const sectionName = link.dataset.section;
+    state.activeSection = sectionName;
 
-        event.preventDefault();
+    navLinks.forEach(item => item.classList.remove("active"));
+    link.classList.add("active");
+    sections.forEach(section => section.classList.remove("active-section"));
 
-        const sectionName =
-            link.getAttribute("data-section");
+    document.getElementById(sectionName)?.classList.add("active-section");
+    if (pageName) pageName.textContent = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
 
-        document.querySelectorAll(".nav-link")
-            .forEach(item => item.classList.remove("active"));
-
-        link.classList.add("active");
-
-        document.querySelectorAll(".section")
-            .forEach(section => {
-                section.classList.remove("active-section");
-            });
-
-        const selectedSection =
-            document.getElementById(sectionName);
-
-        if (selectedSection) {
-            selectedSection.classList.add("active-section");
-        }
-
-        const pageName =
-            document.getElementById("pageName");
-
-        if (pageName) {
-            pageName.textContent =
-                link.textContent
-                    .replace(/[📊🏢👨‍🎓💼📄📈⚙️]/g, "")
-                    .replace(/\d+/g, "")
-                    .trim();
-        }
-
-        if (sectionName === "overview") {
-            await loadOverview();
-        }
-
-        if (sectionName === "businesses") {
-            await loadBusinesses();
-        }
-
-        if (sectionName === "students") {
-            await loadStudents();
-        }
-
-        if (sectionName === "opportunities") {
-            await loadJobs();
-        }
-
-        if (sectionName === "applications") {
-            await loadApplications();
-        }
-
-        if (sectionName === "verification") {
-            await loadVerifications();
-        }
-
-        if (sectionName === "analytics") {
-            await loadAnalytics();
-        }
-    });
-
-});
-
-
-// =====================================================
-// REFRESH
-// =====================================================
-refreshBtn.addEventListener("click", async () => {
-
-    refreshBtn.disabled = true;
-    refreshBtn.textContent = "Refreshing...";
-
-    try {
-        await loadDashboard();
-    } catch (error) {
-        console.error(error);
-    }
-
-    refreshBtn.disabled = false;
-    refreshBtn.textContent = "↻ Refresh";
-});
-
+    if (sectionName === "overview") loadOverview();
+    if (sectionName === "businesses") loadBusinesses();
+    if (sectionName === "students") loadStudents();
+    if (sectionName === "opportunities") loadJobs();
+    if (sectionName === "applications") loadApplications();
+    if (sectionName === "verification") loadVerification();
+    if (sectionName === "analytics") loadOverview();
+}));
 
 // =====================================================
 // DASHBOARD
 // =====================================================
-async function loadDashboard() {
 
-    console.log("Loading Admin Dashboard...");
-
-    await loadOverview();
-
-    await loadBusinesses();
-
-    await loadStudents();
-
-    await loadJobs();
-
-    await loadApplications();
-
-    await loadVerifications();
-
-    await loadAnalytics();
-
-    console.log("Admin Dashboard Loaded.");
-
-}
-
-
-// =====================================================
-// OVERVIEW
-// =====================================================
 async function loadOverview() {
-
     try {
-
-        const [
-            businesses,
-            students,
-            jobs,
-            applications
-        ] = await Promise.all([
-
-            supabase
-                .from("profiles")
-                .select("*", { count: "exact", head: true })
-                .eq("Role", "business"),
-
-            supabase
-                .from("profiles")
-                .select("*", { count: "exact", head: true })
-                .eq("Role", "student"),
-
-            supabase
-                .from("jobs")
-                .select("*", { count: "exact", head: true }),
-
-            supabase
-                .from("applications")
-                .select("*", { count: "exact", head: true })
+        const [businesses, students, jobs, applications] = await Promise.all([
+            supabase.from("businesses").select("id", { count: "exact", head: true }),
+            supabase.from("profiles").select("user_id", { count: "exact", head: true }).eq("Role", "student"),
+            supabase.from("jobs").select("id", { count: "exact", head: true }),
+            supabase.from("applications").select("id", { count: "exact", head: true })
         ]);
 
+        const counts = {
+            businesses: businesses.count || 0,
+            students: students.count || 0,
+            jobs: jobs.count || 0,
+            applications: applications.count || 0
+        };
 
-        document.getElementById("totalBusinesses").textContent =
-            businesses.count ?? 0;
-
-        document.getElementById("totalStudents").textContent =
-            students.count ?? 0;
-
-        document.getElementById("totalJobs").textContent =
-            jobs.count ?? 0;
-
-        document.getElementById("totalApplications").textContent =
-            applications.count ?? 0;
-
-
-        document.getElementById("businessCount").textContent =
-            businesses.count ?? 0;
-
-        document.getElementById("studentCount").textContent =
-            students.count ?? 0;
-
-        document.getElementById("jobCount").textContent =
-            jobs.count ?? 0;
-
-        document.getElementById("applicationCount").textContent =
-            applications.count ?? 0;
-
+        setText("totalBusinesses", counts.businesses);
+        setText("totalStudents", counts.students);
+        setText("totalJobs", counts.jobs);
+        setText("totalApplications", counts.applications);
+        setText("businessCount", counts.businesses);
+        setText("studentCount", counts.students);
+        setText("jobCount", counts.jobs);
+        setText("applicationCount", counts.applications);
+        setText("analyticsBusinesses", counts.businesses);
+        setText("analyticsStudents", counts.students);
+        setText("analyticsJobs", counts.jobs);
+        setText("analyticsApplications", counts.applications);
 
         await loadRecentApplications();
-
     } catch (error) {
-
-        console.error("Overview Error:", error);
-
+        console.error("Overview error:", error);
+        showToast("Could not load dashboard statistics.", "error");
     }
 }
 
-
-// =====================================================
-// RECENT APPLICATIONS
-// =====================================================
 async function loadRecentApplications() {
-
-    const tbody =
-        document.getElementById("recentApplications");
-
+    const tbody = document.getElementById("recentApplications");
     if (!tbody) return;
 
-    tbody.innerHTML =
-        `<tr><td colspan="4" class="loading">Loading...</td></tr>`;
-
-    const { data, error } = await supabase
-        .from("applications")
-        .select("id, job_id, student_id, status, applied_at")
-        .order("applied_at", { ascending: false })
-        .limit(5);
-
+    const { data, error } = await supabase.from("applications").select("*").limit(8);
     if (error) {
-
-        console.error("Recent Applications Error:", error);
-
-        tbody.innerHTML =
-            `<tr><td colspan="4">Unable to load applications</td></tr>`;
-
+        console.error(error);
+        tbody.innerHTML = messageRow(5, "Unable to load recent applications.");
         return;
     }
 
-    if (!data || data.length === 0) {
-
-        tbody.innerHTML =
-            `<tr><td colspan="4">No applications found.</td></tr>`;
-
+    const applications = data || [];
+    if (!applications.length) {
+        tbody.innerHTML = messageRow(5, "No applications found.");
         return;
     }
 
-    tbody.innerHTML = data.map(app => `
+    const studentIds = [...new Set(applications.map(x => x.student_id).filter(Boolean))];
+    const jobIds = [...new Set(applications.map(x => x.job_id).filter(Boolean))];
 
-        <tr>
-            <td>${escapeHTML(app.student_id || "-")}</td>
-            <td>${escapeHTML(app.job_id || "-")}</td>
+    const [students, jobs] = await Promise.all([
+        studentIds.length ? supabase.from("profiles").select("*").in("user_id", studentIds) : { data: [] },
+        jobIds.length ? supabase.from("jobs").select("*").in("id", jobIds) : { data: [] }
+    ]);
+
+    const studentMap = new Map((students.data || []).map(x => [x.user_id, x]));
+    const jobMap = new Map((jobs.data || []).map(x => [x.id, x]));
+
+    tbody.innerHTML = applications.map(app => {
+        const student = studentMap.get(app.student_id);
+        const job = jobMap.get(app.job_id);
+        return `<tr>
+            <td>${escapeHTML(student?.full_name || app.student_id || "Student")}</td>
+            <td>${escapeHTML(job?.title || app.job_id || "Opportunity")}</td>
             <td>${statusHTML(app.status)}</td>
-            <td>${formatDate(app.applied_at)}</td>
-        </tr>
-
-    `).join("");
+            <td>${formatDate(app.applied_at || app.created_at)}</td>
+            <td>${escapeHTML(app.id || "-")}</td>
+        </tr>`;
+    }).join("");
 }
-
 
 // =====================================================
 // BUSINESSES
 // =====================================================
+
 async function loadBusinesses() {
-
-    const tbody =
-        document.getElementById("businessTable");
-
+    const tbody = document.getElementById("businessTable");
     if (!tbody) return;
+    tbody.innerHTML = messageRow(6, "Loading businesses...");
 
-    tbody.innerHTML =
-        `<tr><td colspan="4" class="loading">Loading...</td></tr>`;
-
-    const { data, error } = await supabase
-        .from("profiles")
-        .select('"full_name", "Email", "Role", "Created_at"')
-        .eq("Role", "business")
-        .order("Created_at", { ascending: false });
-
+    const { data, error } = await supabase.from("businesses").select("*").order("created_at", { ascending: false });
     if (error) {
-
-        console.error("Businesses Error:", error);
-
-        tbody.innerHTML =
-            `<tr><td colspan="4">Unable to load businesses</td></tr>`;
-
+        console.error(error);
+        tbody.innerHTML = messageRow(6, error.message);
         return;
     }
 
-    if (!data || data.length === 0) {
+    state.businesses = data || [];
+    setText("businessCount", state.businesses.length);
 
-        tbody.innerHTML =
-            `<tr><td colspan="4">No businesses found.</td></tr>`;
-
+    if (!state.businesses.length) {
+        tbody.innerHTML = messageRow(6, "No businesses found.");
         return;
     }
 
-    tbody.innerHTML = data.map(item => `
+    const ownerIds = state.businesses.map(x => x.user_id || x.owner_id).filter(Boolean);
+    const { data: owners } = ownerIds.length
+        ? await supabase.from("profiles").select("*").in("user_id", [...new Set(ownerIds)])
+        : { data: [] };
+    const ownerMap = new Map((owners || []).map(x => [x.user_id, x]));
 
-        <tr>
-            <td>${escapeHTML(item.full_name || "-")}</td>
-            <td>${escapeHTML(item.Email || "-")}</td>
-            <td>${escapeHTML(item.Role || "-")}</td>
-            <td>${formatDate(item.Created_at)}</td>
-        </tr>
+    tbody.innerHTML = state.businesses.map(business => {
+        const owner = ownerMap.get(business.user_id || business.owner_id);
+        const name = firstValue(business, ["business_name", "name", "company_name"], "Business");
+        const email = firstValue(business, ["email", "Email"], owner?.Email || owner?.email || "-");
+        const city = firstValue(business, ["city", "location"], "-");
+        const status = statusValue(business);
+        const statusColumn = findStatusColumn(business);
+        const id = business.id;
 
-    `).join("");
+        return `<tr>
+            <td><strong>${escapeHTML(name)}</strong></td>
+            <td>${escapeHTML(email)}</td>
+            <td>${escapeHTML(city)}</td>
+            <td>${statusHTML(status)}</td>
+            <td>${formatDate(business.created_at)}</td>
+            <td class="action-cell">
+                ${statusColumn ? `
+                    <button class="action-btn approve" data-entity="business" data-id="${escapeHTML(id)}" data-status="approved">Approve</button>
+                    <button class="action-btn reject" data-entity="business" data-id="${escapeHTML(id)}" data-status="rejected">Reject</button>
+                ` : `<span class="muted">No approval field</span>`}
+            </td>
+        </tr>`;
+    }).join("");
+
+    attachStatusActions(tbody);
 }
-
 
 // =====================================================
 // STUDENTS
 // =====================================================
+
 async function loadStudents() {
-
-    const tbody =
-        document.getElementById("studentTable");
-
+    const tbody = document.getElementById("studentTable");
     if (!tbody) return;
+    tbody.innerHTML = messageRow(6, "Loading students...");
 
-    tbody.innerHTML =
-        `<tr><td colspan="4" class="loading">Loading...</td></tr>`;
-
-    const { data, error } = await supabase
-        .from("profiles")
-        .select('"full_name", "Email", "Role", "Created_at"')
-        .eq("Role", "student")
-        .order("Created_at", { ascending: false });
-
+    const { data, error } = await supabase.from("profiles").select("*").eq("Role", "student");
     if (error) {
-
-        console.error("Students Error:", error);
-
-        tbody.innerHTML =
-            `<tr><td colspan="4">Unable to load students</td></tr>`;
-
+        console.error(error);
+        tbody.innerHTML = messageRow(6, error.message);
         return;
     }
 
-    if (!data || data.length === 0) {
+    state.students = data || [];
+    setText("studentCount", state.students.length);
 
-        tbody.innerHTML =
-            `<tr><td colspan="4">No students found.</td></tr>`;
-
+    if (!state.students.length) {
+        tbody.innerHTML = messageRow(6, "No students found.");
         return;
     }
 
-    tbody.innerHTML = data.map(item => `
+    tbody.innerHTML = state.students.map(student => {
+        const status = statusValue(student);
+        const statusColumn = findStatusColumn(student);
+        return `<tr>
+            <td><strong>${escapeHTML(student.full_name || "Student")}</strong></td>
+            <td>${escapeHTML(student.Email || student.email || "-")}</td>
+            <td>${escapeHTML(student.Role || "student")}</td>
+            <td>${statusHTML(status)}</td>
+            <td>${formatDate(student.created_at)}</td>
+            <td class="action-cell">
+                ${statusColumn ? `
+                    <button class="action-btn approve" data-entity="student" data-id="${escapeHTML(student.user_id)}" data-status="approved">Approve</button>
+                    <button class="action-btn reject" data-entity="student" data-id="${escapeHTML(student.user_id)}" data-status="rejected">Reject</button>
+                ` : `<span class="muted">No approval field</span>`}
+            </td>
+        </tr>`;
+    }).join("");
 
-        <tr>
-            <td>${escapeHTML(item.full_name || "-")}</td>
-            <td>${escapeHTML(item.Email || "-")}</td>
-            <td>${escapeHTML(item.Role || "-")}</td>
-            <td>${formatDate(item.Created_at)}</td>
-        </tr>
-
-    `).join("");
+    attachStatusActions(tbody);
 }
 
+async function attachStatusActions(tbody) {
+    tbody.querySelectorAll(".action-btn[data-status]").forEach(button => {
+        button.addEventListener("click", async () => {
+            const entity = button.dataset.entity;
+            const id = button.dataset.id;
+            const nextStatus = button.dataset.status;
+            const label = nextStatus === "approved" ? "approve" : "reject";
+
+            if (!confirm(`Are you sure you want to ${label} this ${entity}?`)) return;
+
+            button.disabled = true;
+            const result = await updateApproval(entity, id, nextStatus);
+            button.disabled = false;
+
+            if (result.ok) {
+                showToast(`${entity.charAt(0).toUpperCase() + entity.slice(1)} ${nextStatus}.`);
+                entity === "business" ? loadBusinesses() : loadStudents();
+            } else {
+                showToast(result.message, "error");
+            }
+        });
+    });
+}
+
+async function updateApproval(entity, id, status) {
+    const table = entity === "business" ? "businesses" : "profiles";
+    const rows = entity === "business" ? state.businesses : state.students;
+    const row = rows.find(x => (entity === "business" ? x.id : x.user_id) === id);
+    const column = findStatusColumn(row);
+
+    if (!column) {
+        return {
+            ok: false,
+            message: `Your ${table} table has no approval/status column. The Admin UI will not invent or rename one.`
+        };
+    }
+
+    const key = entity === "business" ? "id" : "user_id";
+    const { error } = await supabase.from(table).update({ [column]: status }).eq(key, id);
+    if (error) {
+        console.error("Approval update error:", error);
+        return { ok: false, message: error.message };
+    }
+    return { ok: true };
+}
 
 // =====================================================
-// OPPORTUNITIES / JOBS
+// JOBS / OPPORTUNITIES
 // =====================================================
+
 async function loadJobs() {
-
-    const tbody =
-        document.getElementById("jobTable");
-
+    const tbody = document.getElementById("jobTable");
     if (!tbody) return;
+    tbody.innerHTML = messageRow(5, "Loading opportunities...");
 
-    tbody.innerHTML =
-        `<tr><td colspan="5" class="loading">Loading...</td></tr>`;
-
-    const { data, error } = await supabase
-        .from("jobs")
-        .select("*")
-        .order("id", { ascending: false });
-
+    const { data, error } = await supabase.from("jobs").select("*").order("created_at", { ascending: false });
     if (error) {
-
-        console.error("Jobs Error:", error);
-
-        tbody.innerHTML =
-            `<tr><td colspan="5">Unable to load opportunities</td></tr>`;
-
+        console.error(error);
+        tbody.innerHTML = messageRow(5, error.message);
         return;
     }
 
-    if (!data || data.length === 0) {
+    state.jobs = data || [];
+    setText("jobCount", state.jobs.length);
 
-        tbody.innerHTML =
-            `<tr><td colspan="5">No opportunities found.</td></tr>`;
-
+    if (!state.jobs.length) {
+        tbody.innerHTML = messageRow(5, "No opportunities found.");
         return;
     }
 
-    tbody.innerHTML = data.map(job => `
-
-        <tr>
-            <td>${escapeHTML(job.title || "-")}</td>
-            <td>${escapeHTML(job.job_type || "-")}</td>
-            <td>${escapeHTML(job.salary || "-")}</td>
-            <td>${statusHTML(job.status)}</td>
-            <td>${formatDate(job.created_at)}</td>
-        </tr>
-
-    `).join("");
+    tbody.innerHTML = state.jobs.map(job => `<tr>
+        <td><strong>${escapeHTML(job.title || "Untitled")}</strong></td>
+        <td>${escapeHTML(job.job_type || job.type || "-")}</td>
+        <td>${job.salary !== null && job.salary !== undefined && job.salary !== "" ? `₹${escapeHTML(job.salary)}` : "-"}</td>
+        <td>${statusHTML(job.status || "open")}</td>
+        <td>${formatDate(job.created_at)}</td>
+    </tr>`).join("");
 }
 
+// =====================================================
+// APPLICATIONS - ADMIN ONLY MONITORS
+// =====================================================
 
-// =====================================================
-// APPLICATIONS
-// =====================================================
 async function loadApplications() {
-
-    const tbody =
-        document.getElementById("applicationTable");
-
+    const tbody = document.getElementById("applicationTable");
     if (!tbody) return;
+    tbody.innerHTML = messageRow(4, "Loading applications...");
 
-    tbody.innerHTML =
-        `<tr><td colspan="6" class="loading">Loading...</td></tr>`;
-
-    const { data, error } = await supabase
-        .from("applications")
-        .select("id, job_id, student_id, status, applied_at")
-        .order("applied_at", { ascending: false });
-
+    const { data, error } = await supabase.from("applications").select("*");
     if (error) {
-
-        console.error("Applications Error:", error);
-
-        tbody.innerHTML =
-            `<tr><td colspan="6">Unable to load applications</td></tr>`;
-
+        console.error(error);
+        tbody.innerHTML = messageRow(4, error.message);
         return;
     }
 
-    if (!data || data.length === 0) {
+    state.applications = data || [];
+    const pending = state.applications.filter(x => normalizeStatus(x.status) === "pending").length;
+    const accepted = state.applications.filter(x => normalizeStatus(x.status) === "accepted").length;
+    const rejected = state.applications.filter(x => normalizeStatus(x.status) === "rejected").length;
+    setText("pendingApplications", pending);
+    setText("acceptedApplications", accepted);
+    setText("rejectedApplications", rejected);
 
-        tbody.innerHTML =
-            `<tr><td colspan="6">No applications found.</td></tr>`;
-
-        updateApplicationCounts([]);
-
+    if (!state.applications.length) {
+        tbody.innerHTML = messageRow(4, "No applications found.");
         return;
     }
 
-    updateApplicationCounts(data);
+    const studentIds = [...new Set(state.applications.map(x => x.student_id).filter(Boolean))];
+    const jobIds = [...new Set(state.applications.map(x => x.job_id).filter(Boolean))];
+    const [students, jobs] = await Promise.all([
+        studentIds.length ? supabase.from("profiles").select("*").in("user_id", studentIds) : { data: [] },
+        jobIds.length ? supabase.from("jobs").select("*").in("id", jobIds) : { data: [] }
+    ]);
 
+    const studentMap = new Map((students.data || []).map(x => [x.user_id, x]));
+    const jobMap = new Map((jobs.data || []).map(x => [x.id, x]));
 
-    tbody.innerHTML = data.map(app => {
-
-        const status =
-            String(app.status || "pending")
-                .trim()
-                .toLowerCase();
-
-
-        let action = "";
-
-
-        if (status === "pending") {
-
-            action = `
-                <button
-                    class="action-btn approve-btn"
-                    data-id="${escapeHTML(app.id)}"
-                    data-status="accepted">
-                    Approve
-                </button>
-
-                <button
-                    class="action-btn reject-btn"
-                    data-id="${escapeHTML(app.id)}"
-                    data-status="rejected">
-                    Reject
-                </button>
-            `;
-
-        } else if (status === "accepted") {
-
-            action =
-                `<span class="action-done">Approved</span>`;
-
-        } else if (status === "rejected") {
-
-            action =
-                `<span class="action-done">Rejected</span>`;
-
-        } else {
-
-            action = `
-                <button
-                    class="action-btn approve-btn"
-                    data-id="${escapeHTML(app.id)}"
-                    data-status="accepted">
-                    Approve
-                </button>
-
-                <button
-                    class="action-btn reject-btn"
-                    data-id="${escapeHTML(app.id)}"
-                    data-status="rejected">
-                    Reject
-                </button>
-            `;
-        }
-
-
-        return `
-
-            <tr>
-
-                <td>${escapeHTML(app.id || "-")}</td>
-
-                <td>${escapeHTML(app.job_id || "-")}</td>
-
-                <td>${escapeHTML(app.student_id || "-")}</td>
-
-                <td>${statusHTML(app.status)}</td>
-
-                <td>${formatDate(app.applied_at)}</td>
-
-                <td class="action-cell">
-                    ${action}
-                </td>
-
-            </tr>
-
-        `;
-
+    tbody.innerHTML = state.applications.map(app => {
+        const student = studentMap.get(app.student_id);
+        const job = jobMap.get(app.job_id);
+        return `<tr>
+            <td>${escapeHTML(student?.full_name || app.student_id || "Student")}</td>
+            <td>${escapeHTML(job?.title || app.job_id || "Opportunity")}</td>
+            <td>${statusHTML(app.status)}</td>
+            <td>${formatDate(app.applied_at || app.created_at)}</td>
+        </tr>`;
     }).join("");
 }
 
-
 // =====================================================
-// APPLICATION COUNTS
+// VERIFICATION
+// Uses the EXISTING verification system:
+//   Table  : verification_documents
+//   Bucket : verification-documents
+// No new table/column is required.
 // =====================================================
-function updateApplicationCounts(data) {
 
-    let pending = 0;
-    let accepted = 0;
-    let rejected = 0;
-
-    data.forEach(app => {
-
-        const status =
-            String(app.status || "")
-                .trim()
-                .toLowerCase();
-
-        if (status === "pending") {
-            pending++;
-        }
-
-        if (status === "accepted") {
-            accepted++;
-        }
-
-        if (status === "rejected") {
-            rejected++;
-        }
-
-    });
-
-
-    const pendingElement =
-        document.getElementById("pendingApplications");
-
-    const acceptedElement =
-        document.getElementById("acceptedApplications");
-
-    const rejectedElement =
-        document.getElementById("rejectedApplications");
-
-
-    if (pendingElement)
-        pendingElement.textContent = pending;
-
-    if (acceptedElement)
-        acceptedElement.textContent = accepted;
-
-    if (rejectedElement)
-        rejectedElement.textContent = rejected;
+function verificationDocumentLabel(type) {
+    const labels = {
+        college_id: "College ID",
+        aadhaar: "Aadhaar",
+        pan: "PAN",
+        gst: "GST Certificate",
+        business_proof: "Business Proof",
+        registration_certificate: "Registration Certificate",
+        identity_proof: "Identity Proof",
+        address_proof: "Address Proof"
+    };
+    return labels[type] || String(type || "Verification Document").replaceAll("_", " ");
 }
 
+async function getVerificationViewerUrl(filePath) {
+    if (!filePath) return null;
 
-// =====================================================
-// APPROVE / REJECT
-// =====================================================
-document.addEventListener("click", async (event) => {
+    // Prefer a signed URL because verification documents may be private.
+    const { data, error } = await supabase.storage
+        .from("verification-documents")
+        .createSignedUrl(filePath, 60 * 60);
 
-    const button =
-        event.target.closest(".action-btn");
+    if (!error && data?.signedUrl) return data.signedUrl;
 
-    if (!button) return;
+    console.warn("Signed URL could not be created:", error);
 
-    const applicationId =
-        button.dataset.id;
+    // Fallback for a public bucket.
+    const { data: publicData } = supabase.storage
+        .from("verification-documents")
+        .getPublicUrl(filePath);
 
-    const newStatus =
-        button.dataset.status;
+    return publicData?.publicUrl || null;
+}
 
-    if (!applicationId || !newStatus) return;
+async function updateVerificationStatus(id, status, rejectionReason = null) {
+    const payload = { status };
 
+    if (status === "rejected") {
+        payload.rejection_reason = rejectionReason || "Rejected by admin.";
+    } else {
+        payload.rejection_reason = null;
+    }
 
-    button.disabled = true;
-    button.textContent = "Updating...";
+    const { error } = await supabase
+        .from("verification_documents")
+        .update(payload)
+        .eq("id", id);
 
+    if (error) throw error;
+}
+
+async function handleVerificationAction(id, status) {
+    if (status === "approved") {
+        const confirmed = window.confirm(
+            "Approve this verification document?"
+        );
+        if (!confirmed) return;
+
+        try {
+            await updateVerificationStatus(id, "approved");
+            showToast("Verification approved.");
+            await loadVerification();
+        } catch (error) {
+            console.error("Verification approval error:", error);
+            showToast(error.message || "Could not approve verification.", "error");
+        }
+        return;
+    }
+
+    const reason = window.prompt(
+        "Reason for rejection (this will be shown to the user):",
+        "Document could not be verified. Please upload a valid document."
+    );
+
+    if (reason === null) return;
 
     try {
+        await updateVerificationStatus(id, "rejected", reason.trim());
+        showToast("Verification rejected.");
+        await loadVerification();
+    } catch (error) {
+        console.error("Verification rejection error:", error);
+        showToast(error.message || "Could not reject verification.", "error");
+    }
+}
 
-        const { error } = await supabase
-            .from("applications")
-            .update({
-                status: newStatus
-            })
-            .eq("id", applicationId);
+async function viewVerificationDocument(filePath) {
+    try {
+        const url = await getVerificationViewerUrl(filePath);
 
-
-        if (error) {
-
-            console.error(
-                "Application Update Error:",
-                error
-            );
-
-            alert(
-                "Update failed: " +
-                error.message
-            );
-
-            button.disabled = false;
-
-            button.textContent =
-                newStatus === "accepted"
-                    ? "Approve"
-                    : "Reject";
-
+        if (!url) {
+            showToast("Document could not be opened.", "error");
             return;
         }
 
-
-        await loadApplications();
-
-        await loadOverview();
-
+        window.open(url, "_blank", "noopener,noreferrer");
     } catch (error) {
-
-        console.error(error);
-
-        alert("Something went wrong.");
-
-        button.disabled = false;
+        console.error("Document view error:", error);
+        showToast(error.message || "Could not open document.", "error");
     }
+}
 
-});
-
-
-// =====================================================
-// VERIFICATION REQUESTS
-// =====================================================
-async function loadVerifications() {
-
+async function loadVerification() {
     const tbody = document.getElementById("verificationTable");
-
     if (!tbody) return;
 
-    tbody.innerHTML =
-        `<tr><td colspan="6" class="loading">Loading...</td></tr>`;
+    tbody.innerHTML = messageRow(6, "Loading verification requests...");
 
-    const { data, error } = await supabase
+    // This is the same table used by the Student and Business profile pages.
+    const { data: documents, error } = await supabase
         .from("verification_documents")
-        .select("id, user_id, role, document_type, file_path, status, rejection_reason, uploaded_at, reviewed_at")
+        .select("id, user_id, role, document_type, file_path, status, rejection_reason, uploaded_at")
         .order("uploaded_at", { ascending: false });
 
     if (error) {
-        console.error("Verification Error:", error);
-        tbody.innerHTML =
-            `<tr><td colspan="6">Unable to load verification requests: ${escapeHTML(error.message)}</td></tr>`;
+        console.error("Verification documents error:", error);
+        setText("verificationCount", 0);
+        tbody.innerHTML = messageRow(6, error.message || "Unable to load verification requests.");
         return;
     }
 
-    if (!data || data.length === 0) {
-        tbody.innerHTML =
-            `<tr><td colspan="6">No verification requests found.</td></tr>`;
-        updateVerificationCount(0);
+    const rows = documents || [];
+    setText("verificationCount", rows.filter(row => normalizeStatus(row.status) === "pending").length);
+
+    if (!rows.length) {
+        tbody.innerHTML = messageRow(6, "No verification documents have been submitted yet.");
         return;
     }
 
-    const userIds = [...new Set(data.map(item => item.user_id).filter(Boolean))];
+    // Fetch profile information for both students and businesses.
+    const userIds = [...new Set(rows.map(row => row.user_id).filter(Boolean))];
 
-    let profiles = [];
-    if (userIds.length > 0) {
-        const result = await supabase
-            .from("profiles")
-            .select('"user_id", "full_name", "Email"')
-            .in("user_id", userIds);
+    const [{ data: profiles, error: profilesError }, { data: businesses, error: businessesError }] = await Promise.all([
+        userIds.length
+            ? supabase.from("profiles").select("user_id, full_name, Email, Role").in("user_id", userIds)
+            : Promise.resolve({ data: [], error: null }),
+        userIds.length
+            ? supabase.from("businesses").select("user_id, business_name, business_type, city").in("user_id", userIds)
+            : Promise.resolve({ data: [], error: null })
+    ]);
 
-        if (result.error) {
-            console.error("Verification Profiles Error:", result.error);
-        } else {
-            profiles = result.data || [];
-        }
-    }
+    if (profilesError) console.warn("Profile lookup warning:", profilesError);
+    if (businessesError) console.warn("Business lookup warning:", businessesError);
 
-    const profileMap = {};
-    profiles.forEach(profile => {
-        profileMap[profile.user_id] = profile;
-    });
+    const profileMap = new Map((profiles || []).map(row => [row.user_id, row]));
+    const businessMap = new Map((businesses || []).map(row => [row.user_id, row]));
 
-    const pendingCount = data.filter(item =>
-        String(item.status || "pending").toLowerCase() === "pending"
-    ).length;
+    tbody.innerHTML = rows.map(row => {
+        const profile = profileMap.get(row.user_id) || {};
+        const business = businessMap.get(row.user_id) || {};
+        const isBusiness = normalizeStatus(row.role) === "business";
 
-    updateVerificationCount(pendingCount);
+        const name = isBusiness
+            ? firstValue(business, ["business_name"], firstValue(profile, ["full_name"], "Business"))
+            : firstValue(profile, ["full_name"], "Student");
 
-    tbody.innerHTML = data.map(item => {
-
-        const profile = profileMap[item.user_id] || {};
-        const role = String(item.role || "").toLowerCase();
-        const typeLabel = role === "business" ? "Business" : "Student";
-        const documentLabel = item.document_type || "Verification Document";
-        const status = String(item.status || "pending").toLowerCase();
+        const type = isBusiness ? "Business" : "Student";
+        const documentType = verificationDocumentLabel(row.document_type);
+        const status = normalizeStatus(row.status || "pending");
+        const uploaded = formatDate(row.uploaded_at);
 
         let action = `
             <button class="verification-btn view-verification"
-                data-path="${escapeHTML(item.file_path || "")}">
-                View
+                type="button"
+                data-verification-view="${escapeHTML(row.file_path || "")}">
+                View Document
             </button>
         `;
 
         if (status === "pending") {
             action += `
                 <button class="verification-btn approve-verification"
-                    data-id="${escapeHTML(item.id)}">
+                    type="button"
+                    data-verification-action="approved"
+                    data-verification-id="${escapeHTML(row.id)}">
                     Approve
                 </button>
                 <button class="verification-btn reject-verification"
-                    data-id="${escapeHTML(item.id)}">
+                    type="button"
+                    data-verification-action="rejected"
+                    data-verification-id="${escapeHTML(row.id)}">
                     Reject
                 </button>
             `;
-        } else if (status === "approved") {
-            action += `<span class="action-done">Approved</span>`;
-        } else if (status === "rejected") {
-            action += `<span class="action-done">Rejected</span>`;
+        } else {
+            action += `<span class="action-done">${escapeHTML(status.charAt(0).toUpperCase() + status.slice(1))}</span>`;
         }
 
         return `
             <tr>
                 <td>
-                    <strong>${escapeHTML(profile.full_name || "-")}</strong>
-                    <small class="verification-email">${escapeHTML(profile.Email || "")}</small>
+                    <strong>${escapeHTML(name)}</strong>
+                    <span class="verification-email">${escapeHTML(profile.Email || row.user_id || "")}</span>
                 </td>
-                <td>${escapeHTML(typeLabel)}</td>
-                <td>${escapeHTML(documentLabel)}</td>
+                <td>${escapeHTML(type)}</td>
+                <td>
+                    <strong>${escapeHTML(documentType)}</strong>
+                    ${row.rejection_reason && status === "rejected"
+                        ? `<span class="verification-email">Reason: ${escapeHTML(row.rejection_reason)}</span>`
+                        : ""}
+                </td>
                 <td>${statusHTML(status)}</td>
-                <td>${formatDate(item.uploaded_at)}</td>
-                <td class="action-cell">${action}</td>
+                <td>${escapeHTML(uploaded)}</td>
+                <td>${action}</td>
             </tr>
         `;
     }).join("");
-}
 
-function updateVerificationCount(count) {
-    const element = document.getElementById("verificationCount");
-    if (element) element.textContent = count;
-}
+    tbody.querySelectorAll("[data-verification-view]").forEach(button => {
+        button.addEventListener("click", () => {
+            viewVerificationDocument(button.dataset.verificationView);
+        });
+    });
 
-async function reviewVerification(documentId, newStatus, rejectionReason = null) {
-
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-        alert("Admin session expired. Please log in again.");
-        showLogin();
-        return false;
-    }
-
-    const updateData = {
-        status: newStatus,
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id,
-        rejection_reason: newStatus === "rejected"
-            ? rejectionReason
-            : null
-    };
-
-    const { error } = await supabase
-        .from("verification_documents")
-        .update(updateData)
-        .eq("id", documentId);
-
-    if (error) {
-        console.error("Verification Update Error:", error);
-        alert("Update failed: " + error.message);
-        return false;
-    }
-
-    return true;
-}
-
-document.addEventListener("click", async (event) => {
-
-    const viewButton = event.target.closest(".view-verification");
-
-    if (viewButton) {
-
-        const filePath = viewButton.dataset.path;
-
-        if (!filePath) {
-            alert("Document path is missing.");
-            return;
-        }
-
-        viewButton.disabled = true;
-        viewButton.textContent = "Opening...";
-
-        try {
-            const { data, error } = await supabase
-                .storage
-                .from("verification-documents")
-                .createSignedUrl(filePath, 300);
-
-            if (error) {
-                console.error("Document View Error:", error);
-                alert("Unable to open document: " + error.message);
-            } else if (data?.signedUrl) {
-                window.open(data.signedUrl, "_blank", "noopener,noreferrer");
-            }
-
-        } finally {
-            viewButton.disabled = false;
-            viewButton.textContent = "View";
-        }
-
-        return;
-    }
-
-    const approveButton = event.target.closest(".approve-verification");
-
-    if (approveButton) {
-
-        const documentId = approveButton.dataset.id;
-        if (!documentId) return;
-
-        if (!confirm("Approve this verification document?")) return;
-
-        approveButton.disabled = true;
-        approveButton.textContent = "Updating...";
-
-        const success = await reviewVerification(documentId, "approved");
-
-        if (success) {
-            await loadVerifications();
-        } else {
-            approveButton.disabled = false;
-            approveButton.textContent = "Approve";
-        }
-
-        return;
-    }
-
-    const rejectButton = event.target.closest(".reject-verification");
-
-    if (rejectButton) {
-
-        const documentId = rejectButton.dataset.id;
-        if (!documentId) return;
-
-        const reason = prompt("Enter the reason for rejection:");
-
-        if (reason === null) return;
-
-        if (!reason.trim()) {
-            alert("Please enter a rejection reason.");
-            return;
-        }
-
-        rejectButton.disabled = true;
-        rejectButton.textContent = "Updating...";
-
-        const success =
-            await reviewVerification(
-                documentId,
-                "rejected",
-                reason.trim()
+    tbody.querySelectorAll("[data-verification-action]").forEach(button => {
+        button.addEventListener("click", async () => {
+            button.disabled = true;
+            await handleVerificationAction(
+                button.dataset.verificationId,
+                button.dataset.verificationAction
             );
+        });
+    });
+}
 
-        if (success) {
-            await loadVerifications();
-        } else {
-            rejectButton.disabled = false;
-            rejectButton.textContent = "Reject";
-        }
+// =====================================================
+// REFRESH
+// =====================================================
+
+refreshBtn?.addEventListener("click", async () => {
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "↻ Refreshing...";
+    try {
+        await loadOverview();
+        if (state.activeSection === "businesses") await loadBusinesses();
+        if (state.activeSection === "students") await loadStudents();
+        if (state.activeSection === "opportunities") await loadJobs();
+        if (state.activeSection === "applications") await loadApplications();
+        if (state.activeSection === "verification") await loadVerification();
+        showToast("Admin data refreshed.");
+    } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = "↻ Refresh";
     }
 });
 
 // =====================================================
-// ANALYTICS
+// START
 // =====================================================
-async function loadAnalytics() {
-
-    const [
-        businesses,
-        students,
-        jobs,
-        applications
-    ] = await Promise.all([
-
-        supabase
-            .from("profiles")
-            .select("*", { count: "exact", head: true })
-            .eq("Role", "business"),
-
-        supabase
-            .from("profiles")
-            .select("*", { count: "exact", head: true })
-            .eq("Role", "student"),
-
-        supabase
-            .from("jobs")
-            .select("*", { count: "exact", head: true }),
-
-        supabase
-            .from("applications")
-            .select("*", { count: "exact", head: true })
-    ]);
-
-
-    document.getElementById("analyticsBusinesses").textContent =
-        businesses.count ?? 0;
-
-    document.getElementById("analyticsStudents").textContent =
-        students.count ?? 0;
-
-    document.getElementById("analyticsJobs").textContent =
-        jobs.count ?? 0;
-
-    document.getElementById("analyticsApplications").textContent =
-        applications.count ?? 0;
-}
-
-
-// =====================================================
-// HELPERS
-// =====================================================
-function escapeHTML(value) {
-
-    if (value === null || value === undefined) {
-        return "";
-    }
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-function formatDate(date) {
-
-    if (!date) return "-";
-
-    const d = new Date(date);
-
-    if (isNaN(d.getTime())) {
-        return "-";
-    }
-
-    return d.toLocaleDateString("en-IN", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-    });
-}
-
-
-function statusHTML(status) {
-
-    const value =
-        String(status || "pending")
-            .trim()
-            .toLowerCase();
-
-    return `
-        <span class="status ${value}">
-            ${escapeHTML(status || "Pending")}
-        </span>
-    `;
-}
-
-
-// =====================================================
-// INITIAL LOAD
-// =====================================================
-async function init() {
-
-    console.log("Admin page starting...");
-
-    // Always start with login
-    showLogin();
-
-    // Check if already logged in
-    const {
-        data: { session }
-    } = await supabase.auth.getSession();
-
-    if (session && session.user) {
-
-        console.log(
-            "Existing session found:",
-            session.user.id
-        );
-
-        const admin =
-            await isAdmin(session.user.id);
-
-        if (admin) {
-
-            console.log(
-                "Existing admin session accepted."
-            );
-
-            showApp();
-
-            await loadDashboard();
-
-        } else {
-
-            await supabase.auth.signOut();
-
-            showLogin();
-        }
-    }
-}
-
 
 // =====================================================
 // START
 // =====================================================
+
+async function init() {
+    injectTools();
+
+    // Clear any previous Supabase session
+    // so Admin Login is always shown first.
+    await supabase.auth.signOut();
+
+    showLogin();
+}
+
 init();

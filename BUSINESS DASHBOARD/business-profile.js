@@ -1,4 +1,4 @@
-/*
+/*.from("businesses")
 =========================================================
 POTential BUSINESS PROFILE
 Professional Business Profile + Verification
@@ -223,10 +223,15 @@ document.addEventListener("DOMContentLoaded", function () {
                         profile_photo_url
                     `)
                     .eq(
-                        "owner_id",
-                        user.id
-                    )
-                    .maybeSingle();
+    "owner_id",
+    user.id
+)
+.order(
+    "created_at",
+    { ascending: false }
+)
+.limit(1)
+.maybeSingle();
 
 
             if (error) {
@@ -528,7 +533,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 showPhotoMessage(
-                    "Photo selected. Click Upload Photo to save it.",
+                    "",
                     "success"
                 );
             }
@@ -756,10 +761,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         profile_photo_url:
                             publicUrl
                     })
-                    .eq(
-                        "owner_id",
-                        currentUser.id
-                    );
+                   .eq(
+    "id",
+    currentBusiness.id
+);
 
 
             if (updateError) {
@@ -1967,9 +1972,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         })
                         .eq(
-                            "owner_id",
-                            currentUser.id
-                        );
+    "id",
+    currentBusiness.id
+);
 
 
                 if (error) {

@@ -653,3 +653,19 @@ tr:hover td {
     color: var(--muted);
     margin-left: 3px;
 }
+
+
+/* =====================================================
+   ADMIN PANEL ENHANCEMENTS
+===================================================== */
+.admin-tools{display:flex;gap:12px;margin-bottom:18px;align-items:center;}
+.admin-search{width:100%;max-width:420px;padding:11px 14px;border:1px solid #d9e1ec;border-radius:10px;background:#fff;color:#172033;outline:none;font:inherit;}
+.admin-search:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.10);}
+.action-cell{white-space:nowrap;}
+.muted{color:#7b8798;font-size:12px;}
+.admin-toast{position:fixed;right:24px;bottom:24px;z-index:9999;transform:translateY(20px);opacity:0;pointer-events:none;padding:13px 18px;border-radius:10px;background:#172033;color:#fff;box-shadow:0 10px 30px rgba(15,23,42,.18);transition:.25s ease;font-size:14px;}
+.admin-toast.show{transform:translateY(0);opacity:1;}
+.admin-toast.error{background:#b42318;}
+.admin-toast.success{background:#166534;}
+.action-btn{border:0;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:5px;margin:2px;}
+@media(max-width:700px){.admin-tools{display:block}.admin-search{max-width:none}.admin-toast{left:16px;right:16px;bottom:16px;text-align:center}}

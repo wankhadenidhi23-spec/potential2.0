@@ -162,3 +162,199 @@ input:focus, textarea:focus, select:focus { border-color: #8b82ef; box-shadow: 0
 .business-profile-link:hover {
     text-decoration: underline;
 }
+
+
+/* =========================================================
+   BUSINESS VERIFICATION POPUP
+   ========================================================= */
+
+.verification-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(32, 35, 74, 0.45);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  z-index: 9999;
+}
+
+.verification-popup-overlay.show {
+  display: flex;
+}
+
+.verification-popup {
+  position: relative;
+  width: 100%;
+  max-width: 470px;
+
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+
+  padding: 34px 32px 30px;
+
+  text-align: center;
+
+  box-shadow:
+    0 25px 70px rgba(65, 56, 168, 0.20);
+
+  animation: verificationPopupIn 0.25s ease-out;
+}
+
+@keyframes verificationPopupIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.verification-popup-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #f2f1ff;
+  color: #5b51c8;
+
+  font-size: 22px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.verification-popup-close:hover {
+  background: #e8e5ff;
+  transform: rotate(5deg);
+}
+
+.verification-popup-icon {
+  width: 64px;
+  height: 64px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: linear-gradient(
+    135deg,
+    #eeeaff,
+    #eaf3ff
+  );
+
+  color: var(--primary);
+
+  font-size: 28px;
+  font-weight: 800;
+
+  box-shadow: 0 8px 25px rgba(101, 87, 232, 0.12);
+}
+
+.verification-popup-eyebrow {
+  margin: 0 0 8px;
+
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.verification-popup h2 {
+  margin: 0 0 12px;
+
+  color: var(--text);
+  font-size: 25px;
+}
+
+.verification-popup-text {
+  margin: 0 auto 24px;
+
+  max-width: 390px;
+
+  color: var(--muted);
+
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.verification-popup-btn {
+  width: 100%;
+
+  border: 0;
+  border-radius: 11px;
+
+  padding: 13px 20px;
+
+  background: linear-gradient(
+    90deg,
+    #7164ee,
+    #5b73e9
+  );
+
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 20px rgba(91, 83, 220, 0.20);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.verification-popup-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 25px rgba(91, 83, 220, 0.28);
+}
+
+.verification-popup-btn:active {
+  transform: translateY(0);
+}
+
+
+/* Mobile */
+
+@media (max-width: 500px) {
+
+  .verification-popup {
+    padding: 30px 22px 24px;
+    border-radius: 18px;
+  }
+
+  .verification-popup h2 {
+    font-size: 22px;
+  }
+
+  .verification-popup-text {
+    font-size: 13px;
+  }
+
+}

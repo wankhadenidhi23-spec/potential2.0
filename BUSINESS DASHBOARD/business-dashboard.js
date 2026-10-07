@@ -29,9 +29,11 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+
 /* ---------------- BUSINESS DETAILS ---------------- */
 
 async function loadBusiness() {
+
   const {
     data: { user },
     error: userError,
@@ -52,7 +54,12 @@ async function loadBusiness() {
 
   if (error || !business) {
     console.error(error);
-    showMessage("Business profile not found.", "error");
+
+    showMessage(
+      "Business profile not found.",
+      "error"
+    );
+
     return false;
   }
 
@@ -79,80 +86,261 @@ async function loadBusiness() {
   return true;
 }
 
+
+/* =========================================================
+   BUSINESS VERIFICATION POPUP
+   ========================================================= */
+
+async function checkBusinessVerification() {
+
+  const popup = $("verificationPopup");
+
+  if (!popup || !currentUser) {
+    return;
+  }
+
+  /*
+    Get the latest business verification document
+    from the existing verification_documents table.
+  */
+
+  const { data, error } = await supabaseClient
+    .from("verification_documents")
+    .select("status, uploaded_at")
+    .eq("user_id", currentUser.id)
+    .eq("role", "business")
+    .order("uploaded_at", {
+      ascending: false
+    })
+    .limit(1);
+
+  if (error) {
+
+    console.error(
+      "Verification status check error:",
+      error
+    );
+
+    return;
+  }
+
+  /*
+    Get latest verification record.
+  */
+
+  const record =
+    data && data.length
+      ? data[0]
+      : null;
+
+
+  /*
+    NOT SUBMITTED
+    ----------------
+    If there is no verification document,
+    show the popup.
+  */
+
+  if (!record) {
+
+    popup.classList.add("show");
+
+    return;
+  }
+
+
+  /*
+    PENDING
+    ----------------
+    If business proof has been uploaded but
+    admin has not approved it yet,
+    show the popup.
+  */
+
+  if (record.status === "pending") {
+
+    popup.classList.add("show");
+
+    return;
+  }
+
+
+  /*
+    APPROVED
+    ----------------
+    If verification is approved,
+    do not show the popup.
+  */
+
+  if (record.status === "approved") {
+
+    popup.classList.remove("show");
+
+    return;
+  }
+
+
+  /*
+    REJECTED
+    ----------------
+    For now we don't show the popup automatically.
+    Existing rejection handling remains on
+    the Business Profile page.
+  */
+
+  if (record.status === "rejected") {
+
+    popup.classList.remove("show");
+
+    return;
+  }
+
+}
+
+
 /* ---------------- POST JOB ---------------- */
 
 async function postOpportunity(e) {
+
   e.preventDefault();
 
   if (!currentBusiness) {
-    showMessage("Business not found.", "error");
+
+    showMessage(
+      "Business not found.",
+      "error"
+    );
+
     return;
   }
 
   const jobData = {
+
     business_id: currentBusiness.id,
+
     title: $("title").value.trim(),
+
     description: $("description").value.trim(),
-    required_skills: $("skills").value.trim(),
-    job_type: $("jobType").value,
-    salary: $("salary").value
-      ? Number($("salary").value)
-      : null,
-    availability: $("availability").value.trim(),
-    deadline: $("deadline").value || null,
+
+    required_skills:
+      $("skills").value.trim(),
+
+    job_type:
+      $("jobType").value,
+
+    salary:
+      $("salary").value
+        ? Number($("salary").value)
+        : null,
+
+    availability:
+      $("availability").value.trim(),
+
+    deadline:
+      $("deadline").value || null,
+
     status: "open",
   };
+
 
   if (
     !jobData.title ||
     !jobData.description ||
     !jobData.job_type
   ) {
-    showMessage("Please fill all required fields.", "error");
+
+    showMessage(
+      "Please fill all required fields.",
+      "error"
+    );
+
     return;
   }
+
 
   $("postBtn").disabled = true;
-  $("postBtn").textContent = "Posting...";
 
-  const { error } = await supabaseClient
-    .from("jobs")
-    .insert(jobData);
+  $("postBtn").textContent =
+    "Posting...";
+
+
+  const { error } =
+    await supabaseClient
+      .from("jobs")
+      .insert(jobData);
+
 
   $("postBtn").disabled = false;
-  $("postBtn").textContent = "Post Opportunity";
+
+  $("postBtn").textContent =
+    "Post Opportunity";
+
 
   if (error) {
+
     console.error(error);
-    showMessage(error.message, "error");
+
+    showMessage(
+      error.message,
+      "error"
+    );
+
     return;
   }
 
+
   $("opportunityForm").reset();
-  showMessage("Opportunity posted successfully!", "success");
+
+  showMessage(
+    "Opportunity posted successfully!",
+    "success"
+  );
+
 
   await loadMyJobs();
 }
 
+
 /* ---------------- MY JOBS ---------------- */
 
 async function loadMyJobs() {
-  if (!currentBusiness) return;
 
-  const container = $("jobsContainer");
+  if (!currentBusiness) {
+    return;
+  }
 
-  if (!container) return;
+  const container =
+    $("jobsContainer");
+
+  if (!container) {
+    return;
+  }
+
 
   container.innerHTML =
     "<p class='loading'>Loading opportunities...</p>";
 
-  const { data: jobs, error } = await supabaseClient
+
+  const {
+    data: jobs,
+    error
+  } = await supabaseClient
     .from("jobs")
     .select("*")
-    .eq("business_id", currentBusiness.id)
-    .order("created_at", { ascending: false });
+    .eq(
+      "business_id",
+      currentBusiness.id
+    )
+    .order(
+      "created_at",
+      {
+        ascending: false
+      }
+    );
+
 
   if (error) {
+
     console.error(error);
 
     container.innerHTML =
@@ -161,59 +349,107 @@ async function loadMyJobs() {
     return;
   }
 
+
   if (!jobs || !jobs.length) {
+
     container.innerHTML =
       "<p>No opportunities posted yet.</p>";
 
     return;
   }
 
+
   container.innerHTML = "";
 
-  jobs.forEach((job) => {
-    const card = document.createElement("div");
 
-    card.className = "job-card";
+  jobs.forEach((job) => {
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "job-card";
+
 
     card.innerHTML = `
-      <h3>${escapeHtml(job.title)}</h3>
 
-      <p>${escapeHtml(job.description)}</p>
+      <h3>
+        ${escapeHtml(job.title)}
+      </h3>
+
+      <p>
+        ${escapeHtml(job.description)}
+      </p>
 
       <div class="job-details">
-        <span>💼 ${escapeHtml(job.job_type)}</span>
-        <span>💰 ₹${job.salary ?? "Not specified"}</span>
-        <span>👥 ${escapeHtml(job.availability)}</span>
-        <span>📅 ${escapeHtml(job.deadline)}</span>
-        <span>Status: ${escapeHtml(job.status)}</span>
+
+        <span>
+          💼 ${escapeHtml(job.job_type)}
+        </span>
+
+        <span>
+          💰 ₹${job.salary ?? "Not specified"}
+        </span>
+
+        <span>
+          👥 ${escapeHtml(job.availability)}
+        </span>
+
+        <span>
+          📅 ${escapeHtml(job.deadline)}
+        </span>
+
+        <span>
+          Status: ${escapeHtml(job.status)}
+        </span>
+
       </div>
     `;
 
+
     container.appendChild(card);
+
   });
+
 }
+
 
 /* ---------------- APPLICATIONS ---------------- */
 
 async function loadApplications() {
-  const container = $("applicationsContainer");
 
-  if (!container) return;
+  const container =
+    $("applicationsContainer");
 
-  if (!currentBusiness) return;
+  if (!container) {
+    return;
+  }
+
+  if (!currentBusiness) {
+    return;
+  }
+
 
   container.innerHTML =
     "<p class='loading'>Loading applications...</p>";
 
+
   /* GET BUSINESS JOBS */
 
-  const { data: jobs, error: jobsError } =
-    await supabaseClient
-      .from("jobs")
-      .select("id,title")
-      .eq("business_id", currentBusiness.id);
+  const {
+    data: jobs,
+    error: jobsError
+  } = await supabaseClient
+    .from("jobs")
+    .select("id,title")
+    .eq(
+      "business_id",
+      currentBusiness.id
+    );
+
 
   if (jobsError) {
+
     console.error(jobsError);
 
     container.innerHTML =
@@ -222,26 +458,47 @@ async function loadApplications() {
     return;
   }
 
+
   if (!jobs || !jobs.length) {
+
     container.innerHTML =
       "<p>No opportunities posted yet.</p>";
 
     return;
   }
 
-  const jobIds = jobs.map((job) => job.id);
+
+  const jobIds =
+    jobs.map(
+      (job) => job.id
+    );
+
 
   /* GET APPLICATIONS */
 
-  const { data: applications, error: applicationsError } =
-    await supabaseClient
-      .from("applications")
-      .select("*")
-      .in("job_id", jobIds)
-      .order("applied_at", { ascending: false });
+  const {
+    data: applications,
+    error: applicationsError
+  } = await supabaseClient
+    .from("applications")
+    .select("*")
+    .in(
+      "job_id",
+      jobIds
+    )
+    .order(
+      "applied_at",
+      {
+        ascending: false
+      }
+    );
+
 
   if (applicationsError) {
-    console.error(applicationsError);
+
+    console.error(
+      applicationsError
+    );
 
     container.innerHTML =
       "<p>Unable to load applications.</p>";
@@ -249,177 +506,288 @@ async function loadApplications() {
     return;
   }
 
-  if (!applications || !applications.length) {
+
+  if (
+    !applications ||
+    !applications.length
+  ) {
+
     container.innerHTML =
       "<p>No students have applied yet.</p>";
 
     return;
   }
 
+
   /* GET STUDENT IDS */
 
-  const studentIds = applications.map(
-    (app) => app.student_id
-  );
+  const studentIds =
+    applications.map(
+      (app) => app.student_id
+    );
+
 
   /* GET STUDENT NAMES FROM PROFILES */
 
-  const { data: students, error: studentsError } =
-    await supabaseClient
-      .from("profiles")
-      .select("user_id, full_name")
-      .in("user_id", studentIds);
+  const {
+    data: students,
+    error: studentsError
+  } = await supabaseClient
+    .from("profiles")
+    .select(
+      "user_id, full_name"
+    )
+    .in(
+      "user_id",
+      studentIds
+    );
+
 
   if (studentsError) {
-    console.error("Student profile error:", studentsError);
+
+    console.error(
+      "Student profile error:",
+      studentsError
+    );
+
   }
+
 
   container.innerHTML = "";
 
+
   /* DISPLAY APPLICATIONS */
 
-  applications.forEach((app) => {
+  applications.forEach(
+    (app) => {
 
-    const job = jobs.find(
-      (j) => j.id === app.job_id
-    );
+      const job =
+        jobs.find(
+          (j) =>
+            j.id === app.job_id
+        );
 
-    /* FIND THE STUDENT PROFILE */
 
-    const student = students?.find(
-      (s) => s.user_id === app.student_id
-    );
+      /* FIND THE STUDENT PROFILE */
 
-    /* GET STUDENT NAME */
+      const student =
+        students?.find(
+          (s) =>
+            s.user_id ===
+            app.student_id
+        );
 
-    const studentName =
-      student?.full_name || "Student";
 
-    const status =
-      (app.status || "pending").toLowerCase();
+      /* GET STUDENT NAME */
 
-    const card =
-      document.createElement("div");
+      const studentName =
+        student?.full_name ||
+        "Student";
 
-    card.className = "job-card";
 
-    let actionButtons = "";
+      const status =
+        (
+          app.status ||
+          "pending"
+        ).toLowerCase();
 
-    /* PENDING */
 
-    if (status === "pending") {
+      const card =
+        document.createElement(
+          "div"
+        );
 
-      actionButtons = `
-        <div class="job-actions">
 
-          <button
-            class="post-btn"
-            onclick="updateApplicationStatus('${app.id}', 'accepted')">
-            Accept
-          </button>
+      card.className =
+        "job-card";
 
-          <button
-            class="logout-btn"
-            onclick="updateApplicationStatus('${app.id}', 'rejected')">
-            Reject
-          </button>
 
-        </div>
+      let actionButtons = "";
+
+
+      /* PENDING */
+
+      if (status === "pending") {
+
+        actionButtons = `
+
+          <div class="job-actions">
+
+            <button
+              class="post-btn"
+              onclick="updateApplicationStatus('${app.id}', 'accepted')">
+
+              Accept
+
+            </button>
+
+
+            <button
+              class="logout-btn"
+              onclick="updateApplicationStatus('${app.id}', 'rejected')">
+
+              Reject
+
+            </button>
+
+          </div>
+        `;
+
+      }
+
+
+      /* ACCEPTED */
+
+      else if (
+        status === "accepted"
+      ) {
+
+        actionButtons = `
+
+          <div class="job-actions">
+
+            <button
+              class="post-btn"
+              disabled>
+
+              Accepted
+
+            </button>
+
+          </div>
+
+        `;
+
+      }
+
+
+      /* REJECTED */
+
+      else if (
+        status === "rejected"
+      ) {
+
+        actionButtons = `
+
+          <div class="job-actions">
+
+            <button
+              class="logout-btn"
+              disabled>
+
+              Rejected
+
+            </button>
+
+          </div>
+
+        `;
+
+      }
+
+
+      /* APPLICATION CARD */
+
+      card.innerHTML = `
+
+        <h3>
+          ${escapeHtml(
+            job?.title ||
+            "Opportunity"
+          )}
+        </h3>
+
+
+        <p>
+
+          <strong>
+            Student:
+          </strong>
+
+          ${escapeHtml(
+            studentName
+          )}
+
+        </p>
+
+
+        <p>
+
+          <strong>
+            Status:
+          </strong>
+
+          ${escapeHtml(
+            status
+          )}
+
+        </p>
+
+
+        <p>
+
+          <strong>
+            Applied:
+          </strong>
+
+          ${
+            app.applied_at
+              ? new Date(
+                  app.applied_at
+                ).toLocaleDateString()
+              : "-"
+          }
+
+        </p>
+
+
+        ${actionButtons}
+
       `;
 
-    }
 
-    /* ACCEPTED */
-
-    else if (status === "accepted") {
-
-      actionButtons = `
-        <div class="job-actions">
-
-          <button
-            class="post-btn"
-            disabled>
-            Accepted
-          </button>
-
-        </div>
-      `;
+      container.appendChild(
+        card
+      );
 
     }
+  );
 
-    /* REJECTED */
-
-    else if (status === "rejected") {
-
-      actionButtons = `
-        <div class="job-actions">
-
-          <button
-            class="logout-btn"
-            disabled>
-            Rejected
-          </button>
-
-        </div>
-      `;
-    }
-
-    /* APPLICATION CARD */
-
-    card.innerHTML = `
-
-      <h3>
-        ${escapeHtml(job?.title || "Opportunity")}
-      </h3>
-
-      <p>
-        <strong>Student:</strong>
-        ${escapeHtml(studentName)}
-      </p>
-
-      <p>
-        <strong>Status:</strong>
-        ${escapeHtml(status)}
-      </p>
-
-      <p>
-        <strong>Applied:</strong>
-        ${
-          app.applied_at
-            ? new Date(app.applied_at).toLocaleDateString()
-            : "-"
-        }
-      </p>
-
-      ${actionButtons}
-
-    `;
-
-    container.appendChild(card);
-  });
 }
+
 
 /* ---------------- UPDATE APPLICATION STATUS ---------------- */
 
-async function updateApplicationStatus(id, status) {
+async function updateApplicationStatus(
+  id,
+  status
+) {
 
   const confirmMessage =
     status === "accepted"
       ? "Are you sure you want to accept this student?"
       : "Are you sure you want to reject this student?";
 
+
   if (!confirm(confirmMessage)) {
     return;
   }
 
-  const { error } = await supabaseClient
-    .from("applications")
-    .update({
-      status: status
-    })
-    .eq("id", id);
+
+  const { error } =
+    await supabaseClient
+      .from("applications")
+      .update({
+        status: status
+      })
+      .eq(
+        "id",
+        id
+      );
+
 
   if (error) {
+
     console.error(error);
 
     alert(
@@ -430,8 +798,10 @@ async function updateApplicationStatus(id, status) {
     return;
   }
 
+
   await loadApplications();
 }
+
 
 /* ---------------- LOGOUT ---------------- */
 
@@ -439,21 +809,90 @@ async function logout() {
 
   await supabaseClient.auth.signOut();
 
-  window.location.href = "auth.html";
+  window.location.href =
+    "auth.html";
 }
+
+
+/* =========================================================
+   VERIFICATION POPUP EVENTS
+   ========================================================= */
+
+const verificationPopup =
+  $("verificationPopup");
+
+const closeVerificationPopup =
+  $("closeVerificationPopup");
+
+const verifyBusinessBtn =
+  $("verifyBusinessBtn");
+
+
+/*
+  CLOSE POPUP
+*/
+
+if (closeVerificationPopup) {
+
+  closeVerificationPopup.addEventListener(
+    "click",
+    () => {
+
+      verificationPopup.classList.remove(
+        "show"
+      );
+
+    }
+  );
+
+}
+
+
+/*
+  GET VERIFIED BUTTON
+*/
+
+if (verifyBusinessBtn) {
+
+  verifyBusinessBtn.addEventListener(
+    "click",
+    () => {
+
+      window.location.href =
+        "business-profile.html";
+
+    }
+  );
+
+}
+
 
 /* ---------------- START DASHBOARD ---------------- */
 
 async function startDashboard() {
 
-  const ok = await loadBusiness();
+  const ok =
+    await loadBusiness();
 
-  if (!ok) return;
+  if (!ok) {
+    return;
+  }
+
 
   await loadMyJobs();
 
   await loadApplications();
+
+
+  /*
+    Check business verification
+    after dashboard data has loaded.
+  */
+
+  await checkBusinessVerification();
+
 }
+
 
 /* ---------------- EVENTS ---------------- */
 
@@ -466,6 +905,7 @@ if ($("opportunityForm")) {
 
 }
 
+
 if ($("refreshJobs")) {
 
   $("refreshJobs").addEventListener(
@@ -474,6 +914,7 @@ if ($("refreshJobs")) {
   );
 
 }
+
 
 if ($("refreshApplications")) {
 
@@ -484,6 +925,7 @@ if ($("refreshApplications")) {
 
 }
 
+
 if ($("logoutBtn")) {
 
   $("logoutBtn").addEventListener(
@@ -492,6 +934,7 @@ if ($("logoutBtn")) {
   );
 
 }
+
 
 /* ---------------- RUN ---------------- */
 

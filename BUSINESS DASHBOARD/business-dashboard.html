@@ -1,208 +1,794 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>POTential | Business Dashboard</title>
-  <link rel="stylesheet" href="business-dashboard.css">
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>POTential | Business Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="business-dashboard.css">
+
 </head>
+
+
 <body>
-  <header class="navbar">
-    <div class="logo">POTential</div>
+
+
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
+
+<header class="navbar">
+
+    <a
+        href="business-dashboard.html"
+        class="logo">
+
+        POTential
+
+    </a>
+
+
     <div class="nav-right">
-     <a
-    href="business-profile.html"
-    id="businessNameTop"
-    class="business-profile-link">
-    Business
-</a>
-      <button id="logoutBtn" class="logout-btn">Logout</button>
-    </div>
-  </header>
 
-  <div class="app-layout">
-    <aside class="sidebar">
-      <nav>
-        <a class="active" href="#dashboard">Dashboard</a>
-        <a href="#post">Post Opportunity</a>
-        <a href="#opportunities">My Opportunities</a>
-        <a href="#applicants">Applicants</a>
-        <a href="business-profile.html">
-    Business Profile
-</a>
-      </nav>
-      <p class="tagline">Empowering Students.<br>Building Stronger Communities.</p>
-    </aside>
+        <a
+            href="business-profile.html"
+            id="businessNameTop"
+            class="business-profile-link">
 
-    <main class="dashboard" id="dashboard">
-      <section class="welcome-section">
-        <div>
-          <p class="eyebrow">Business workspace</p>
-          <h1>Business Dashboard</h1>
-          <p id="welcomeText">Welcome! Manage your opportunities here.</p>
-        </div>
-      </section>
+            Business
 
-      <section class="business-card" id="profile">
-        <div class="section-heading">
-          <div>
-            <h2>Business Information</h2>
-            <p>Your business data is loaded from Supabase.</p>
-          </div>
-        </div>
-        <div class="business-grid">
-          <div><span>Business Name</span><strong id="businessName">Loading...</strong></div>
-          <div><span>Business Type</span><strong id="businessType">Loading...</strong></div>
-          <div><span>City</span><strong id="businessCity">Loading...</strong></div>
-          <div><span>Phone</span><strong id="businessPhone">Loading...</strong></div>
-        </div>
-      </section>
+        </a>
 
-      <section class="post-section" id="post">
-        <div class="section-heading">
-          <div>
-            <h2>Post a New Opportunity</h2>
-            <p>Create an opportunity for students to discover and apply.</p>
-          </div>
-        </div>
 
-        <form id="opportunityForm">
-          <div class="form-grid">
-            <div class="form-group full">
-              <label for="title">Opportunity Title *</label>
-              <input id="title" type="text" placeholder="Example: Part-time Social Media Intern" required>
-            </div>
+        <button
+            type="button"
+            id="logoutBtn"
+            class="logout-btn">
 
-            <div class="form-group full">
-              <label for="description">Description *</label>
-              <textarea id="description" rows="5" placeholder="Describe the opportunity..." required></textarea>
-            </div>
+            Logout
 
-            <div class="form-group">
-              <label for="location">Location</label>
-              <input id="location" type="text" placeholder="Example: Nagpur">
-            </div>
-
-            <div class="form-group">
-              <label for="jobType">Opportunity Type *</label>
-              <select id="jobType" required>
-                <option value="">Select type</option>
-                <option>Internship</option>
-                <option>Part-time</option>
-                <option>Full-time</option>
-                <option>Freelance</option>
-                <option>Volunteer</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="skills">Required Skills *</label>
-              <input id="skills" type="text" placeholder="Example: Cooking, Management" required>
-            </div>
-
-            <div class="form-group">
-              <label for="salary">Stipend / Salary</label>
-              <input id="salary" type="number" min="0" placeholder="Example: 5000">
-            </div>
-
-            <div class="form-group">
-              <label for="availability">Availability</label>
-              <input id="availability" type="text" placeholder="Example: 4 positions">
-            </div>
-
-            <div class="form-group">
-              <label for="deadline">Application Deadline *</label>
-              <input id="deadline" type="date" required>
-            </div>
-          </div>
-
-          <button type="submit" id="postBtn" class="post-btn">Post Opportunity</button>
-          <div id="message" class="message" role="status"></div>
-        </form>
-      </section>
-
-      <section class="jobs-section" id="opportunities">
-        <div class="section-heading">
-          <div>
-            <h2>My Opportunities</h2>
-            <p>Opportunities posted by your business.</p>
-          </div>
-          <button id="refreshJobs" class="refresh-btn">Refresh</button>
-        </div>
-        <div id="jobsContainer">
-          <p class="loading">Loading opportunities...</p>
-        </div>
-      </section>
-
-     <section class="jobs-section">
-
-    <div class="section-heading">
-
-        <div>
-            <h2>Applications Received</h2>
-            <p>Students who applied for your opportunities</p>
-        </div>
-
-        <button id="refreshApplications" class="refresh-btn">
-            Refresh
         </button>
 
     </div>
 
-    <div id="applicationsContainer">
+</header>
 
-        <p class="loading">
-            Loading applications...
-        </p>
 
-    </div>
 
-</section>
+<!-- =====================================================
+     MAIN DASHBOARD
+===================================================== -->
+
+<div class="dashboard-layout">
+
+
+    <!-- =================================================
+         SIDEBAR
+    ================================================== -->
+
+    <aside class="sidebar">
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="#dashboard"
+                class="nav-item active">
+
+                Dashboard
+
+            </a>
+
+
+            <a
+                href="#post"
+                class="nav-item">
+
+                Post Opportunity
+
+            </a>
+
+
+            <a
+                href="#opportunities"
+                class="nav-item">
+
+                My Opportunities
+
+            </a>
+
+
+            <a
+                href="#applicants"
+                class="nav-item">
+
+                Applicants
+
+            </a>
+
+
+            <a
+                href="business-profile.html"
+                class="nav-item">
+
+                Business Profile
+
+            </a>
+
+
+            <a
+                href="#"
+                id="sidebarLogout"
+                class="nav-item">
+
+                Logout
+
+            </a>
+
+        </nav>
+
+    </aside>
+
+
+
+    <!-- =================================================
+         MAIN CONTENT
+    ================================================== -->
+
+    <main class="dashboard-main">
+
+
+        <!-- =================================================
+             DASHBOARD HEADER
+        ================================================== -->
+
+        <section
+            id="dashboard"
+            class="dashboard-header">
+
+            <div>
+
+                <p class="eyebrow">
+                    BUSINESS DASHBOARD
+                </p>
+
+
+                <h1 id="welcomeText">
+                    Welcome!
+                </h1>
+
+
+                <p>
+                    Manage your opportunities,
+                    applicants and business profile.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             BUSINESS INFORMATION
+        ================================================== -->
+
+        <section class="business-info-grid">
+
+
+            <div class="info-card">
+
+                <span>
+                    Business
+                </span>
+
+                <strong id="businessName">
+                    Not provided
+                </strong>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <span>
+                    Business Type
+                </span>
+
+                <strong id="businessType">
+                    Not provided
+                </strong>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <span>
+                    City
+                </span>
+
+                <strong id="businessCity">
+                    Not provided
+                </strong>
+
+            </div>
+
+
+            <div class="info-card">
+
+                <span>
+                    Phone
+                </span>
+
+                <strong id="businessPhone">
+                    Not provided
+                </strong>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             GENERAL MESSAGE
+        ================================================== -->
+
+        <div
+            id="message"
+            class="message">
+        </div>
+
+
+
+        <!-- =================================================
+             POST OPPORTUNITY
+        ================================================== -->
+
+        <section
+            id="post"
+            class="dashboard-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        CREATE OPPORTUNITY
+                    </p>
+
+                    <h2>
+                        Post New Opportunity
+                    </h2>
+
+                    <p>
+                        Create a new opportunity for
+                        students and workers.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <form
+                id="opportunityForm"
+                class="opportunity-form">
+
+
+                <!-- TITLE -->
+
+                <div class="form-group">
+
+                    <label for="title">
+                        Opportunity Title
+                    </label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        placeholder="Example: Part-Time Teaching Assistant"
+                        required>
+
+                </div>
+
+
+
+                <!-- DESCRIPTION -->
+
+                <div class="form-group">
+
+                    <label for="description">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        rows="5"
+                        placeholder="Describe the opportunity..."
+                        required></textarea>
+
+                </div>
+
+
+
+                <!-- LOCATION -->
+
+                <div class="form-group">
+
+                    <label for="location">
+                        Location
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        placeholder="Example: Amravati">
+
+                </div>
+
+
+
+                <!-- JOB TYPE -->
+
+                <div class="form-group">
+
+                    <label for="jobType">
+                        Job Type
+                    </label>
+
+                    <select
+                        id="jobType"
+                        required>
+
+                        <option value="">
+                            Select job type
+                        </option>
+
+                        <option value="Full Time">
+                            Full Time
+                        </option>
+
+                        <option value="Part Time">
+                            Part Time
+                        </option>
+
+                        <option value="Internship">
+                            Internship
+                        </option>
+
+                        <option value="Freelance">
+                            Freelance
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     PART-TIME TIME SLOT
+                ================================================== -->
+
+                <div
+                    id="partTimeScheduleGroup"
+                    class="form-group"
+                    style="
+                        display:none;
+                        padding:18px;
+                        margin-top:10px;
+                        border:1px solid #e3e0f5;
+                        border-radius:14px;
+                        background:#faf9ff;
+                    ">
+
+
+                    <label
+                        style="
+                            font-weight:700;
+                            margin-bottom:6px;
+                            display:block;
+                        ">
+
+                        Part-Time Work Schedule
+
+                    </label>
+
+
+                    <small
+                        style="
+                            display:block;
+                            margin-bottom:15px;
+                            color:#777;
+                            line-height:1.5;
+                        ">
+
+                        Select the preferred time period and
+                        exact working hours for this part-time
+                        opportunity.
+
+                    </small>
+
+
+
+                    <!-- TIME PERIOD -->
+
+                    <div class="form-group">
+
+                        <label for="partTimePeriod">
+                            Time Period
+                        </label>
+
+                        <select
+                            id="partTimePeriod">
+
+                            <option value="">
+                                Select time period
+                            </option>
+
+                            <option value="Morning">
+                                Morning
+                            </option>
+
+                            <option value="Afternoon">
+                                Afternoon
+                            </option>
+
+                            <option value="Evening">
+                                Evening
+                            </option>
+
+                            <option value="Night">
+                                Night
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <!-- START + END -->
+
+                    <div
+                        style="
+                            display:grid;
+                            grid-template-columns:1fr 1fr;
+                            gap:15px;
+                        ">
+
+
+                        <div class="form-group">
+
+                            <label for="partTimeStart">
+                                Start Time
+                            </label>
+
+                            <input
+                                type="time"
+                                id="partTimeStart">
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="partTimeEnd">
+                                End Time
+                            </label>
+
+                            <input
+                                type="time"
+                                id="partTimeEnd">
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PREVIEW -->
+
+                    <div
+                        id="partTimeSchedulePreview"
+                        style="
+                            display:none;
+                            margin-top:10px;
+                            padding:10px 12px;
+                            border-radius:10px;
+                            background:#eeeaff;
+                            color:#5145c7;
+                            font-size:13px;
+                            font-weight:600;
+                        ">
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- REQUIRED SKILLS -->
+
+                <div class="form-group">
+
+                    <label for="skills">
+                        Required Skills
+                    </label>
+
+                    <input
+                        type="text"
+                        id="skills"
+                        placeholder="Example: Communication, MS Office">
+
+                </div>
+
+
+
+                <!-- SALARY -->
+
+                <div class="form-group">
+
+                    <label for="salary">
+                        Salary / Stipend
+                    </label>
+
+                    <input
+                        type="number"
+                        id="salary"
+                        min="0"
+                        placeholder="Enter amount">
+
+                </div>
+
+
+
+                <!-- AVAILABILITY -->
+
+                <div class="form-group">
+
+                    <label for="availability">
+                        Availability
+                    </label>
+
+                    <input
+                        type="text"
+                        id="availability"
+                        placeholder="Example: Monday to Friday">
+
+                </div>
+
+
+
+                <!-- DEADLINE -->
+
+                <div class="form-group">
+
+                    <label for="deadline">
+                        Application Deadline
+                    </label>
+
+                    <input
+                        type="date"
+                        id="deadline">
+
+                </div>
+
+
+
+                <!-- BUTTON -->
+
+                <button
+                    type="submit"
+                    id="postBtn"
+                    class="post-btn">
+
+                    Post Opportunity
+
+                </button>
+
+
+            </form>
+
+        </section>
+
+
+
+        <!-- =================================================
+             MY OPPORTUNITIES
+        ================================================== -->
+
+        <section
+            id="opportunities"
+            class="dashboard-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        YOUR POSTS
+                    </p>
+
+                    <h2>
+                        My Opportunities
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="refreshJobs"
+                    class="refresh-btn">
+
+                    Refresh
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="jobsContainer"
+                class="jobs-container">
+
+                <p class="loading">
+                    Loading opportunities...
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             APPLICANTS
+        ================================================== -->
+
+        <section
+            id="applicants"
+            class="dashboard-section applicants-section">
+
+
+            <div class="section-heading">
+
+                <div>
+
+                    <p class="eyebrow">
+                        APPLICATIONS
+                    </p>
+
+                    <h2>
+                        Applicants
+                    </h2>
+
+                    <p>
+                        Review students who applied
+                        to your opportunities.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="refreshApplications"
+                    class="refresh-btn">
+
+                    Refresh
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="applicationsContainer">
+
+                <p class="loading">
+                    Loading applications...
+                </p>
+
+            </div>
+
+        </section>
+
+
     </main>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
- <script src="supabase-config.js?v=2"></script>
-<script src="business-dashboard.js?v=2"></script>
-<!-- BUSINESS VERIFICATION POPUP -->
-<div id="verificationPopup" class="verification-popup-overlay">
-
-  <div class="verification-popup">
-
-    <button
-      type="button"
-      id="closeVerificationPopup"
-      class="verification-popup-close"
-      aria-label="Close">
-      ×
-    </button>
-
-    <div class="verification-popup-icon">
-      ✓
-    </div>
-
-    <p class="verification-popup-eyebrow">
-      BUSINESS VERIFICATION
-    </p>
-
-    <h2>
-      Build Trust. Get Verified.
-    </h2>
-
-    <p class="verification-popup-text">
-      Your business verification is still pending.
-      Complete your verification to build trust with students on POTEntial.
-    </p>
-
-    <button
-      type="button"
-      id="verifyBusinessBtn"
-      class="verification-popup-btn">
-      🚀 Get My Business Verified
-    </button>
-
-  </div>
 
 </div>
+
+
+
+<!-- =====================================================
+     BUSINESS VERIFICATION POPUP
+===================================================== -->
+
+<div
+    id="verificationPopup"
+    class="verification-popup-overlay">
+
+
+    <div class="verification-popup">
+
+
+        <button
+            type="button"
+            id="closeVerificationPopup"
+            class="verification-popup-close"
+            aria-label="Close">
+
+            ×
+
+        </button>
+
+
+        <div class="verification-popup-icon">
+            ✓
+        </div>
+
+
+        <p class="verification-popup-eyebrow">
+            BUSINESS VERIFICATION
+        </p>
+
+
+        <h2>
+            Build Trust. Get Verified.
+        </h2>
+
+
+        <p>
+            Your business verification is still pending.
+            Complete your verification to build trust
+            with students on POTEntial.
+        </p>
+
+
+        <button
+            type="button"
+            id="verifyBusinessBtn"
+            class="verification-popup-btn">
+
+            🚀 Get My Business Verified
+
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     SUPABASE
+===================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+
+
+<script src="supabase-config.js?v=2"></script>
+
+
+<script src="business-dashboard.js?v=3"></script>
+
+
 </body>
+
 </html>

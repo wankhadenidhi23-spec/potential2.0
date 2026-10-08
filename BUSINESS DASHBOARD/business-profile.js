@@ -1,10 +1,9 @@
-/*.from("businesses")
+/*
 =========================================================
-POTential BUSINESS PROFILE
+POTEntial BUSINESS PROFILE
 Professional Business Profile + Verification
 =========================================================
 */
-
 
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -12,35 +11,25 @@ document.addEventListener("DOMContentLoaded", function () {
        BASIC ELEMENTS
     ===================================================== */
 
-    const profileForm =
-        document.getElementById("profileForm");
-
-    const loadingBox =
-        document.getElementById("loadingBox");
-
-    const errorBox =
-        document.getElementById("errorBox");
-
-    const profileMessage =
-        document.getElementById("profileMessage");
-
-    const saveBtn =
-        document.getElementById("saveBtn");
-
-    const saveText =
-        document.getElementById("saveText");
-
+    const profileForm = document.getElementById("profileForm");
+    const loadingBox = document.getElementById("loadingBox");
+    const errorBox = document.getElementById("errorBox");
+    const profileMessage = document.getElementById("profileMessage");
+    const saveBtn = document.getElementById("saveBtn");
+    const saveText = document.getElementById("saveText");
 
     /* =====================================================
        STATE
     ===================================================== */
 
     let currentUser = null;
-
     let currentBusiness = null;
-
     let supabaseClient = null;
 
+    let currentVerificationRecord = null;
+
+    let profilePhotoObjectUrl = null;
+    let documentObjectUrl = null;
 
     /* =====================================================
        HELPERS
@@ -48,55 +37,64 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function showError(text) {
 
-        errorBox.textContent = text;
+        if (errorBox) {
+            errorBox.textContent = text;
+            errorBox.classList.remove("hidden");
+        }
 
-        errorBox.classList.remove("hidden");
+        if (loadingBox) {
+            loadingBox.classList.add("hidden");
+        }
 
-        loadingBox.classList.add("hidden");
-
-        profileForm.classList.add("hidden");
+        if (profileForm) {
+            profileForm.classList.add("hidden");
+        }
     }
 
 
     function showMessage(text, type = "") {
 
-        profileMessage.textContent = text;
+        if (!profileMessage) return;
 
-        profileMessage.className =
-            "message " + type;
+        profileMessage.textContent = text;
+        profileMessage.className = "message " + type;
     }
 
 
     function updateHeader(name) {
 
-        const businessName =
-            name || "Business";
+        const businessName = name || "Business";
 
+        const businessNameTop =
+            document.getElementById("businessNameTop");
 
-        document.getElementById(
-            "businessNameTop"
-        ).textContent = businessName;
+        const heroBusinessName =
+            document.getElementById("heroBusinessName");
 
+        const profileAvatar =
+            document.getElementById("profileAvatar");
 
-        document.getElementById(
-            "heroBusinessName"
-        ).textContent = businessName;
+        const profilePhotoInitial =
+            document.getElementById("profilePhotoInitial");
 
+        if (businessNameTop) {
+            businessNameTop.textContent = businessName;
+        }
+
+        if (heroBusinessName) {
+            heroBusinessName.textContent = businessName;
+        }
 
         const initial =
-            businessName
-                .charAt(0)
-                .toUpperCase();
+            businessName.charAt(0).toUpperCase();
 
+        if (profileAvatar) {
+            profileAvatar.textContent = initial;
+        }
 
-        document.getElementById(
-            "profileAvatar"
-        ).textContent = initial;
-
-
-        document.getElementById(
-            "profilePhotoInitial"
-        ).textContent = initial;
+        if (profilePhotoInitial) {
+            profilePhotoInitial.textContent = initial;
+        }
     }
 
 
@@ -106,13 +104,58 @@ document.addEventListener("DOMContentLoaded", function () {
 
         element.textContent = text;
 
-        element.style.color = color;
+        if (color) {
+            element.style.color = color;
+        }
+    }
+
+
+    function getFileExtension(fileName) {
+
+        if (!fileName || !fileName.includes(".")) {
+            return "bin";
+        }
+
+        return fileName
+            .split(".")
+            .pop()
+            .toLowerCase();
+    }
+
+
+    function createSafeFileId() {
+
+        if (
+            window.crypto &&
+            typeof window.crypto.randomUUID === "function"
+        ) {
+            return window.crypto.randomUUID();
+        }
+
+        return (
+            Date.now().toString() +
+            "-" +
+            Math.random().toString(36).substring(2)
+        );
+    }
+
+
+    function getFileNameFromPath(path) {
+
+        if (!path) {
+            return "Saved document";
+        }
+
+        const parts = path.split("/");
+
+        return parts[parts.length - 1] || "Saved document";
     }
 
 
     /* =====================================================
        LOAD BUSINESS
        SUPABASE READ
+       Existing businesses table
     ===================================================== */
 
     async function loadBusiness() {
@@ -120,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
 
             /* ---------------------------------------------
-               Check Supabase Config
+               Supabase Config
             --------------------------------------------- */
 
             if (
@@ -137,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             /* ---------------------------------------------
-               Check Supabase Library
+               Supabase Library
             --------------------------------------------- */
 
             if (
@@ -164,11 +207,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
 
 
-            console.log(
-                "Supabase Connected"
-            );
-
-
             /* ---------------------------------------------
                Get Logged-in User
             --------------------------------------------- */
@@ -182,9 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (authError) {
 
-                showError(
-                    authError.message
-                );
+                showError(authError.message);
 
                 return;
             }
@@ -222,23 +258,14 @@ document.addEventListener("DOMContentLoaded", function () {
                         phone,
                         profile_photo_url
                     `)
-                    .eq(
-    "owner_id",
-    user.id
-)
-.order(
-    "created_at",
-    { ascending: false }
-)
-.limit(1)
-.maybeSingle();
+                    .eq("owner_id", user.id)
+                    .limit(1)
+                    .maybeSingle();
 
 
             if (error) {
 
-                showError(
-                    error.message
-                );
+                showError(error.message);
 
                 return;
             }
@@ -254,36 +281,45 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
-            currentBusiness =
-                business;
+            currentBusiness = business;
 
 
             /* ---------------------------------------------
-               Fill Existing Form
+               Fill Business Form
             --------------------------------------------- */
 
-            document.getElementById(
-                "businessName"
-            ).value =
-                business.business_name || "";
+            const businessName =
+                document.getElementById("businessName");
+
+            const businessType =
+                document.getElementById("businessType");
+
+            const city =
+                document.getElementById("city");
+
+            const phone =
+                document.getElementById("phone");
 
 
-            document.getElementById(
-                "businessType"
-            ).value =
-                business.business_type || "";
+            if (businessName) {
+                businessName.value =
+                    business.business_name || "";
+            }
 
+            if (businessType) {
+                businessType.value =
+                    business.business_type || "";
+            }
 
-            document.getElementById(
-                "city"
-            ).value =
-                business.city || "";
+            if (city) {
+                city.value =
+                    business.city || "";
+            }
 
-
-            document.getElementById(
-                "phone"
-            ).value =
-                business.phone || "";
+            if (phone) {
+                phone.value =
+                    business.phone || "";
+            }
 
 
             /* ---------------------------------------------
@@ -299,30 +335,30 @@ document.addEventListener("DOMContentLoaded", function () {
                Load Profile Photo
             --------------------------------------------- */
 
-            loadProfilePhoto(
+            await loadProfilePhoto(
                 business.profile_photo_url
             );
 
 
             /* ---------------------------------------------
-               Show Form
+               Show Profile Form
             --------------------------------------------- */
 
-            loadingBox.classList.add(
-                "hidden"
-            );
+            if (loadingBox) {
+                loadingBox.classList.add("hidden");
+            }
 
-            errorBox.classList.add(
-                "hidden"
-            );
+            if (errorBox) {
+                errorBox.classList.add("hidden");
+            }
 
-            profileForm.classList.remove(
-                "hidden"
-            );
+            if (profileForm) {
+                profileForm.classList.remove("hidden");
+            }
 
 
             /* ---------------------------------------------
-               Load Verification
+               Load Existing Verification
             --------------------------------------------- */
 
             await loadBusinessVerification(
@@ -331,19 +367,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             /* ---------------------------------------------
-               Update Profile Strength
+               Update Completion
             --------------------------------------------- */
 
-            updateProfileCompletion();
+            await updateProfileCompletion();
 
 
         } catch (err) {
 
-            console.error(err);
+            console.error(
+                "Business profile load error:",
+                err
+            );
 
             showError(
                 err.message ||
-                "Something went wrong."
+                "Something went wrong while loading business profile."
             );
         }
     }
@@ -351,9 +390,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     /* =====================================================
        PROFILE PHOTO
+       SUPABASE STORAGE READ
     ===================================================== */
 
-    function loadProfilePhoto(photoUrl) {
+    async function loadProfilePhoto(photoValue) {
 
         const preview =
             document.getElementById(
@@ -371,35 +411,90 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        if (photoUrl) {
-
-            preview.src = photoUrl;
-
-            preview.classList.remove(
-                "hidden"
-            );
-
-            placeholder.classList.add(
-                "hidden"
-            );
-
-        } else {
+        if (!photoValue) {
 
             preview.src = "";
 
-            preview.classList.add(
-                "hidden"
+            preview.classList.add("hidden");
+
+            placeholder.classList.remove("hidden");
+
+            return;
+        }
+
+
+        try {
+
+            /*
+            Old records may contain a complete URL.
+            New records contain a Storage path.
+            */
+
+            let imageUrl = photoValue;
+
+
+            if (
+                !photoValue.startsWith("http://") &&
+                !photoValue.startsWith("https://")
+            ) {
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient.storage
+                        .from("verification-documents")
+                        .createSignedUrl(
+                            photoValue,
+                            3600
+                        );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                imageUrl =
+                    data &&
+                    data.signedUrl
+                        ? data.signedUrl
+                        : "";
+            }
+
+
+            if (!imageUrl) {
+                throw new Error(
+                    "Profile photo URL generate nahi hui."
+                );
+            }
+
+
+            preview.src = imageUrl;
+
+            preview.classList.remove("hidden");
+
+            placeholder.classList.add("hidden");
+
+
+        } catch (error) {
+
+            console.error(
+                "Profile photo load error:",
+                error
             );
 
-            placeholder.classList.remove(
-                "hidden"
-            );
+            preview.src = "";
+
+            preview.classList.add("hidden");
+
+            placeholder.classList.remove("hidden");
         }
     }
 
 
     /* =====================================================
-       SELECT PROFILE PHOTO
+       PROFILE PHOTO BUTTONS
     ===================================================== */
 
     const selectPhotoBtn =
@@ -418,7 +513,7 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
 
-    if (selectPhotoBtn) {
+    if (selectPhotoBtn && profilePhotoFile) {
 
         selectPhotoBtn.addEventListener(
             "click",
@@ -431,7 +526,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    if (changePhotoBtn) {
+    if (changePhotoBtn && profilePhotoFile) {
 
         changePhotoBtn.addEventListener(
             "click",
@@ -503,10 +598,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
 
-                const objectUrl =
-                    URL.createObjectURL(
-                        file
+                if (profilePhotoObjectUrl) {
+
+                    URL.revokeObjectURL(
+                        profilePhotoObjectUrl
                     );
+                }
+
+
+                profilePhotoObjectUrl =
+                    URL.createObjectURL(file);
 
 
                 const preview =
@@ -520,20 +621,27 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
 
 
-                preview.src =
-                    objectUrl;
+                if (preview) {
 
-                preview.classList.remove(
-                    "hidden"
-                );
+                    preview.src =
+                        profilePhotoObjectUrl;
 
-                placeholder.classList.add(
-                    "hidden"
-                );
+                    preview.classList.remove(
+                        "hidden"
+                    );
+                }
+
+
+                if (placeholder) {
+
+                    placeholder.classList.add(
+                        "hidden"
+                    );
+                }
 
 
                 showPhotoMessage(
-                    "",
+                    "Photo selected. Click Upload Photo to save it.",
                     "success"
                 );
             }
@@ -555,8 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!message) return;
 
 
-        message.textContent =
-            text;
+        message.textContent = text;
 
 
         if (type === "success") {
@@ -595,14 +702,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function uploadProfilePhoto() {
 
+        if (!profilePhotoFile) {
+            return;
+        }
+
+
         const file =
             profilePhotoFile.files[0];
-
-
-        const message =
-            document.getElementById(
-                "profilePhotoMessage"
-            );
 
 
         if (!file) {
@@ -652,7 +758,11 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        if (!currentUser) {
+        if (
+            !currentUser ||
+            !currentBusiness ||
+            !supabaseClient
+        ) {
 
             showPhotoMessage(
                 "Please login again.",
@@ -663,8 +773,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        uploadPhotoBtn.disabled =
-            true;
+        uploadPhotoBtn.disabled = true;
 
         uploadPhotoBtn.textContent =
             "Uploading...";
@@ -673,11 +782,21 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
 
             const extension =
-                file.name
-                    .split(".")
-                    .pop()
-                    .toLowerCase();
+                getFileExtension(
+                    file.name
+                );
 
+
+            /*
+            Profile photo uses a separate folder
+            inside the existing storage bucket.
+
+            Verification documents remain in:
+            business/<user-id>/...
+
+            Profile photos remain in:
+            business-profiles/<user-id>/...
+            */
 
             const filePath =
                 `business-profiles/${currentUser.id}/profile-${Date.now()}.${extension}`;
@@ -685,13 +804,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
             /* ---------------------------------------------
                SUPABASE STORAGE WRITE
-
-               IMPORTANT:
-               This uses the existing
-               "verification-documents" bucket.
-
-               If you prefer a separate profile-images
-               bucket, change the bucket name here.
             --------------------------------------------- */
 
             const {
@@ -708,49 +820,24 @@ document.addEventListener("DOMContentLoaded", function () {
                             contentType:
                                 file.type,
 
-                            upsert: true
+                            upsert:
+                                false
                         }
                     );
 
 
             if (uploadError) {
-
                 throw uploadError;
             }
 
 
-            /* ---------------------------------------------
-               Get Public URL
-            --------------------------------------------- */
+            /*
+            We save the Storage path in the existing
+            profile_photo_url column.
 
-            const {
-                data: publicData
-            } =
-                supabaseClient.storage
-                    .from(
-                        "verification-documents"
-                    )
-                    .getPublicUrl(
-                        filePath
-                    );
-
-
-            const publicUrl =
-                publicData.publicUrl;
-
-
-            if (!publicUrl) {
-
-                throw new Error(
-                    "Profile photo URL generate nahi hui."
-                );
-            }
-
-
-            /* ---------------------------------------------
-               SUPABASE WRITE
-               Update businesses table
-            --------------------------------------------- */
+            The value is later converted into a
+            signed URL when the profile loads.
+            */
 
             const {
                 error: updateError
@@ -759,27 +846,43 @@ document.addEventListener("DOMContentLoaded", function () {
                     .from("businesses")
                     .update({
                         profile_photo_url:
-                            publicUrl
+                            filePath
                     })
-                   .eq(
-    "id",
-    currentBusiness.id
-);
+                    .eq(
+                        "id",
+                        currentBusiness.id
+                    );
 
 
             if (updateError) {
+
+                /*
+                Roll back uploaded image if
+                businesses update fails.
+                */
+
+                await supabaseClient.storage
+                    .from(
+                        "verification-documents"
+                    )
+                    .remove([
+                        filePath
+                    ]);
 
                 throw updateError;
             }
 
 
             currentBusiness.profile_photo_url =
-                publicUrl;
+                filePath;
 
 
-            loadProfilePhoto(
-                publicUrl
+            await loadProfilePhoto(
+                filePath
             );
+
+
+            profilePhotoFile.value = "";
 
 
             showPhotoMessage(
@@ -788,7 +891,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            updateProfileCompletion();
+            await updateProfileCompletion();
 
 
         } catch (error) {
@@ -885,29 +988,92 @@ document.addEventListener("DOMContentLoaded", function () {
             "removeDocumentBtn"
         );
 
+    const verificationUploadButton =
+        document.getElementById(
+            "businessVerificationUploadBtn"
+        );
+
 
     /* =====================================================
-       INITIAL VERIFICATION UI
+       VERIFICATION STATE
     ===================================================== */
+
+    function setVerificationStatus(
+        status
+    ) {
+
+        const statusEl =
+            document.getElementById(
+                "businessVerificationStatus"
+            );
+
+        if (!statusEl) {
+            return;
+        }
+
+
+        const cleanStatus =
+            status || "not submitted";
+
+
+        if (
+            cleanStatus ===
+            "not_submitted"
+        ) {
+
+            statusEl.textContent =
+                "Not submitted";
+
+            statusEl.className =
+                "verification-status";
+
+            return;
+        }
+
+
+        statusEl.textContent =
+            cleanStatus
+                .charAt(0)
+                .toUpperCase() +
+            cleanStatus.slice(1);
+
+        statusEl.className =
+            "verification-status " +
+            cleanStatus;
+    }
+
 
     function resetVerificationDocumentFields() {
 
-        identityDocumentGroup.classList.add(
-            "hidden"
-        );
+        if (identityDocumentGroup) {
 
-        businessDocumentGroup.classList.add(
-            "hidden"
-        );
+            identityDocumentGroup.classList.add(
+                "hidden"
+            );
+        }
 
-        identityDocumentType.value =
-            "";
 
-        businessDocumentType.value =
-            "";
+        if (businessDocumentGroup) {
 
-        documentNumber.value =
-            "";
+            businessDocumentGroup.classList.add(
+                "hidden"
+            );
+        }
+
+
+        if (identityDocumentType) {
+            identityDocumentType.value = "";
+        }
+
+
+        if (businessDocumentType) {
+            businessDocumentType.value = "";
+        }
+
+
+        if (documentNumber) {
+            documentNumber.value = "";
+        }
     }
 
 
@@ -928,20 +1094,30 @@ document.addEventListener("DOMContentLoaded", function () {
                     this.value;
 
 
-                identityDocumentGroup.classList.add(
-                    "hidden"
-                );
+                if (identityDocumentGroup) {
 
-                businessDocumentGroup.classList.add(
-                    "hidden"
-                );
+                    identityDocumentGroup.classList.add(
+                        "hidden"
+                    );
+                }
 
 
-                identityDocumentType.value =
-                    "";
+                if (businessDocumentGroup) {
 
-                businessDocumentType.value =
-                    "";
+                    businessDocumentGroup.classList.add(
+                        "hidden"
+                    );
+                }
+
+
+                if (identityDocumentType) {
+                    identityDocumentType.value = "";
+                }
+
+
+                if (businessDocumentType) {
+                    businessDocumentType.value = "";
+                }
 
 
                 if (
@@ -949,10 +1125,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     "identity"
                 ) {
 
-                    identityDocumentGroup.classList.remove(
-                        "hidden"
-                    );
+                    if (identityDocumentGroup) {
 
+                        identityDocumentGroup.classList.remove(
+                            "hidden"
+                        );
+                    }
                 }
 
 
@@ -961,13 +1139,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     "business"
                 ) {
 
-                    businessDocumentGroup.classList.remove(
-                        "hidden"
-                    );
+                    if (businessDocumentGroup) {
+
+                        businessDocumentGroup.classList.remove(
+                            "hidden"
+                        );
+                    }
                 }
 
-
-                updateProfileCompletion();
             }
         );
     }
@@ -977,7 +1156,10 @@ document.addEventListener("DOMContentLoaded", function () {
        CHOOSE VERIFICATION FILE
     ===================================================== */
 
-    if (chooseVerificationFileBtn) {
+    if (
+        chooseVerificationFileBtn &&
+        fileInput
+    ) {
 
         chooseVerificationFileBtn.addEventListener(
             "click",
@@ -1056,13 +1238,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
 
-                selectedDocumentName.textContent =
-                    file.name;
+                if (selectedDocumentName) {
+
+                    selectedDocumentName.textContent =
+                        file.name;
+                }
 
 
-                showDocumentPreview(
-                    file
-                );
+                showDocumentPreview(file);
 
 
                 showVerificationMessage(
@@ -1090,49 +1273,80 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
 
-        documentImagePreview.classList.add(
-            "hidden"
-        );
+        if (documentImagePreview) {
 
-        documentPdfPreview.classList.add(
-            "hidden"
-        );
+            documentImagePreview.classList.add(
+                "hidden"
+            );
+
+            documentImagePreview.src = "";
+        }
+
+
+        if (documentPdfPreview) {
+
+            documentPdfPreview.classList.add(
+                "hidden"
+            );
+        }
 
 
         if (
-            file.type ===
-                "image/jpeg" ||
-            file.type ===
-                "image/png"
+            file.type === "image/jpeg" ||
+            file.type === "image/png"
         ) {
 
-            const objectUrl =
-                URL.createObjectURL(
-                    file
+            if (documentObjectUrl) {
+
+                URL.revokeObjectURL(
+                    documentObjectUrl
                 );
+            }
 
 
-            documentImagePreview.src =
-                objectUrl;
+            documentObjectUrl =
+                URL.createObjectURL(file);
 
 
-            documentImagePreview.classList.remove(
-                "hidden"
-            );
+            if (documentImagePreview) {
+
+                documentImagePreview.src =
+                    documentObjectUrl;
+
+                documentImagePreview.classList.remove(
+                    "hidden"
+                );
+            }
 
         } else if (
             file.type ===
             "application/pdf"
         ) {
 
-            documentPdfPreview.classList.remove(
-                "hidden"
-            );
+            if (documentPdfPreview) {
+
+                documentPdfPreview.classList.remove(
+                    "hidden"
+                );
+
+                documentPdfPreview.textContent =
+                    "📄 PDF document selected";
+            }
         }
     }
 
 
     function clearDocumentPreview() {
+
+        if (documentObjectUrl) {
+
+            URL.revokeObjectURL(
+                documentObjectUrl
+            );
+
+            documentObjectUrl = null;
+        }
+
 
         if (documentPreview) {
 
@@ -1157,6 +1371,9 @@ document.addEventListener("DOMContentLoaded", function () {
             documentPdfPreview.classList.add(
                 "hidden"
             );
+
+            documentPdfPreview.textContent =
+                "📄 PDF document selected";
         }
 
 
@@ -1174,7 +1391,9 @@ document.addEventListener("DOMContentLoaded", function () {
             "click",
             function () {
 
-                fileInput.value = "";
+                if (fileInput) {
+                    fileInput.value = "";
+                }
 
                 clearDocumentPreview();
 
@@ -1207,35 +1426,193 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-        const {
-            data,
-            error
-        } =
-            await supabaseClient
-                .from(
-                    "verification_documents"
-                )
-                .select(
-                    "id, document_type, status, rejection_reason, uploaded_at"
-                )
-                .eq(
-                    "user_id",
-                    userId
-                )
-                .eq(
-                    "role",
-                    "business"
-                )
-                .order(
-                    "uploaded_at",
-                    {
-                        ascending: false
+        if (!supabaseClient) {
+            return;
+        }
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .from(
+                        "verification_documents"
+                    )
+                    .select(
+                        `
+                        id,
+                        document_type,
+                        document_number,
+                        file_path,
+                        status,
+                        rejection_reason,
+                        uploaded_at
+                        `
+                    )
+                    .eq(
+                        "user_id",
+                        userId
+                    )
+                    .eq(
+                        "role",
+                        "business"
+                    )
+                    .order(
+                        "uploaded_at",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(1);
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            const record =
+                data &&
+                data.length
+                    ? data[0]
+                    : null;
+
+
+            currentVerificationRecord =
+                record;
+
+
+            /* ---------------------------------------------
+               No verification submitted
+            --------------------------------------------- */
+
+            if (!record) {
+
+                setVerificationStatus(
+                    "not_submitted"
+                );
+
+
+                if (messageEl) {
+                    messageEl.textContent = "";
+                }
+
+
+                enableVerificationForm();
+
+                return;
+            }
+
+
+            const status =
+                record.status ||
+                "pending";
+
+
+            setVerificationStatus(
+                status
+            );
+
+
+            /* ---------------------------------------------
+               Restore category + document type
+            --------------------------------------------- */
+
+            restoreVerificationFields(
+                record.document_type
+            );
+
+
+            /* ---------------------------------------------
+               Restore document number
+            --------------------------------------------- */
+
+            if (documentNumber) {
+
+                documentNumber.value =
+                    record.document_number || "";
+            }
+
+
+            /* ---------------------------------------------
+               Restore saved document name/preview
+            --------------------------------------------- */
+
+            if (record.file_path) {
+
+                await loadSavedVerificationPreview(
+                    record.file_path
+                );
+            }
+
+
+            /* ---------------------------------------------
+               Status message
+            --------------------------------------------- */
+
+            if (status === "rejected") {
+
+                if (messageEl) {
+
+                    if (record.rejection_reason) {
+
+                        messageEl.textContent =
+                            "Rejected: " +
+                            record.rejection_reason;
+
+                    } else {
+
+                        messageEl.textContent =
+                            "Your verification was rejected. Please submit an updated document.";
                     }
-                )
-                .limit(1);
+
+                    messageEl.style.color =
+                        "#991b1b";
+                }
 
 
-        if (error) {
+                enableVerificationForm();
+
+            } else if (
+                status === "approved"
+            ) {
+
+                if (messageEl) {
+
+                    messageEl.textContent =
+                        "✓ Your business document has been approved.";
+
+                    messageEl.style.color =
+                        "#166534";
+                }
+
+
+                disableVerificationForm(
+                    "Your business verification is approved."
+                );
+
+            } else {
+
+                if (messageEl) {
+
+                    messageEl.textContent =
+                        "Your document is waiting for admin review.";
+
+                    messageEl.style.color =
+                        "#92400e";
+                }
+
+
+                disableVerificationForm(
+                    "Verification is pending admin approval."
+                );
+            }
+
+
+        } catch (error) {
 
             console.error(
                 "Verification loading error:",
@@ -1243,90 +1620,371 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            statusEl.textContent =
-                "Unable to load status";
+            if (statusEl) {
+
+                statusEl.textContent =
+                    "Unable to load status";
+
+                statusEl.className =
+                    "verification-status";
+            }
 
 
+            if (messageEl) {
+
+                messageEl.textContent =
+                    error.message ||
+                    "Unable to load verification status.";
+
+                messageEl.style.color =
+                    "#991b1b";
+            }
+        }
+    }
+
+
+    /* =====================================================
+       RESTORE VERIFICATION FIELDS
+    ===================================================== */
+
+    function restoreVerificationFields(
+        storedDocumentType
+    ) {
+
+        if (!storedDocumentType) {
             return;
         }
 
 
-        const record =
-            data &&
-            data.length
-                ? data[0]
-                : null;
-
-
-        if (!record) {
-
-            statusEl.textContent =
-                "Not submitted";
-
-            statusEl.className =
-                "verification-status";
-
-
-            messageEl.textContent =
-                "";
-
-
-            return;
-        }
-
-
-        const status =
-            record.status ||
-            "pending";
-
-
-        statusEl.textContent =
-            status
-                .charAt(0)
-                .toUpperCase() +
-            status.slice(1);
-
-
-        statusEl.className =
-            "verification-status " +
-            status;
+        let category = "";
+        let type = "";
 
 
         if (
-            status ===
-            "rejected" &&
-            record.rejection_reason
+            storedDocumentType.startsWith(
+                "identity_"
+            )
         ) {
 
-            messageEl.textContent =
-                "Rejected: " +
-                record.rejection_reason;
+            category = "identity";
 
-            messageEl.style.color =
-                "#991b1b";
+            type =
+                storedDocumentType.replace(
+                    "identity_",
+                    ""
+                );
 
         } else if (
-            status ===
-            "approved"
+            storedDocumentType.startsWith(
+                "business_"
+            )
         ) {
 
-            messageEl.textContent =
-                "✓ Your business document has been approved.";
+            category = "business";
 
-            messageEl.style.color =
-                "#166534";
+            type =
+                storedDocumentType.replace(
+                    "business_",
+                    ""
+                );
 
         } else {
 
-            messageEl.textContent =
-                "Your document is waiting for admin review.";
+            /*
+            Backward compatibility for an older
+            record where document_type may contain
+            only the document name.
+            */
 
-            messageEl.style.color =
-                "#92400e";
+            type = storedDocumentType;
+
+            const identityTypes = [
+                "aadhaar",
+                "pan",
+                "voter_id",
+                "driving_license",
+                "passport"
+            ];
+
+            if (
+                identityTypes.includes(type)
+            ) {
+
+                category = "identity";
+
+            } else {
+
+                category = "business";
+            }
         }
 
 
-        updateProfileCompletion();
+        if (verificationCategory) {
+
+            verificationCategory.value =
+                category;
+
+            verificationCategory.dispatchEvent(
+                new Event("change")
+            );
+        }
+
+
+        if (
+            category === "identity" &&
+            identityDocumentType
+        ) {
+
+            identityDocumentType.value =
+                type;
+
+        } else if (
+            category === "business" &&
+            businessDocumentType
+        ) {
+
+            businessDocumentType.value =
+                type;
+        }
+    }
+
+
+    /* =====================================================
+       LOAD SAVED VERIFICATION PREVIEW
+       SUPABASE STORAGE READ
+    ===================================================== */
+
+    async function loadSavedVerificationPreview(
+        filePath
+    ) {
+
+        if (!filePath) {
+            return;
+        }
+
+
+        if (selectedDocumentName) {
+
+            selectedDocumentName.textContent =
+                getFileNameFromPath(filePath);
+        }
+
+
+        if (!documentPreview) {
+            return;
+        }
+
+
+        try {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient.storage
+                    .from(
+                        "verification-documents"
+                    )
+                    .createSignedUrl(
+                        filePath,
+                        3600
+                    );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            const signedUrl =
+                data &&
+                data.signedUrl
+                    ? data.signedUrl
+                    : "";
+
+
+            if (!signedUrl) {
+                throw new Error(
+                    "Saved document URL generate nahi hui."
+                );
+            }
+
+
+            documentPreview.classList.remove(
+                "hidden"
+            );
+
+
+            const extension =
+                getFileExtension(
+                    filePath
+                );
+
+
+            if (
+                extension === "jpg" ||
+                extension === "jpeg" ||
+                extension === "png"
+            ) {
+
+                if (documentImagePreview) {
+
+                    documentImagePreview.src =
+                        signedUrl;
+
+                    documentImagePreview.classList.remove(
+                        "hidden"
+                    );
+                }
+
+
+                if (documentPdfPreview) {
+
+                    documentPdfPreview.classList.add(
+                        "hidden"
+                    );
+                }
+
+            } else if (
+                extension === "pdf"
+            ) {
+
+                if (documentImagePreview) {
+
+                    documentImagePreview.classList.add(
+                        "hidden"
+                    );
+
+                    documentImagePreview.src = "";
+                }
+
+
+                if (documentPdfPreview) {
+
+                    documentPdfPreview.classList.remove(
+                        "hidden"
+                    );
+
+                    documentPdfPreview.textContent =
+                        "📄 Saved PDF document — verification document already submitted.";
+                }
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "Saved document preview error:",
+                error
+            );
+
+
+            /*
+            Even if preview cannot be generated,
+            the saved document name remains visible.
+            */
+
+            documentPreview.classList.remove(
+                "hidden"
+            );
+
+
+            if (documentImagePreview) {
+
+                documentImagePreview.classList.add(
+                    "hidden"
+                );
+            }
+
+
+            if (documentPdfPreview) {
+
+                documentPdfPreview.classList.remove(
+                    "hidden"
+                );
+
+                documentPdfPreview.textContent =
+                    "📄 Saved verification document";
+            }
+        }
+    }
+
+
+    /* =====================================================
+       ENABLE VERIFICATION FORM
+    ===================================================== */
+
+    function enableVerificationForm() {
+
+        if (verificationCategory) {
+            verificationCategory.disabled = false;
+        }
+
+        if (identityDocumentType) {
+            identityDocumentType.disabled = false;
+        }
+
+        if (businessDocumentType) {
+            businessDocumentType.disabled = false;
+        }
+
+        if (documentNumber) {
+            documentNumber.disabled = false;
+        }
+
+        if (fileInput) {
+            fileInput.disabled = false;
+        }
+
+        if (chooseVerificationFileBtn) {
+            chooseVerificationFileBtn.disabled = false;
+        }
+
+        if (verificationUploadButton) {
+            verificationUploadButton.disabled = false;
+            verificationUploadButton.textContent =
+                "🚀 Submit for Verification";
+        }
+    }
+
+
+    /* =====================================================
+       DISABLE VERIFICATION FORM
+    ===================================================== */
+
+    function disableVerificationForm(
+        message
+    ) {
+
+        if (verificationCategory) {
+            verificationCategory.disabled = true;
+        }
+
+        if (identityDocumentType) {
+            identityDocumentType.disabled = true;
+        }
+
+        if (businessDocumentType) {
+            businessDocumentType.disabled = true;
+        }
+
+        if (documentNumber) {
+            documentNumber.disabled = true;
+        }
+
+        if (fileInput) {
+            fileInput.disabled = true;
+        }
+
+        if (chooseVerificationFileBtn) {
+            chooseVerificationFileBtn.disabled = true;
+        }
+
+        if (verificationUploadButton) {
+            verificationUploadButton.disabled = true;
+            verificationUploadButton.textContent =
+                message;
+        }
     }
 
 
@@ -1379,7 +2037,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function getSelectedDocumentType() {
 
         const category =
-            verificationCategory.value;
+            verificationCategory
+                ? verificationCategory.value
+                : "";
 
 
         if (
@@ -1387,7 +2047,9 @@ document.addEventListener("DOMContentLoaded", function () {
             "identity"
         ) {
 
-            return identityDocumentType.value;
+            return identityDocumentType
+                ? identityDocumentType.value
+                : "";
         }
 
 
@@ -1396,7 +2058,9 @@ document.addEventListener("DOMContentLoaded", function () {
             "business"
         ) {
 
-            return businessDocumentType.value;
+            return businessDocumentType
+                ? businessDocumentType.value
+                : "";
         }
 
 
@@ -1405,17 +2069,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       DOCUMENT NUMBER BASIC VALIDATION
+       DOCUMENT NUMBER VALIDATION
     ===================================================== */
 
     function validateDocumentNumber(
-        category,
         documentType,
         number
     ) {
 
         if (!number) {
-
             return true;
         }
 
@@ -1427,7 +2089,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ---------------------------------------------
-           PAN format
+           PAN
            Example: ABCDE1234F
         --------------------------------------------- */
 
@@ -1439,7 +2101,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const panPattern =
                 /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
-
             return panPattern.test(
                 value
             );
@@ -1447,7 +2108,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ---------------------------------------------
-           Aadhaar basic format
+           Aadhaar
            12 digits
         --------------------------------------------- */
 
@@ -1459,7 +2120,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const aadhaarPattern =
                 /^[0-9]{12}$/;
 
-
             return aadhaarPattern.test(
                 value.replace(
                     /\s/g,
@@ -1469,11 +2129,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /*
-           For other documents we only
-           check that the value is not
-           excessively long.
-        */
+        /* ---------------------------------------------
+           Other documents
+        --------------------------------------------- */
 
         return (
             value.length <= 100
@@ -1489,14 +2147,54 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function uploadBusinessVerification() {
 
-        const button =
-            document.getElementById(
-                "businessVerificationUploadBtn"
+        if (
+            !supabaseClient ||
+            !currentUser
+        ) {
+
+            showVerificationMessage(
+                "Please login again.",
+                "error"
             );
+
+            return;
+        }
+
+
+        /*
+        Re-check current verification status
+        before allowing another submission.
+        */
+
+        if (
+            currentVerificationRecord &&
+            (
+                currentVerificationRecord.status ===
+                    "pending" ||
+                currentVerificationRecord.status ===
+                    "approved"
+            )
+        ) {
+
+            showVerificationMessage(
+                currentVerificationRecord.status === "pending"
+                    ? "Your verification is already pending admin approval."
+                    : "Your business is already verified.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        const button =
+            verificationUploadButton;
 
 
         const category =
-            verificationCategory.value;
+            verificationCategory
+                ? verificationCategory.value
+                : "";
 
 
         const documentType =
@@ -1504,15 +2202,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         const number =
-            documentNumber.value.trim();
+            documentNumber
+                ? documentNumber.value.trim()
+                : "";
 
 
         const file =
-            fileInput.files[0];
+            fileInput
+                ? fileInput.files[0]
+                : null;
 
 
         /* ---------------------------------------------
-           Category validation
+           Category
         --------------------------------------------- */
 
         if (!category) {
@@ -1527,7 +2229,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ---------------------------------------------
-           Document type validation
+           Document type
         --------------------------------------------- */
 
         if (!documentType) {
@@ -1542,13 +2244,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ---------------------------------------------
-           Document number validation
+           Document number
         --------------------------------------------- */
 
         if (
             number &&
             !validateDocumentNumber(
-                category,
                 documentType,
                 number
             )
@@ -1588,7 +2289,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ---------------------------------------------
-           File validation
+           File
         --------------------------------------------- */
 
         if (!file) {
@@ -1639,7 +2340,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ---------------------------------------------
-           Get User
+           Get current user
         --------------------------------------------- */
 
         const {
@@ -1669,40 +2370,34 @@ document.addEventListener("DOMContentLoaded", function () {
            Button state
         --------------------------------------------- */
 
-        button.disabled =
-            true;
+        if (button) {
 
-        button.textContent =
-            "Submitting...";
+            button.disabled = true;
 
-
-        showVerificationMessage(
-            "",
-            ""
-        );
+            button.textContent =
+                "Submitting...";
+        }
 
 
         try {
 
             /* -----------------------------------------
-               Generate Storage Path
+               Storage path
             ----------------------------------------- */
 
             const extension =
-                file.name.includes(".")
-                    ? file.name
-                        .split(".")
-                        .pop()
-                        .toLowerCase()
-                    : "bin";
+                getFileExtension(
+                    file.name
+                );
 
 
             const filePath =
-                `business/${user.id}/${crypto.randomUUID()}-business-proof.${extension}`;
+                `business/${user.id}/${createSafeFileId()}-business-proof.${extension}`;
 
 
             /* -----------------------------------------
                SUPABASE STORAGE WRITE
+               Private verification-documents bucket
             ----------------------------------------- */
 
             const {
@@ -1726,17 +2421,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             if (uploadError) {
-
                 throw uploadError;
             }
 
 
             /* -----------------------------------------
-               Store Document Type
-               
-               We use a readable combined value
-               because your existing table already
-               has document_type.
+               Stored document type
             ----------------------------------------- */
 
             let storedDocumentType =
@@ -1783,6 +2473,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         document_type:
                             storedDocumentType,
 
+                        document_number:
+                            number || null,
+
                         file_path:
                             filePath,
 
@@ -1793,10 +2486,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (insertError) {
 
-                /* -------------------------------------
-                   Remove uploaded file if database
-                   insert fails.
-                ------------------------------------- */
+                /*
+                Rollback storage upload
+                if database insert fails.
+                */
 
                 await supabaseClient.storage
                     .from(
@@ -1805,7 +2498,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     .remove([
                         filePath
                     ]);
-
 
                 throw insertError;
             }
@@ -1821,7 +2513,10 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            fileInput.value = "";
+            if (fileInput) {
+                fileInput.value = "";
+            }
+
 
             clearDocumentPreview();
 
@@ -1831,7 +2526,7 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            updateProfileCompletion();
+            await updateProfileCompletion();
 
 
         } catch (error) {
@@ -1850,11 +2545,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
         } finally {
 
-            button.disabled =
-                false;
+            /*
+            Only re-enable if current status is not
+            pending or approved.
+            */
 
-            button.textContent =
-                "🚀 Submit for Verification";
+            if (
+                currentVerificationRecord &&
+                (
+                    currentVerificationRecord.status ===
+                        "pending" ||
+                    currentVerificationRecord.status ===
+                        "approved"
+                )
+            ) {
+
+                disableVerificationForm(
+                    currentVerificationRecord.status === "pending"
+                        ? "Verification is pending admin approval."
+                        : "Your business is already verified."
+                );
+
+            } else if (button) {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "🚀 Submit for Verification";
+            }
         }
     }
 
@@ -1862,12 +2580,6 @@ document.addEventListener("DOMContentLoaded", function () {
     /* =====================================================
        VERIFICATION BUTTON
     ===================================================== */
-
-    const verificationUploadButton =
-        document.getElementById(
-            "businessVerificationUploadBtn"
-        );
-
 
     if (verificationUploadButton) {
 
@@ -1883,165 +2595,167 @@ document.addEventListener("DOMContentLoaded", function () {
        SUPABASE WRITE
     ===================================================== */
 
-    profileForm.addEventListener(
-        "submit",
-        async function (event) {
+    if (profileForm) {
 
-            event.preventDefault();
+        profileForm.addEventListener(
+            "submit",
+            async function (event) {
 
-
-            if (
-                !currentBusiness ||
-                !currentUser
-            ) {
-
-                showMessage(
-                    "Business profile load nahi hui.",
-                    "error"
-                );
-
-                return;
-            }
+                event.preventDefault();
 
 
-            const business_name =
-                document.getElementById(
-                    "businessName"
-                ).value.trim();
+                if (
+                    !currentBusiness ||
+                    !currentUser
+                ) {
 
+                    showMessage(
+                        "Business profile load nahi hui.",
+                        "error"
+                    );
 
-            const business_type =
-                document.getElementById(
-                    "businessType"
-                ).value.trim();
-
-
-            const city =
-                document.getElementById(
-                    "city"
-                ).value.trim();
-
-
-            const phone =
-                document.getElementById(
-                    "phone"
-                ).value.trim();
-
-
-            if (!business_name) {
-
-                showMessage(
-                    "Business Name required hai.",
-                    "error"
-                );
-
-                return;
-            }
-
-
-            saveBtn.disabled =
-                true;
-
-            saveText.textContent =
-                "Saving...";
-
-
-            try {
-
-                /* -----------------------------------------
-                   SUPABASE WRITE
-                   Existing businesses table
-                ----------------------------------------- */
-
-                const {
-                    error
-                } =
-                    await supabaseClient
-                        .from(
-                            "businesses"
-                        )
-                        .update({
-
-                            business_name,
-
-                            business_type,
-
-                            city,
-
-                            phone
-
-                        })
-                        .eq(
-    "id",
-    currentBusiness.id
-);
-
-
-                if (error) {
-
-                    throw error;
+                    return;
                 }
 
 
-                /* -----------------------------------------
-                   Update local state
-                ----------------------------------------- */
-
-                currentBusiness.business_name =
-                    business_name;
-
-                currentBusiness.business_type =
-                    business_type;
-
-                currentBusiness.city =
-                    city;
-
-                currentBusiness.phone =
-                    phone;
+                const business_name =
+                    document.getElementById(
+                        "businessName"
+                    ).value.trim();
 
 
-                updateHeader(
-                    business_name
-                );
+                const business_type =
+                    document.getElementById(
+                        "businessType"
+                    ).value.trim();
 
 
-                showMessage(
-                    "✓ Changes successfully save ho gaye!",
-                    "success"
-                );
+                const city =
+                    document.getElementById(
+                        "city"
+                    ).value.trim();
 
 
-                updateProfileCompletion();
+                const phone =
+                    document.getElementById(
+                        "phone"
+                    ).value.trim();
 
 
-            } catch (error) {
+                if (!business_name) {
 
-                console.error(
-                    "Profile update error:",
-                    error
-                );
+                    showMessage(
+                        "Business Name required hai.",
+                        "error"
+                    );
 
+                    return;
+                }
 
-                showMessage(
-                    error.message ||
-                    "Profile update failed.",
-                    "error"
-                );
-
-            } finally {
 
                 saveBtn.disabled =
-                    false;
+                    true;
 
                 saveText.textContent =
-                    "Save Changes";
+                    "Saving...";
+
+
+                try {
+
+                    /* -----------------------------------------
+                       SUPABASE WRITE
+                       Existing businesses table
+                    ----------------------------------------- */
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+                            .from(
+                                "businesses"
+                            )
+                            .update({
+
+                                business_name,
+
+                                business_type,
+
+                                city,
+
+                                phone
+
+                            })
+                            .eq(
+                                "id",
+                                currentBusiness.id
+                            );
+
+
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    /* -----------------------------------------
+                       Update local state
+                    ----------------------------------------- */
+
+                    currentBusiness.business_name =
+                        business_name;
+
+                    currentBusiness.business_type =
+                        business_type;
+
+                    currentBusiness.city =
+                        city;
+
+                    currentBusiness.phone =
+                        phone;
+
+
+                    updateHeader(
+                        business_name
+                    );
+
+
+                    showMessage(
+                        "✓ Changes successfully save ho gaye!",
+                        "success"
+                    );
+
+
+                    await updateProfileCompletion();
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Profile update error:",
+                        error
+                    );
+
+
+                    showMessage(
+                        error.message ||
+                        "Profile update failed.",
+                        "error"
+                    );
+
+                } finally {
+
+                    saveBtn.disabled =
+                        false;
+
+                    saveText.textContent =
+                        "Save Changes";
+                }
             }
-        }
-    );
+        );
+    }
 
 
     /* =====================================================
-       PROFILE COMPLETENESS
+       PROFILE COMPLETION
     ===================================================== */
 
     async function updateProfileCompletion() {
@@ -2051,11 +2765,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        let completed =
-            0;
+        let completed = 0;
 
-        const total =
-            3;
+        const total = 3;
 
 
         /* ---------------------------------------------
@@ -2113,11 +2825,18 @@ document.addEventListener("DOMContentLoaded", function () {
            Verification
         --------------------------------------------- */
 
-        let verified =
-            false;
+        let verified = false;
 
 
         if (
+            currentVerificationRecord &&
+            currentVerificationRecord.status ===
+                "approved"
+        ) {
+
+            verified = true;
+
+        } else if (
             currentUser &&
             supabaseClient
         ) {
@@ -2143,8 +2862,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     .order(
                         "uploaded_at",
                         {
-                            ascending:
-                                false
+                            ascending: false
                         }
                     )
                     .limit(1);
@@ -2154,11 +2872,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 data &&
                 data.length &&
                 data[0].status ===
-                "approved"
+                    "approved"
             ) {
 
-                verified =
-                    true;
+                verified = true;
             }
         }
 
@@ -2197,12 +2914,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 "profileCompletionText"
             );
 
-
         const percent =
             document.getElementById(
                 "profileCompletionPercent"
             );
-
 
         const bar =
             document.getElementById(
@@ -2229,7 +2944,8 @@ document.addEventListener("DOMContentLoaded", function () {
         if (bar) {
 
             bar.style.width =
-                percentage + "%";
+                percentage +
+                "%";
         }
     }
 
@@ -2256,7 +2972,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 "✓ " +
                 getCompletionLabel(id);
 
-
             element.style.color =
                 "#16845b";
 
@@ -2268,7 +2983,6 @@ document.addEventListener("DOMContentLoaded", function () {
             element.textContent =
                 "○ " +
                 getCompletionLabel(id);
-
 
             element.style.color =
                 "#747994";
@@ -2316,9 +3030,15 @@ document.addEventListener("DOMContentLoaded", function () {
        LOGOUT
     ===================================================== */
 
-    document
-        .getElementById("logoutBtn")
-        .addEventListener(
+    const logoutBtn =
+        document.getElementById(
+            "logoutBtn"
+        );
+
+
+    if (logoutBtn) {
+
+        logoutBtn.addEventListener(
             "click",
             async function () {
 
@@ -2334,6 +3054,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "../auth.html";
             }
         );
+    }
 
 
     /* =====================================================

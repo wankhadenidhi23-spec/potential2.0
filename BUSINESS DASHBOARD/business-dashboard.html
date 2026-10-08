@@ -5,17 +5,11 @@
 
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>POTential | Business Dashboard</title>
 
-    <link
-        rel="stylesheet"
-        href="business-dashboard.css"
-    >
+    <link rel="stylesheet" href="business-dashboard.css">
 
 </head>
 
@@ -23,19 +17,15 @@
 <body>
 
 
-<!-- =========================================================
-     TOP NAVBAR
-========================================================= -->
+<!-- =====================================================
+     NAVBAR
+===================================================== -->
 
 <header class="navbar">
 
-    <a
-        href="business-dashboard.html"
-        class="logo"
-    >
+    <a href="business-dashboard.html" class="logo">
         POTential
     </a>
-
 
     <div class="nav-right">
 
@@ -46,7 +36,6 @@
         >
             Business
         </a>
-
 
         <button
             type="button"
@@ -61,54 +50,42 @@
 </header>
 
 
-
-<!-- =========================================================
-     MAIN APP LAYOUT
-========================================================= -->
+<!-- =====================================================
+     APP LAYOUT
+===================================================== -->
 
 <div class="app-layout">
 
 
-    <!-- =====================================================
+    <!-- =================================================
          SIDEBAR
-    ====================================================== -->
+    ================================================== -->
 
     <aside class="sidebar">
 
         <nav>
 
-            <a
-                href="#dashboard"
-                class="active"
-            >
+            <a href="#dashboard" class="active">
                 Dashboard
             </a>
-
 
             <a href="#post">
                 Post Opportunity
             </a>
 
-
             <a href="#opportunities">
                 My Opportunities
             </a>
-
 
             <a href="#applicants">
                 Applicants
             </a>
 
-
             <a href="business-profile.html">
                 Business Profile
             </a>
 
-
-            <a
-                href="#"
-                id="sidebarLogout"
-            >
+            <a href="#" id="sidebarLogout">
                 Logout
             </a>
 
@@ -126,16 +103,15 @@
     </aside>
 
 
-
-    <!-- =====================================================
-         DASHBOARD MAIN CONTENT
-    ====================================================== -->
+    <!-- =================================================
+         MAIN DASHBOARD
+    ================================================== -->
 
     <main class="dashboard">
 
 
         <!-- =================================================
-             WELCOME SECTION
+             WELCOME
         ================================================== -->
 
         <section
@@ -147,19 +123,16 @@
                 BUSINESS DASHBOARD
             </p>
 
-
             <h1 id="welcomeText">
                 Welcome!
             </h1>
 
-
             <p>
-                Manage your opportunities, applicants and
-                business profile.
+                Manage your opportunities,
+                applicants and business profile.
             </p>
 
         </section>
-
 
 
         <!-- =================================================
@@ -175,7 +148,6 @@
                     <p class="eyebrow">
                         BUSINESS INFORMATION
                     </p>
-
 
                     <h2>
                         Your Business
@@ -195,13 +167,11 @@
                         Business
                     </span>
 
-
                     <strong id="businessName">
                         Not provided
                     </strong>
 
                 </div>
-
 
 
                 <div>
@@ -210,13 +180,11 @@
                         Business Type
                     </span>
 
-
                     <strong id="businessType">
                         Not provided
                     </strong>
 
                 </div>
-
 
 
                 <div>
@@ -225,7 +193,6 @@
                         City
                     </span>
 
-
                     <strong id="businessCity">
                         Not provided
                     </strong>
@@ -233,13 +200,11 @@
                 </div>
 
 
-
                 <div>
 
                     <span>
                         Phone
                     </span>
-
 
                     <strong id="businessPhone">
                         Not provided
@@ -253,16 +218,14 @@
         </section>
 
 
-
         <!-- =================================================
-             MESSAGE AREA
+             MESSAGE
         ================================================== -->
 
         <div
             id="message"
             class="message"
         ></div>
-
 
 
         <!-- =================================================
@@ -274,7 +237,6 @@
             class="post-section"
         >
 
-
             <div class="section-heading">
 
                 <div>
@@ -283,15 +245,13 @@
                         CREATE OPPORTUNITY
                     </p>
 
-
                     <h2>
                         Post New Opportunity
                     </h2>
 
-
                     <p>
-                        Create a new opportunity for students
-                        and workers.
+                        Create a new opportunity
+                        for students and workers.
                     </p>
 
                 </div>
@@ -299,27 +259,19 @@
             </div>
 
 
-
-            <!-- =============================================
-                 OPPORTUNITY FORM
-            ============================================== -->
-
             <form
                 id="opportunityForm"
                 class="form-grid"
             >
 
 
-                <!-- =========================================
-                     OPPORTUNITY TITLE
-                ========================================== -->
+                <!-- TITLE -->
 
                 <div class="form-group">
 
                     <label for="title">
                         Opportunity Title
                     </label>
-
 
                     <input
                         type="text"
@@ -331,17 +283,13 @@
                 </div>
 
 
-
-                <!-- =========================================
-                     DESCRIPTION
-                ========================================== -->
+                <!-- DESCRIPTION -->
 
                 <div class="form-group">
 
                     <label for="description">
                         Description
                     </label>
-
 
                     <textarea
                         id="description"
@@ -353,17 +301,13 @@
                 </div>
 
 
-
-                <!-- =========================================
-                     LOCATION
-                ========================================== -->
+                <!-- LOCATION -->
 
                 <div class="form-group">
 
                     <label for="location">
                         Location
                     </label>
-
 
                     <input
                         type="text"
@@ -374,17 +318,13 @@
                 </div>
 
 
-
-                <!-- =========================================
-                     JOB TYPE
-                ========================================== -->
+                <!-- JOB TYPE -->
 
                 <div class="form-group">
 
                     <label for="jobType">
                         Job Type
                     </label>
-
 
                     <select
                         id="jobType"
@@ -395,21 +335,17 @@
                             Select job type
                         </option>
 
-
                         <option value="Full Time">
                             Full Time
                         </option>
-
 
                         <option value="Part Time">
                             Part Time
                         </option>
 
-
                         <option value="Internship">
                             Internship
                         </option>
-
 
                         <option value="Freelance">
                             Freelance
@@ -420,36 +356,28 @@
                 </div>
 
 
-
                 <!-- =================================================
-                     PART-TIME SHIFT SECTION
-                     
-                     IMPORTANT:
-                     This section is hidden initially.
-
-                     JavaScript will show it ONLY when:
-                     Job Type = Part Time
+                     PART TIME ONLY
                 ================================================== -->
 
                 <div
                     id="partTimeScheduleGroup"
                     class="form-group full"
                     style="
-                        display: none;
-                        padding: 18px;
-                        margin-top: 10px;
-                        border: 1px solid #e3e0f5;
-                        border-radius: 14px;
-                        background: #faf9ff;
+                        display:none;
+                        padding:18px;
+                        margin-top:10px;
+                        border:1px solid #e3e0f5;
+                        border-radius:14px;
+                        background:#faf9ff;
                     "
                 >
 
-
                     <label
                         style="
-                            font-weight: 700;
-                            margin-bottom: 6px;
-                            display: block;
+                            font-weight:700;
+                            margin-bottom:6px;
+                            display:block;
                         "
                     >
                         Part-Time Work Schedule
@@ -458,21 +386,19 @@
 
                     <small
                         style="
-                            display: block;
-                            margin-bottom: 15px;
-                            color: #777;
-                            line-height: 1.5;
+                            display:block;
+                            margin-bottom:15px;
+                            color:#777;
+                            line-height:1.5;
                         "
                     >
-                        Select the preferred shift and exact
-                        working hours for this part-time opportunity.
+                        Select the shift and exact
+                        working hours for this
+                        part-time opportunity.
                     </small>
 
 
-
-                    <!-- =====================================
-                         SHIFT
-                    ====================================== -->
+                    <!-- SHIFT -->
 
                     <div class="form-group">
 
@@ -480,28 +406,23 @@
                             Shift
                         </label>
 
-
                         <select id="partTimePeriod">
 
                             <option value="">
                                 Select shift
                             </option>
 
-
                             <option value="Morning">
                                 Morning
                             </option>
-
 
                             <option value="Afternoon">
                                 Afternoon
                             </option>
 
-
                             <option value="Evening">
                                 Evening
                             </option>
-
 
                             <option value="Night">
                                 Night
@@ -512,26 +433,21 @@
                     </div>
 
 
-
-                    <!-- =====================================
-                         START + END TIME
-                    ====================================== -->
+                    <!-- START + END -->
 
                     <div
                         style="
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 15px;
+                            display:grid;
+                            grid-template-columns:1fr 1fr;
+                            gap:15px;
                         "
                     >
-
 
                         <div class="form-group">
 
                             <label for="partTimeStart">
                                 Start Time
                             </label>
-
 
                             <input
                                 type="time"
@@ -541,13 +457,11 @@
                         </div>
 
 
-
                         <div class="form-group">
 
                             <label for="partTimeEnd">
                                 End Time
                             </label>
-
 
                             <input
                                 type="time"
@@ -556,44 +470,35 @@
 
                         </div>
 
-
                     </div>
 
 
-
-                    <!-- =====================================
-                         SHIFT PREVIEW
-                    ====================================== -->
+                    <!-- PREVIEW -->
 
                     <div
                         id="partTimeSchedulePreview"
                         style="
-                            display: none;
-                            margin-top: 10px;
-                            padding: 10px 12px;
-                            border-radius: 10px;
-                            background: #eeeaff;
-                            color: #5145c7;
-                            font-size: 13px;
-                            font-weight: 600;
+                            display:none;
+                            margin-top:10px;
+                            padding:10px 12px;
+                            border-radius:10px;
+                            background:#eeeaff;
+                            color:#5145c7;
+                            font-size:13px;
+                            font-weight:600;
                         "
                     ></div>
-
 
                 </div>
 
 
-
-                <!-- =========================================
-                     REQUIRED SKILLS
-                ========================================== -->
+                <!-- SKILLS -->
 
                 <div class="form-group">
 
                     <label for="skills">
                         Required Skills
                     </label>
-
 
                     <input
                         type="text"
@@ -604,17 +509,13 @@
                 </div>
 
 
-
-                <!-- =========================================
-                     SALARY / STIPEND
-                ========================================== -->
+                <!-- SALARY -->
 
                 <div class="form-group">
 
                     <label for="salary">
                         Salary / Stipend
                     </label>
-
 
                     <input
                         type="number"
@@ -626,17 +527,13 @@
                 </div>
 
 
-
-                <!-- =========================================
-                     APPLICATION DEADLINE
-                ========================================== -->
+                <!-- DEADLINE -->
 
                 <div class="form-group">
 
                     <label for="deadline">
                         Application Deadline
                     </label>
-
 
                     <input
                         type="date"
@@ -646,10 +543,7 @@
                 </div>
 
 
-
-                <!-- =========================================
-                     POST BUTTON
-                ========================================== -->
+                <!-- BUTTON -->
 
                 <button
                     type="submit"
@@ -665,7 +559,6 @@
         </section>
 
 
-
         <!-- =================================================
              MY OPPORTUNITIES
         ================================================== -->
@@ -675,9 +568,7 @@
             class="jobs-section"
         >
 
-
             <div class="section-heading">
-
 
                 <div>
 
@@ -685,13 +576,11 @@
                         YOUR POSTS
                     </p>
 
-
                     <h2>
                         My Opportunities
                     </h2>
 
                 </div>
-
 
 
                 <button
@@ -702,9 +591,7 @@
                     Refresh
                 </button>
 
-
             </div>
-
 
 
             <div id="jobsContainer">
@@ -715,9 +602,7 @@
 
             </div>
 
-
         </section>
-
 
 
         <!-- =================================================
@@ -729,9 +614,7 @@
             class="jobs-section"
         >
 
-
             <div class="section-heading">
-
 
                 <div>
 
@@ -739,19 +622,16 @@
                         APPLICATIONS
                     </p>
 
-
                     <h2>
                         Applicants
                     </h2>
 
-
                     <p>
-                        Review students who applied to your
-                        opportunities.
+                        Review students who applied
+                        to your opportunities.
                     </p>
 
                 </div>
-
 
 
                 <button
@@ -762,9 +642,7 @@
                     Refresh
                 </button>
 
-
             </div>
-
 
 
             <div id="applicationsContainer">
@@ -775,7 +653,6 @@
 
             </div>
 
-
         </section>
 
 
@@ -784,19 +661,16 @@
 </div>
 
 
-
-<!-- =========================================================
-     BUSINESS VERIFICATION POPUP
-========================================================= -->
+<!-- =====================================================
+     VERIFICATION POPUP
+===================================================== -->
 
 <div
     id="verificationPopup"
     class="verification-popup-overlay"
 >
 
-
     <div class="verification-popup">
-
 
         <button
             type="button"
@@ -808,11 +682,9 @@
         </button>
 
 
-
         <div class="verification-popup-icon">
             ✓
         </div>
-
 
 
         <p class="verification-popup-eyebrow">
@@ -820,19 +692,16 @@
         </p>
 
 
-
         <h2>
             Build Trust. Get Verified.
         </h2>
 
 
-
         <p>
             Your business verification is still pending.
-            Complete your verification to build trust with
-            students on POTEntial.
+            Complete your verification to build trust
+            with students on POTEntial.
         </p>
-
 
 
         <button
@@ -843,29 +712,20 @@
             🚀 Get My Business Verified
         </button>
 
-
     </div>
 
 </div>
 
 
-
-<!-- =========================================================
+<!-- =====================================================
      SUPABASE
-========================================================= -->
+===================================================== -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
 <script src="supabase-config.js?v=2"></script>
 
-
-<!--
-    v=5 is used so browser loads the latest dashboard JS
-    instead of an older cached version.
--->
-
-<script src="business-dashboard.js?v=5"></script>
+<script src="business-dashboard.js?v=6"></script>
 
 
 </body>

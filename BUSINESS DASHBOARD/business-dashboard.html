@@ -17,9 +17,7 @@
 
 </head>
 
-
 <body>
-
 
 <!-- =====================================================
      NAVBAR
@@ -35,7 +33,6 @@
 
     </a>
 
-
     <div class="nav-right">
 
         <a
@@ -46,7 +43,6 @@
             Business
 
         </a>
-
 
         <button
             type="button"
@@ -62,12 +58,11 @@
 </header>
 
 
-
 <!-- =====================================================
      MAIN DASHBOARD
 ===================================================== -->
 
-<div class="dashboard-layout">
+<div class="app-layout">
 
 
     <!-- =================================================
@@ -76,57 +71,47 @@
 
     <aside class="sidebar">
 
-        <nav class="sidebar-nav">
+        <nav>
 
             <a
                 href="#dashboard"
-                class="nav-item active">
+                class="active">
 
                 Dashboard
 
             </a>
 
-
             <a
-                href="#post"
-                class="nav-item">
+                href="#post">
 
                 Post Opportunity
 
             </a>
 
-
             <a
-                href="#opportunities"
-                class="nav-item">
+                href="#opportunities">
 
                 My Opportunities
 
             </a>
 
-
             <a
-                href="#applicants"
-                class="nav-item">
+                href="#applicants">
 
                 Applicants
 
             </a>
 
-
             <a
-                href="business-profile.html"
-                class="nav-item">
+                href="business-profile.html">
 
                 Business Profile
 
             </a>
 
-
             <a
                 href="#"
-                id="sidebarLogout"
-                class="nav-item">
+                id="sidebarLogout">
 
                 Logout
 
@@ -134,15 +119,21 @@
 
         </nav>
 
-    </aside>
+        <div class="tagline">
 
+            POTential<br>
+            Connecting talent with opportunity.
+
+        </div>
+
+    </aside>
 
 
     <!-- =================================================
          MAIN CONTENT
     ================================================== -->
 
-    <main class="dashboard-main">
+    <main class="dashboard">
 
 
         <!-- =================================================
@@ -151,91 +142,103 @@
 
         <section
             id="dashboard"
-            class="dashboard-header">
+            class="welcome-section">
 
-            <div>
+            <p class="eyebrow">
+                BUSINESS DASHBOARD
+            </p>
 
-                <p class="eyebrow">
-                    BUSINESS DASHBOARD
-                </p>
+            <h1 id="welcomeText">
+                Welcome!
+            </h1>
 
-
-                <h1 id="welcomeText">
-                    Welcome!
-                </h1>
-
-
-                <p>
-                    Manage your opportunities,
-                    applicants and business profile.
-                </p>
-
-            </div>
+            <p>
+                Manage your opportunities,
+                applicants and business profile.
+            </p>
 
         </section>
-
 
 
         <!-- =================================================
              BUSINESS INFORMATION
         ================================================== -->
 
-        <section class="business-info-grid">
+        <section class="business-card">
 
+            <div class="section-heading">
 
-            <div class="info-card">
+                <div>
 
-                <span>
-                    Business
-                </span>
+                    <p class="eyebrow">
+                        BUSINESS INFORMATION
+                    </p>
 
-                <strong id="businessName">
-                    Not provided
-                </strong>
+                    <h2>
+                        Your Business
+                    </h2>
 
-            </div>
-
-
-            <div class="info-card">
-
-                <span>
-                    Business Type
-                </span>
-
-                <strong id="businessType">
-                    Not provided
-                </strong>
+                </div>
 
             </div>
 
 
-            <div class="info-card">
+            <div class="business-grid">
 
-                <span>
-                    City
-                </span>
+                <div>
 
-                <strong id="businessCity">
-                    Not provided
-                </strong>
+                    <span>
+                        Business
+                    </span>
 
-            </div>
+                    <strong id="businessName">
+                        Not provided
+                    </strong>
+
+                </div>
 
 
-            <div class="info-card">
+                <div>
 
-                <span>
-                    Phone
-                </span>
+                    <span>
+                        Business Type
+                    </span>
 
-                <strong id="businessPhone">
-                    Not provided
-                </strong>
+                    <strong id="businessType">
+                        Not provided
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        City
+                    </span>
+
+                    <strong id="businessCity">
+                        Not provided
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Phone
+                    </span>
+
+                    <strong id="businessPhone">
+                        Not provided
+                    </strong>
+
+                </div>
 
             </div>
 
         </section>
-
 
 
         <!-- =================================================
@@ -248,14 +251,13 @@
         </div>
 
 
-
         <!-- =================================================
              POST OPPORTUNITY
         ================================================== -->
 
         <section
             id="post"
-            class="dashboard-section">
+            class="post-section">
 
 
             <div class="section-heading">
@@ -280,10 +282,9 @@
             </div>
 
 
-
             <form
                 id="opportunityForm"
-                class="opportunity-form">
+                class="form-grid">
 
 
                 <!-- TITLE -->
@@ -303,7 +304,6 @@
                 </div>
 
 
-
                 <!-- DESCRIPTION -->
 
                 <div class="form-group">
@@ -321,7 +321,6 @@
                 </div>
 
 
-
                 <!-- LOCATION -->
 
                 <div class="form-group">
@@ -336,7 +335,6 @@
                         placeholder="Example: Amravati">
 
                 </div>
-
 
 
                 <!-- JOB TYPE -->
@@ -376,14 +374,13 @@
                 </div>
 
 
-
                 <!-- =================================================
                      PART-TIME TIME SLOT
                 ================================================== -->
 
                 <div
                     id="partTimeScheduleGroup"
-                    class="form-group"
+                    class="form-group full"
                     style="
                         display:none;
                         padding:18px;
@@ -392,7 +389,6 @@
                         border-radius:14px;
                         background:#faf9ff;
                     ">
-
 
                     <label
                         style="
@@ -421,7 +417,6 @@
                     </small>
 
 
-
                     <!-- TIME PERIOD -->
 
                     <div class="form-group">
@@ -430,8 +425,7 @@
                             Time Period
                         </label>
 
-                        <select
-                            id="partTimePeriod">
+                        <select id="partTimePeriod">
 
                             <option value="">
                                 Select time period
@@ -458,7 +452,6 @@
                     </div>
 
 
-
                     <!-- START + END -->
 
                     <div
@@ -467,7 +460,6 @@
                             grid-template-columns:1fr 1fr;
                             gap:15px;
                         ">
-
 
                         <div class="form-group">
 
@@ -497,7 +489,6 @@
                     </div>
 
 
-
                     <!-- PREVIEW -->
 
                     <div
@@ -518,7 +509,6 @@
                 </div>
 
 
-
                 <!-- REQUIRED SKILLS -->
 
                 <div class="form-group">
@@ -533,7 +523,6 @@
                         placeholder="Example: Communication, MS Office">
 
                 </div>
-
 
 
                 <!-- SALARY -->
@@ -553,7 +542,6 @@
                 </div>
 
 
-
                 <!-- AVAILABILITY -->
 
                 <div class="form-group">
@@ -570,7 +558,6 @@
                 </div>
 
 
-
                 <!-- DEADLINE -->
 
                 <div class="form-group">
@@ -584,7 +571,6 @@
                         id="deadline">
 
                 </div>
-
 
 
                 <!-- BUTTON -->
@@ -604,14 +590,13 @@
         </section>
 
 
-
         <!-- =================================================
              MY OPPORTUNITIES
         ================================================== -->
 
         <section
             id="opportunities"
-            class="dashboard-section">
+            class="jobs-section">
 
 
             <div class="section-heading">
@@ -641,9 +626,7 @@
             </div>
 
 
-            <div
-                id="jobsContainer"
-                class="jobs-container">
+            <div id="jobsContainer">
 
                 <p class="loading">
                     Loading opportunities...
@@ -654,14 +637,13 @@
         </section>
 
 
-
         <!-- =================================================
              APPLICANTS
         ================================================== -->
 
         <section
             id="applicants"
-            class="dashboard-section applicants-section">
+            class="jobs-section">
 
 
             <div class="section-heading">
@@ -696,8 +678,7 @@
             </div>
 
 
-            <div
-                id="applicationsContainer">
+            <div id="applicationsContainer">
 
                 <p class="loading">
                     Loading applications...
@@ -711,7 +692,6 @@
     </main>
 
 </div>
-
 
 
 <!-- =====================================================
@@ -773,7 +753,6 @@
 </div>
 
 
-
 <!-- =====================================================
      SUPABASE
 ===================================================== -->
@@ -782,9 +761,7 @@
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 </script>
 
-
 <script src="supabase-config.js?v=2"></script>
-
 
 <script src="business-dashboard.js?v=3"></script>
 

@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Student Profile - POTential</title>
+
+    <link
+        rel="stylesheet"
+        href="student-dashboard.css"
+    >
+
+    <style>
+
+        /* =========================================
+           PROFILE PAGE
+        ========================================= */
+
+        .profile-page {
+            padding: 30px;
+        }
+
+
+        .profile-header {
+            margin-bottom: 25px;
+        }
+
+
+        .profile-header h1 {
+            margin: 0 0 8px;
+        }
+
+
+        .profile-header p {
+            color: #666;
+            margin: 0;
+        }
+
+
+        /* =========================================
+           PROFILE CARD
+        ========================================= */
+
+        .profile-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+            margin-bottom: 25px;
+        }
+
+
+        .profile-card h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+
+        .large-profile-icon {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+
+            background: #eeeeff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-size: 28px;
+            font-weight: 700;
+
+            color: #4f46e5;
+        }
+
+
+        .profile-top h2 {
+            margin: 0 0 5px;
+        }
+
+
+        .profile-top p {
+            margin: 0;
+            color: #777;
+        }
+
+
+        /* =========================================
+           INFORMATION GRID
+        ========================================= */
+
+        .profile-info-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+
+        .info-box {
+            background: #f5f7fb;
+
+            border-radius: 12px;
+
+            padding: 20px;
+        }
+
+
+        .info-box label {
+            display: block;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+
+            color: #27324a;
+        }
+
+
+        .info-value {
+            color: #64748b;
+
+            font-size: 16px;
+
+            word-break: break-word;
+        }
+
+
+        /* =========================================
+           EDIT PROFILE
+        ========================================= */
+
+        .edit-section {
+            margin-top: 30px;
+
+            padding-top: 25px;
+
+            border-top: 1px solid #eeeeee;
+        }
+
+
+        .edit-section h3 {
+            margin-top: 0;
+        }
+
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 18px;
+        }
+
+
+        .form-group {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 7px;
+        }
+
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+
+        .form-group label {
+            font-weight: 600;
+        }
+
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+
+            width: 100%;
+
+            box-sizing: border-box;
+
+            padding: 12px 14px;
+
+            border: 1px solid #d5d9e2;
+
+            border-radius: 9px;
+
+            font-size: 14px;
+
+            outline: none;
+
+            background: #ffffff;
+        }
+
+
+        .form-group textarea {
+            min-height: 100px;
+
+            resize: vertical;
+        }
+
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+
+            border-color: #4f46e5;
+
+            box-shadow:
+                0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+
+        .edit-buttons {
+            display: flex;
+
+            gap: 12px;
+
+            margin-top: 20px;
+        }
+
+
+        .btn-primary {
+            border: none;
+
+            padding: 12px 20px;
+
+            border-radius: 9px;
+
+            background: #4f46e5;
+
+            color: white;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+
+        .btn-secondary {
+            border: 1px solid #ddd;
+
+            padding: 12px 20px;
+
+            border-radius: 9px;
+
+            background: white;
+
+            color: #333;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================================
+           VERIFICATION
+        ========================================= */
+
+        .verification-card {
+            background: #ffffff;
+
+            border-radius: 16px;
+
+            padding: 30px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.06);
+        }
+
+
+        .verification-card h2 {
+            margin-top: 0;
+        }
+
+
+        .verification-subtitle {
+            color: #666;
+
+            line-height: 1.5;
+
+            margin-bottom: 25px;
+        }
+
+
+        .verification-select {
+            width: 100%;
+
+            padding: 13px 14px;
+
+            border: 1px solid #d5d9e2;
+
+            border-radius: 9px;
+
+            background: white;
+
+            font-size: 14px;
+
+            margin-top: 8px;
+        }
+
+
+        .file-input {
+            margin-top: 18px;
+
+            padding: 12px;
+
+            border: 1px dashed #bfc5d2;
+
+            border-radius: 10px;
+
+            width: 100%;
+
+            box-sizing: border-box;
+        }
+
+
+        .upload-button {
+            margin-top: 18px;
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #111827;
+
+            color: white;
+
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+
+        .upload-button:disabled {
+            opacity: 0.6;
+
+            cursor: not-allowed;
+        }
+
+
+        .verification-status-box {
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            display: none;
+
+            line-height: 1.5;
+        }
+
+
+        .verification-status-box.pending {
+
+            display: block;
+
+            background: #fff7df;
+
+            color: #8a6500;
+        }
+
+
+        .verification-status-box.approved {
+
+            display: block;
+
+            background: #e8f8ee;
+
+            color: #16833b;
+        }
+
+
+        .verification-status-box.rejected {
+
+            display: block;
+
+            background: #ffecec;
+
+            color: #b42318;
+        }
+
+
+        .verification-status-box.none {
+
+            display: block;
+
+            background: #f4f5f7;
+
+            color: #555;
+        }
+
+
+        .security-note {
+
+            margin-top: 18px;
+
+            font-size: 13px;
+
+            color: #777;
+
+            text-align: center;
+        }
+
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 800px) {
+
+            .profile-info-grid,
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: auto;
+            }
+
+            .profile-page {
+                padding: 20px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         SIDEBAR
+    ========================================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            POTential
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <a
+                href="student-dashboard.html"
+                class="nav-link"
+            >
+                🏠 Home
+            </a>
+
+
+            <a
+                href="browse-jobs.html"
+                class="nav-link"
+            >
+                🔍 Find Opportunities
+            </a>
+
+
+            <a
+                href="my-applications.html"
+                class="nav-link"
+            >
+                📄 My Applications
+            </a>
+
+
+            <a
+                href="student-profile.html"
+                class="nav-link active"
+            >
+                👤 Profile
+            </a>
+
+
+            <a
+                href="#"
+                class="nav-link"
+            >
+                ⚙️ Settings
+            </a>
+
+        </nav>
+
+
+        <a
+            href="#"
+            class="nav-link logout"
+            id="logoutButton"
+        >
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+
+    <!-- =========================================
+         MAIN
+    ========================================= -->
+
+    <main class="main-content">
+
+        <div class="profile-page">
+
+
+            <!-- HEADER -->
+
+            <div class="profile-header">
+
+                <h1>
+                    My Profile
+                </h1>
+
+                <p>
+                    Manage your personal information and
+                    student verification.
+                </p>
+
+            </div>
+
+
+
+            <!-- =====================================
+                 PERSONAL INFORMATION
+            ===================================== -->
+
+            <section class="profile-card">
+
+                <div class="profile-top">
+
+                    <div
+                        class="large-profile-icon"
+                        id="profileIcon"
+                    >
+                        👤
+                    </div>
+
+
+                    <div>
+
+                        <h2 id="profileDisplayName">
+                            Student
+                        </h2>
+
+                        <p>
+                            Student Profile
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <h2>
+                    Personal Information
+                </h2>
+
+
+                <div class="profile-info-grid">
+
+
+                    <!-- FULL NAME -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Full Name
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="fullNameValue"
+                        >
+                            Loading...
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- EMAIL -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Email
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="emailValue"
+                        >
+                            Loading...
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ROLE -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Role
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="roleValue"
+                        >
+                            Student
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CITY -->
+
+                    <div class="info-box">
+
+                        <label>
+                            City
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="cityValue"
+                        >
+                            Not specified
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- AVAILABILITY -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Availability
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="availabilityValue"
+                        >
+                            Not specified
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- AGE -->
+
+                    <div class="info-box">
+
+                        <label>
+                            Age
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="ageValue"
+                        >
+                            Not specified
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- SKILLS -->
+
+                    <div
+                        class="info-box"
+                        style="grid-column: 1 / -1;"
+                    >
+
+                        <label>
+                            Skills
+                        </label>
+
+                        <div
+                            class="info-value"
+                            id="skillsValue"
+                        >
+                            No skills added yet.
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- =================================
+                     EDIT PROFILE
+                ================================== -->
+
+                <div class="edit-section">
+
+                    <h3>
+                        Edit Profile
+                    </h3>
+
+
+                    <div class="form-grid">
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editFullName"
+                                placeholder="Enter your full name"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label>
+                                City
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editCity"
+                                placeholder="Enter your city"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Availability
+                            </label>
+
+                            <input
+                                type="text"
+                                id="editAvailability"
+                                placeholder="Example: Part-time"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Age
+                            </label>
+
+                            <input
+                                type="number"
+                                id="editAge"
+                                min="1"
+                                max="100"
+                                placeholder="Enter your age"
+                            >
+
+                        </div>
+
+
+
+                        <div class="form-group full-width">
+
+                            <label>
+                                Skills
+                            </label>
+
+                            <textarea
+                                id="editSkills"
+                                placeholder="Example: Python, Java, Data Analysis"
+                            ></textarea>
+
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="edit-buttons">
+
+                        <button
+                            type="button"
+                            class="btn-primary"
+                            id="saveProfileButton"
+                        >
+                            Save Changes
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            id="cancelEditButton"
+                        >
+                            Cancel
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =====================================
+                 VERIFICATION
+            ===================================== -->
+
+            <section class="verification-card">
+
+                <h2>
+                    🎓 Student Verification
+                </h2>
+
+
+                <p class="verification-subtitle">
+
+                    Verify your student identity by submitting
+                    one of the supported documents. Verification
+                    will be completed only after Admin approval.
+
+                </p>
+
+
+
+                <!-- DOCUMENT TYPE -->
+
+                <label>
+
+                    <strong>
+                        Document Type
+                    </strong>
+
+                </label>
+
+
+                <select
+                    id="studentVerificationType"
+                    class="verification-select"
+                >
+
+                    <option value="">
+                        Select Document Type
+                    </option>
+
+                    <option value="college_id">
+                        🎓 College ID
+                    </option>
+
+                    <option value="resume">
+                        📄 Resume
+                    </option>
+
+                    <option value="skill_certificate">
+                        🏆 Skill Certificate
+                    </option>
+
+                </select>
+
+
+
+                <!-- FILE -->
+
+                <input
+                    type="file"
+                    id="verificationFile"
+                    class="file-input"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                >
+
+
+
+                <!-- UPLOAD -->
+
+                <button
+                    type="button"
+                    id="uploadVerificationButton"
+                    class="upload-button"
+                >
+
+                    Upload Document
+
+                </button>
+
+
+
+                <!-- STATUS -->
+
+                <div
+                    id="verificationStatus"
+                    class="verification-status-box"
+                >
+                </div>
+
+
+
+                <div class="security-note">
+
+                    🔒 Your documents are securely used only
+                    for student verification.
+
+                </div>
+
+            </section>
+
+
+        </div>
+
+    </main>
+
+
+
+    <!-- =========================================
+         SUPABASE
+    ========================================= -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../supabase-config.js"></script>
+
+    <script src="../supabase-client.js"></script>
+
+
+
+    <script>
+
+        let currentUser = null;
+        let currentProfile = null;
+
+
+
+        /* =========================================
+           GET CURRENT USER
+        ========================================= */
+
+        async function getCurrentUser() {
+
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.getUser();
+
+
+            if (error) {
+
+                console.error(
+                    "Error getting user:",
+                    error
+                );
+
+                return null;
+            }
+
+
+            return data.user || null;
+        }
+
+
+
+        /* =========================================
+           LOAD PROFILE
+        ========================================= */
+
+        async function loadProfile() {
+
+            currentUser =
+                await getCurrentUser();
+
+
+            if (!currentUser) {
+
+                window.location.href =
+                    "../auth.html";
+
+                return;
+            }
+
+
+            const {
+                data: profile,
+                error
+            } =
+                await supabaseClient
+                    .from("profiles")
+                    .select(
+                        "full_name, Email, Role, city, skills, availability, age"
+                    )
+                    .eq(
+                        "user_id",
+                        currentUser.id
+                    )
+                    .maybeSingle();
+
+
+            if (error) {
+
+                console.error(
+                    "Profile loading error:",
+                    error
+                );
+
+                alert(
+                    "Unable to load your profile."
+                );
+
+                return;
+            }
+
+
+            currentProfile =
+                profile || {};
+
+
+
+            /* ===============================
+               DISPLAY PROFILE
+            =============================== */
+
+            const fullName =
+                currentProfile.full_name ||
+                "Student";
+
+
+            document.getElementById(
+                "profileDisplayName"
+            ).textContent =
+                fullName;
+
+
+            document.getElementById(
+                "profileIcon"
+            ).textContent =
+                fullName
+                    .charAt(0)
+                    .toUpperCase();
+
+
+            document.getElementById(
+                "fullNameValue"
+            ).textContent =
+                fullName;
+
+
+            document.getElementById(
+                "emailValue"
+            ).textContent =
+                currentProfile.Email ||
+                currentUser.email ||
+                "Not specified";
+
+
+            document.getElementById(
+                "roleValue"
+            ).textContent =
+                currentProfile.Role ||
+                "student";
+
+
+            document.getElementById(
+                "cityValue"
+            ).textContent =
+                currentProfile.city ||
+                "Not specified";
+
+
+            document.getElementById(
+                "availabilityValue"
+            ).textContent =
+                currentProfile.availability ||
+                "Not specified";
+
+
+            document.getElementById(
+                "ageValue"
+            ).textContent =
+                currentProfile.age ||
+                "Not specified";
+
+
+            document.getElementById(
+                "skillsValue"
+            ).textContent =
+                currentProfile.skills ||
+                "No skills added yet.";
+
+
+
+            /* ===============================
+               EDIT FORM
+            =============================== */
+
+            document.getElementById(
+                "editFullName"
+            ).value =
+                currentProfile.full_name || "";
+
+
+            document.getElementById(
+                "editCity"
+            ).value =
+                currentProfile.city || "";
+
+
+            document.getElementById(
+                "editAvailability"
+            ).value =
+                currentProfile.availability || "";
+
+
+            document.getElementById(
+                "editAge"
+            ).value =
+                currentProfile.age || "";
+
+
+            document.getElementById(
+                "editSkills"
+            ).value =
+                currentProfile.skills || "";
+
+
+
+            /* ===============================
+               LOAD VERIFICATION
+            =============================== */
+
+            await loadStudentVerification(
+                currentUser.id
+            );
+
+
+            /* ===============================
+               DASHBOARD DOCUMENT SELECTION
+            =============================== */
+
+            applyDashboardVerificationSelection();
+
+        }
+
+
+
+        /* =========================================
+           SAVE PROFILE
+        ========================================= */
+
+        async function saveProfile() {
+
+            if (!currentUser) {
+
+                return;
+            }
+
+
+            const fullName =
+                document.getElementById(
+                    "editFullName"
+                ).value.trim();
+
+
+            const city =
+                document.getElementById(
+                    "editCity"
+                ).value.trim();
+
+
+            const availability =
+                document.getElementById(
+                    "editAvailability"
+                ).value.trim();
+
+
+            const age =
+                document.getElementById(
+                    "editAge"
+                ).value;
+
+
+            const skills =
+                document.getElementById(
+                    "editSkills"
+                ).value.trim();
+
+
+            if (!fullName) {
+
+                alert(
+                    "Please enter your full name."
+                );
+
+                return;
+            }
+
+
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from("profiles")
+                    .update({
+
+                        full_name:
+                            fullName,
+
+                        city:
+                            city || null,
+
+                        availability:
+                            availability || null,
+
+                        age:
+                            age
+                                ? Number(age)
+                                : null,
+
+                        skills:
+                            skills || null
+
+                    })
+                    .eq(
+                        "user_id",
+                        currentUser.id
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    "Profile update error:",
+                    error
+                );
+
+                alert(
+                    "Unable to update profile."
+                );
+
+                return;
+            }
+
+
+            alert(
+                "Profile updated successfully!"
+            );
+
+
+            await loadProfile();
+
+        }
+
+
+
+        /* =========================================
+           CANCEL EDIT
+        ========================================= */
+
+        function cancelEdit() {
+
+            if (!currentProfile) {
+
+                return;
+            }
+
+
+            document.getElementById(
+                "editFullName"
+            ).value =
+                currentProfile.full_name || "";
+
+
+            document.getElementById(
+                "editCity"
+            ).value =
+                currentProfile.city || "";
+
+
+            document.getElementById(
+                "editAvailability"
+            ).value =
+                currentProfile.availability || "";
+
+
+            document.getElementById(
+                "editAge"
+            ).value =
+                currentProfile.age || "";
+
+
+            document.getElementById(
+                "editSkills"
+            ).value =
+                currentProfile.skills || "";
+
+        }
+
+
+
+        /* =========================================
+           LOAD VERIFICATION STATUS
+        ========================================= */
+
+        async function loadStudentVerification(
+            userId
+        ) {
+
+            const statusBox =
+                document.getElementById(
+                    "verificationStatus"
+                );
+
+
+            const {
+                data: documents,
+                error
+            } =
+                await supabaseClient
+                    .from(
+                        "verification_documents"
+                    )
+                    .select(
+                        "id, document_type, status, rejection_reason, uploaded_at"
+                    )
+                    .eq(
+                        "user_id",
+                        userId
+                    )
+                    .eq(
+                        "role",
+                        "student"
+                    )
+                    .order(
+                        "uploaded_at",
+                        {
+                            ascending: false
+                        }
+                    )
+                    .limit(1);
+
+
+            if (error) {
+
+                console.error(
+                    "Verification loading error:",
+                    error
+                );
+
+                statusBox.className =
+                    "verification-status-box none";
+
+                statusBox.textContent =
+                    "Unable to load verification status.";
+
+                return;
+            }
+
+
+            const verificationDocument =
+                documents &&
+                documents.length > 0
+                    ? documents[0]
+                    : null;
+
+
+
+            /* ===============================
+               NO DOCUMENT
+            =============================== */
+
+            if (!verificationDocument) {
+
+                statusBox.className =
+                    "verification-status-box none";
+
+                statusBox.textContent =
+                    "No verification document submitted yet.";
+
+                return;
+            }
+
+
+
+            const status =
+                (
+                    verificationDocument.status ||
+                    ""
+                ).toLowerCase();
+
+
+
+            /* ===============================
+               PENDING
+            =============================== */
+
+            if (status === "pending") {
+
+                statusBox.className =
+                    "verification-status-box pending";
+
+                statusBox.textContent =
+                    "⏳ Verification Pending — Your document has been submitted and is waiting for Admin approval.";
+
+                return;
+            }
+
+
+
+            /* ===============================
+               APPROVED
+            =============================== */
+
+            if (status === "approved") {
+
+                statusBox.className =
+                    "verification-status-box approved";
+
+                statusBox.textContent =
+                    "✓ Verified Student — Your document has been approved by Admin.";
+
+                return;
+            }
+
+
+
+            /* ===============================
+               REJECTED
+            =============================== */
+
+            if (status === "rejected") {
+
+                statusBox.className =
+                    "verification-status-box rejected";
+
+                let message =
+                    "❌ Verification Rejected";
+
+
+                if (
+                    verificationDocument.rejection_reason
+                ) {
+
+                    message +=
+                        " — " +
+                        verificationDocument.rejection_reason;
+                }
+
+
+                statusBox.textContent =
+                    message;
+
+                return;
+            }
+
+
+
+            /* ===============================
+               OTHER STATUS
+            =============================== */
+
+            statusBox.className =
+                "verification-status-box none";
+
+            statusBox.textContent =
+                "Verification status: " +
+                (
+                    verificationDocument.status ||
+                    "Unknown"
+                );
+
+        }
+
+
+
+        /* =========================================
+           APPLY DASHBOARD DOCUMENT TYPE
+        ========================================= */
+
+        function applyDashboardVerificationSelection() {
+
+            const savedType =
+                localStorage.getItem(
+                    "verificationDocumentType"
+                );
+
+
+            if (!savedType) {
+
+                return;
+            }
+
+
+            const dropdown =
+                document.getElementById(
+                    "studentVerificationType"
+                );
+
+
+            if (
+                dropdown.querySelector(
+                    `option[value="${savedType}"]`
+                )
+            ) {
+
+                dropdown.value =
+                    savedType;
+            }
+
+
+            /*
+             * Remove it after using it.
+             * This prevents an old selection from
+             * appearing every time Profile opens.
+             */
+
+            localStorage.removeItem(
+                "verificationDocumentType"
+            );
+
+        }
+
+
+
+        /* =========================================
+           UPLOAD VERIFICATION DOCUMENT
+        ========================================= */
+
+        async function uploadStudentVerification() {
+
+            if (!currentUser) {
+
+                alert(
+                    "Please login again."
+                );
+
+                return;
+            }
+
+
+            const documentType =
+                document.getElementById(
+                    "studentVerificationType"
+                ).value;
+
+
+            const file =
+                document.getElementById(
+                    "verificationFile"
+                ).files[0];
+
+
+            if (!documentType) {
+
+                alert(
+                    "Please select a document type."
+                );
+
+                return;
+            }
+
+
+            if (!file) {
+
+                alert(
+                    "Please select a document."
+                );
+
+                return;
+            }
+
+
+
+            /* ===============================
+               VALID DOCUMENT TYPES
+            =============================== */
+
+            const validTypes = [
+                "college_id",
+                "resume",
+                "skill_certificate"
+            ];
+
+
+            if (
+                !validTypes.includes(
+                    documentType
+                )
+            ) {
+
+                alert(
+                    "Invalid document type."
+                );
+
+                return;
+            }
+
+
+
+            /* ===============================
+               VALID FILE TYPES
+            =============================== */
+
+            const allowedTypes = [
+                "application/pdf",
+                "image/jpeg",
+                "image/png"
+            ];
+
+
+            if (
+                !allowedTypes.includes(
+                    file.type
+                )
+            ) {
+
+                alert(
+                    "Only PDF, JPG and PNG files are allowed."
+                );
+
+                return;
+            }
+
+
+
+            /* ===============================
+               FILE SIZE
+            =============================== */
+
+            const maxSize =
+                5 * 1024 * 1024;
+
+
+            if (
+                file.size > maxSize
+            ) {
+
+                alert(
+                    "File size must be 5 MB or less."
+                );
+
+                return;
+            }
+
+
+
+            const uploadButton =
+                document.getElementById(
+                    "uploadVerificationButton"
+                );
+
+
+            uploadButton.disabled =
+                true;
+
+
+            uploadButton.textContent =
+                "Uploading...";
+
+
+
+            try {
+
+                /* =========================
+                   FILE EXTENSION
+                ========================= */
+
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+
+                const safeType =
+                    documentType;
+
+
+                const filePath =
+                    `student/${currentUser.id}/${crypto.randomUUID()}-${safeType}.${extension}`;
+
+
+
+                /* =========================
+                   STORAGE UPLOAD
+                ========================= */
+
+                const {
+                    error:
+                        storageError
+                } =
+                    await supabaseClient
+                        .storage
+                        .from(
+                            "verification-documents"
+                        )
+                        .upload(
+                            filePath,
+                            file,
+                            {
+                                upsert: false
+                            }
+                        );
+
+
+                if (storageError) {
+
+                    throw storageError;
+                }
+
+
+
+                /* =========================
+                   DATABASE RECORD
+                ========================= */
+
+                const {
+                    error:
+                        databaseError
+                } =
+                    await supabaseClient
+                        .from(
+                            "verification_documents"
+                        )
+                        .insert({
+
+                            user_id:
+                                currentUser.id,
+
+                            role:
+                                "student",
+
+                            document_type:
+                                documentType,
+
+                            file_path:
+                                filePath,
+
+                            status:
+                                "pending"
+
+                        });
+
+
+                if (databaseError) {
+
+                    /*
+                     * Remove uploaded file if
+                     * database insert fails.
+                     */
+
+                    await supabaseClient
+                        .storage
+                        .from(
+                            "verification-documents"
+                        )
+                        .remove([
+                            filePath
+                        ]);
+
+
+                    throw databaseError;
+                }
+
+
+
+                /* =========================
+                   SUCCESS
+                ========================= */
+
+                alert(
+                    "Document uploaded successfully! It is now pending Admin approval."
+                );
+
+
+                document.getElementById(
+                    "verificationFile"
+                ).value = "";
+
+
+                await loadStudentVerification(
+                    currentUser.id
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Verification upload error:",
+                    error
+                );
+
+
+                alert(
+                    "Unable to upload document. Please try again."
+                );
+
+            } finally {
+
+                uploadButton.disabled =
+                    false;
+
+                uploadButton.textContent =
+                    "Upload Document";
+
+            }
+
+        }
+
+
+
+        /* =========================================
+           LOGOUT
+        ========================================= */
+
+        document
+            .getElementById(
+                "logoutButton"
+            )
+            .addEventListener(
+                "click",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signOut();
+
+
+                    if (error) {
+
+                        console.error(
+                            "Logout error:",
+                            error
+                        );
+
+                        alert(
+                            "Unable to logout."
+                        );
+
+                        return;
+                    }
+
+
+                    window.location.href =
+                        "../auth.html";
+
+                }
+            );
+
+
+
+        /* =========================================
+           BUTTON EVENTS
+        ========================================= */
+
+        document
+            .getElementById(
+                "saveProfileButton"
+            )
+            .addEventListener(
+                "click",
+                saveProfile
+            );
+
+
+        document
+            .getElementById(
+                "cancelEditButton"
+            )
+            .addEventListener(
+                "click",
+                cancelEdit
+            );
+
+
+        document
+            .getElementById(
+                "uploadVerificationButton"
+            )
+            .addEventListener(
+                "click",
+                uploadStudentVerification
+            );
+
+
+
+        /* =========================================
+           PAGE LOAD
+        ========================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async function () {
+
+                await loadProfile();
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Applications - POTEntial</title>
+
+    <link rel="stylesheet" href="student-dashboard.css">
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            POTEntial
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-link">
+                🏠 Dashboard
+            </a>
+
+            <a href="browse-jobs.html" class="nav-link">
+                🔍 Find Opportunities
+            </a>
+
+            <a href="my-applications.html" class="nav-link active">
+                📄 My Applications
+            </a>
+
+            <a href="#" class="nav-link">
+                👤 Profile
+            </a>
+
+            <a href="#" class="nav-link">
+                ⚙️ Settings
+            </a>
+
+        </nav>
+
+        <a href="#" class="nav-link logout">
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+            <h2>My Applications</h2>
+
+            <div class="profile">
+                <div class="profile-icon">S</div>
+                <span>Student</span>
+            </div>
+        </header>
+
+
+        <!-- Page Content -->
+        <section class="welcome">
+            <h1>My Applications</h1>
+            <p>Track the opportunities you have applied for.</p>
+        </section>
+
+
+        <!-- Applications -->
+        <section class="opportunities">
+
+            <div class="section-header">
+                <h2>Your Applications</h2>
+            </div>
+
+
+            <div class="opportunity-grid">
+
+                <!-- Application 1 -->
+                <div class="opportunity-card">
+
+                    <h3>Web Developer Intern</h3>
+
+                    <p>🏢 ABC Technologies</p>
+                    <p>📍 Amravati</p>
+                    <p>💰 ₹8,000</p>
+
+                    <span class="tag">Pending</span>
+
+                </div>
+
+
+                <!-- Application 2 -->
+                <div class="opportunity-card">
+
+                    <h3>Graphic Designer</h3>
+
+                    <p>🏢 Creative Studio</p>
+                    <p>📍 Nagpur</p>
+                    <p>💰 ₹6,000</p>
+
+                    <span class="tag">Accepted</span>
+
+                </div>
+
+
+                <!-- Application 3 -->
+                <div class="opportunity-card">
+
+                    <h3>Python Developer</h3>
+
+                    <p>🏢 Tech Solutions</p>
+                    <p>🌐 Remote</p>
+                    <p>💰 ₹10,000</p>
+
+                    <span class="tag">Rejected</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+
+</body>
+</html>

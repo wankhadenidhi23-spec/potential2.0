@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard - POTential</title>
+
+    <link rel="stylesheet" href="student-dashboard.css">
+
+    <style>
+        .verification-badge {
+            display: none;
+            margin-left: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #e8f8ee;
+            color: #16833b;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #b7e5c5;
+            white-space: nowrap;
+        }
+
+        .verification-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .verification-modal-content {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 18px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .verification-close {
+            position: absolute;
+            right: 18px;
+            top: 15px;
+            border: none;
+            background: transparent;
+            font-size: 25px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .verification-icon {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: #eef5ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .verification-modal-content h2 {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .verification-description {
+            text-align: center;
+            color: #666;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+
+        .verification-document-box {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 18px;
+            background: #fafafa;
+        }
+
+        .verification-document-box h3 {
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+
+        .verification-document-box p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .verification-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        .verification-status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .verification-status.pending {
+            display: block;
+            background: #fff7df;
+            color: #8a6500;
+        }
+
+        .verification-status.approved {
+            display: block;
+            background: #e8f8ee;
+            color: #16833b;
+        }
+
+        .verification-status.rejected {
+            display: block;
+            background: #ffecec;
+            color: #b42318;
+        }
+
+        .verification-action-button {
+            width: 100%;
+            margin-top: 18px;
+            padding: 13px;
+            border: none;
+            border-radius: 9px;
+            background: #111827;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .verification-action-button:hover {
+            opacity: 0.9;
+        }
+
+        .verification-security {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            POTential
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <a href="student-dashboard.html" class="nav-link active">
+                🏠 Home
+            </a>
+
+            <a href="browse-jobs.html" class="nav-link">
+                🔍 Find Opportunities
+            </a>
+
+            <a href="my-applications.html" class="nav-link">
+                📄 My Applications
+            </a>
+
+            <a href="student-profile.html" class="nav-link">
+                👤 Profile
+            </a>
+
+            <a href="#" class="nav-link">
+                ⚙️ Settings
+            </a>
+
+        </nav>
+
+        <a href="#" class="nav-link logout" id="logoutButton">
+            🚪 Logout
+        </a>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    Student Dashboard
+                </h1>
+
+                <p>
+                    Welcome back! Find your next opportunity.
+                </p>
+
+            </div>
+
+            <div class="profile">
+
+                <div
+                    class="profile-icon"
+                    id="profileIcon"
+                >
+                    👤
+                </div>
+
+                <span id="profileName">
+                    Student
+                </span>
+
+                <span
+                    id="verificationBadge"
+                    class="verification-badge"
+                >
+                    ✓ Verified Student
+                </span>
+
+            </div>
+
+        </header>
+
+
+        <!-- WELCOME -->
+
+        <section class="welcome">
+
+            <h2>
+                HELLO,
+                <span id="welcomeName">
+                    Student
+                </span>
+                ✨
+            </h2>
+
+            <p>
+                Explore opportunities and take the next step
+                towards your career.
+            </p>
+
+        </section>
+
+
+        <!-- STATISTICS -->
+
+        <section class="stats">
+
+            <div class="stat-card">
+
+                <h3>
+                    Applications
+                </h3>
+
+                <p id="applicationsCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Pending
+                </h3>
+
+                <p id="pendingCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Accepted
+                </h3>
+
+                <p id="acceptedCount">
+                    0
+                </p>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <h3>
+                    Rejected
+                </h3>
+
+                <p id="rejectedCount">
+                    0
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- RECOMMENDED OPPORTUNITIES -->
+
+        <section class="opportunities">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Recommended Opportunities
+                    </h2>
+
+                    <p>
+                        Opportunities you may be interested in.
+                    </p>
+
+                </div>
+
+                <a href="browse-jobs.html">
+                    View All
+                </a>
+
+            </div>
+
+
+            <div
+                class="opportunity-grid"
+                id="opportunityContainer"
+            >
+
+                <p>
+                    Loading opportunities...
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- VERIFICATION MODAL -->
+
+    <div
+        id="verificationModal"
+        class="verification-modal"
+    >
+
+        <div class="verification-modal-content">
+
+            <button
+                id="verificationClose"
+                class="verification-close"
+                type="button"
+            >
+                ×
+            </button>
+
+
+            <div
+                id="verificationIcon"
+                class="verification-icon"
+            >
+                🎓
+            </div>
+
+
+            <h2 id="verificationTitle">
+                STUDENT VERIFICATION
+            </h2>
+
+
+            <p
+                id="verificationDescription"
+                class="verification-description"
+            >
+                Build Trust. Get Verified.
+            </p>
+
+
+            <div
+                id="verificationDocumentBox"
+                class="verification-document-box"
+            >
+
+                <h3>
+                    Verification Document
+                </h3>
+
+                <p>
+                    Select the document you want to submit
+                    for verification.
+                </p>
+
+
+                <select
+                    id="verificationDocumentType"
+                    class="verification-select"
+                >
+
+                    <option value="">
+                        Select Document Type
+                    </option>
+
+                    <option value="college_id">
+                        🎓 College ID
+                    </option>
+
+                    <option value="resume">
+                        📄 Resume
+                    </option>
+
+                    <option value="skill_certificate">
+                        🏆 Skill Certificate
+                    </option>
+
+                </select>
+
+
+                <div
+                    id="verificationStatus"
+                    class="verification-status"
+                >
+                </div>
+
+
+                <button
+                    id="verificationActionButton"
+                    class="verification-action-button"
+                    type="button"
+                >
+                    Upload Document
+                </button>
+
+            </div>
+
+
+            <p class="verification-security">
+                🔒 Your verification documents are used only
+                for verification purposes.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUPABASE -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="../supabase-config.js"></script>
+
+    <script src="../supabase-client.js"></script>
+
+
+    <script>
+
+        /* ================================
+           GET CURRENT USER
+        ================================= */
+
+        async function getCurrentUser() {
+
+            const {
+                data,
+                error
+            } = await supabaseClient.auth.getUser();
+
+            if (error) {
+
+                console.error(
+                    "Error getting user:",
+                    error
+                );
+
+                return null;
+            }
+
+            if (!data.user) {
+
+                return null;
+            }
+
+            return data.user;
+        }
+
+
+        /* ================================
+           LOAD STUDENT PROFILE
+        ================================= */
+
+        async function loadStudentProfile(user) {
+
+            const {
+                data: profile,
+                error
+            } = await supabaseClient
+                .from("profiles")
+                .select("full_name")
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+
+            if (error) {
+
+                console.error(
+                    "Error loading profile:",
+                    error
+                );
+
+                return;
+            }
+
+
+            if (profile && profile.full_name) {
+
+                document.getElementById(
+                    "profileName"
+                ).textContent =
+                    profile.full_name;
+
+
+                document.getElementById(
+                    "profileIcon"
+                ).textContent =
+                    profile.full_name
+                        .charAt(0)
+                        .toUpperCase();
+
+
+                document.getElementById(
+                    "welcomeName"
+                ).textContent =
+                    profile.full_name;
+            }
+        }
+
+
+        /* ================================
+           LOAD APPLICATION STATISTICS
+        ================================= */
+
+        async function loadApplicationStats(user) {
+
+            const {
+                data: applications,
+                error
+            } = await supabaseClient
+                .from("applications")
+                .select("status")
+                .eq("student_id", user.id);
+
+
+            if (error) {
+
+                console.error(
+                    "Error loading application statistics:",
+                    error
+                );
+
+                return;
+            }
+
+
+            const applicationList =
+                applications || [];
+
+
+            const total =
+                applicationList.length;
+
+
+            const pending =
+                applicationList.filter(
+                    app =>
+                        (app.status || "")
+                            .toLowerCase() === "pending"
+                ).length;
+
+
+            const accepted =
+                applicationList.filter(
+                    app =>
+                        (app.status || "")
+                            .toLowerCase() === "accepted"
+                ).length;
+
+
+            const rejected =
+                applicationList.filter(
+                    app =>
+                        (app.status || "")
+                            .toLowerCase() === "rejected"
+                ).length;
+
+
+            document.getElementById(
+                "applicationsCount"
+            ).textContent = total;
+
+
+            document.getElementById(
+                "pendingCount"
+            ).textContent = pending;
+
+
+            document.getElementById(
+                "acceptedCount"
+            ).textContent = accepted;
+
+
+            document.getElementById(
+                "rejectedCount"
+            ).textContent = rejected;
+        }
+
+
+        /* ================================
+           LOAD RECOMMENDED JOBS
+        ================================= */
+
+        async function loadRecommendedJobs() {
+
+            const container =
+                document.getElementById(
+                    "opportunityContainer"
+                );
+
+
+            const {
+                data: jobs,
+                error
+            } = await supabaseClient
+                .from("jobs")
+                .select("*")
+                .eq("status", "open")
+                .order(
+                    "created_at",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(3);
+
+
+            if (error) {
+
+                console.error(
+                    "Error loading opportunities:",
+                    error
+                );
+
+
+                container.innerHTML = `
+                    <p>
+                        Unable to load opportunities.
+                    </p>
+                `;
+
+                return;
+            }
+
+
+            if (!jobs || jobs.length === 0) {
+
+                container.innerHTML = `
+                    <p>
+                        No opportunities available right now.
+                    </p>
+                `;
+
+                return;
+            }
+
+
+            container.innerHTML = "";
+
+
+            jobs.forEach(function (job) {
+
+                const card =
+                    document.createElement("div");
+
+
+                card.className =
+                    "opportunity-card";
+
+
+                card.innerHTML = `
+
+                    <span class="tag">
+                        ${job.job_type || "Opportunity"}
+                    </span>
+
+                    <h3>
+                        ${job.title || "Opportunity"}
+                    </h3>
+
+                    <p>
+                        📍 ${job.location || "Not specified"}
+                    </p>
+
+                    <p>
+                        💰 ${job.salary || "Not specified"}
+                    </p>
+
+                    <p>
+                        📅 Deadline:
+                        ${job.deadline || "Not specified"}
+                    </p>
+
+                    <button class="view-details-button">
+                        View Details
+                    </button>
+                `;
+
+
+                const button =
+                    card.querySelector(
+                        ".view-details-button"
+                    );
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        localStorage.setItem(
+                            "selectedJobId",
+                            job.id
+                        );
+
+
+                        window.location.href =
+                            "opportunity-details.html";
+                    }
+                );
+
+
+                container.appendChild(card);
+
+            });
+        }
+
+
+        /* ================================
+           VERIFICATION ELEMENTS
+        ================================= */
+
+        const verificationModal =
+            document.getElementById(
+                "verificationModal"
+            );
+
+
+        const verificationClose =
+            document.getElementById(
+                "verificationClose"
+            );
+
+
+        const verificationBadge =
+            document.getElementById(
+                "verificationBadge"
+            );
+
+
+        const verificationTitle =
+            document.getElementById(
+                "verificationTitle"
+            );
+
+
+        const verificationDescription =
+            document.getElementById(
+                "verificationDescription"
+            );
+
+
+        const verificationIcon =
+            document.getElementById(
+                "verificationIcon"
+            );
+
+
+        const verificationStatus =
+            document.getElementById(
+                "verificationStatus"
+            );
+
+
+        const verificationDocumentType =
+            document.getElementById(
+                "verificationDocumentType"
+            );
+
+
+        const verificationActionButton =
+            document.getElementById(
+                "verificationActionButton"
+            );
+
+
+        /* ================================
+           CLOSE MODAL
+        ================================= */
+
+        verificationClose.addEventListener(
+            "click",
+            function () {
+
+                verificationModal.style.display =
+                    "none";
+            }
+        );
+
+
+        /* ================================
+           CHECK VERIFICATION
+        ================================= */
+
+        async function checkStudentVerification(user) {
+
+            const {
+                data: documents,
+                error
+            } = await supabaseClient
+                .from("verification_documents")
+                .select("*")
+                .eq("user_id", user.id)
+                .eq("role", "student")
+                .order(
+                    "uploaded_at",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(1);
+
+
+            if (error) {
+
+                console.error(
+                    "Verification check error:",
+                    error
+                );
+
+                return;
+            }
+
+
+            const verificationDocument =
+                documents &&
+                documents.length > 0
+                    ? documents[0]
+                    : null;
+
+
+            /* ================================
+               NO DOCUMENT
+            ================================= */
+
+            if (!verificationDocument) {
+
+                verificationBadge.style.display =
+                    "none";
+
+
+                verificationIcon.textContent =
+                    "🎓";
+
+
+                verificationTitle.textContent =
+                    "STUDENT VERIFICATION";
+
+
+                verificationDescription.textContent =
+                    "Build Trust. Get Verified.";
+
+
+                verificationStatus.style.display =
+                    "none";
+
+
+                verificationActionButton.style.display =
+                    "block";
+
+
+                verificationActionButton.textContent =
+                    "Upload Document";
+
+
+                /*
+                 * IMPORTANT:
+                 * Dashboard opens normally.
+                 * Modal is shown here.
+                 * It does NOT redirect to Profile.
+                 */
+
+                verificationModal.style.display =
+                    "flex";
+
+                return;
+            }
+
+
+            /* ================================
+               APPROVED
+            ================================= */
+
+            if (
+                (verificationDocument.status || "")
+                    .toLowerCase() === "approved"
+            ) {
+
+                verificationBadge.style.display =
+                    "inline-block";
+
+
+                verificationStatus.style.display =
+                    "block";
+
+
+                verificationStatus.className =
+                    "verification-status approved";
+
+
+                verificationStatus.textContent =
+                    "✓ Your verification has been approved.";
+
+
+                verificationTitle.textContent =
+                    "VERIFIED STUDENT";
+
+
+                verificationDescription.textContent =
+                    "Your submitted document has been verified.";
+
+
+                verificationActionButton.style.display =
+                    "none";
+
+
+                /*
+                 * DO NOT OPEN MODAL FOR APPROVED USER
+                 */
+
+                verificationModal.style.display =
+                    "none";
+
+                return;
+            }
+
+
+            /* ================================
+               PENDING
+            ================================= */
+
+            if (
+                (verificationDocument.status || "")
+                    .toLowerCase() === "pending"
+            ) {
+
+                verificationBadge.style.display =
+                    "none";
+
+
+                verificationIcon.textContent =
+                    "⏳";
+
+
+                verificationTitle.textContent =
+                    "VERIFICATION PENDING";
+
+
+                verificationDescription.textContent =
+                    "Your document is currently being reviewed by the Admin.";
+
+
+                verificationStatus.style.display =
+                    "block";
+
+
+                verificationStatus.className =
+                    "verification-status pending";
+
+
+                verificationStatus.textContent =
+                    "⏳ Verification is pending Admin approval.";
+
+
+                verificationActionButton.style.display =
+                    "block";
+
+
+                verificationActionButton.textContent =
+                    "View / Upload Another Document";
+
+
+                verificationModal.style.display =
+                    "flex";
+
+                return;
+            }
+
+
+            /* ================================
+               REJECTED
+            ================================= */
+
+            if (
+                (verificationDocument.status || "")
+                    .toLowerCase() === "rejected"
+            ) {
+
+                verificationBadge.style.display =
+                    "none";
+
+
+                verificationIcon.textContent =
+                    "❌";
+
+
+                verificationTitle.textContent =
+                    "VERIFICATION REJECTED";
+
+
+                verificationDescription.textContent =
+                    "Your submitted document was rejected. You can submit another document.";
+
+
+                verificationStatus.style.display =
+                    "block";
+
+
+                verificationStatus.className =
+                    "verification-status rejected";
+
+
+                verificationStatus.textContent =
+                    "❌ Rejected";
+
+
+                if (
+                    verificationDocument.rejection_reason
+                ) {
+
+                    verificationStatus.textContent +=
+                        " — " +
+                        verificationDocument.rejection_reason;
+                }
+
+
+                verificationActionButton.style.display =
+                    "block";
+
+
+                verificationActionButton.textContent =
+                    "Upload Again";
+
+
+                verificationModal.style.display =
+                    "flex";
+            }
+        }
+
+
+        /* ================================
+           UPLOAD DOCUMENT BUTTON
+        ================================= */
+
+        verificationActionButton.addEventListener(
+            "click",
+            function () {
+
+                const selectedType =
+                    verificationDocumentType.value;
+
+
+                if (!selectedType) {
+
+                    alert(
+                        "Please select a verification document type first."
+                    );
+
+                    return;
+                }
+
+
+                localStorage.setItem(
+                    "verificationDocumentType",
+                    selectedType
+                );
+
+
+                /*
+                 * ONLY NOW we go to profile page.
+                 *
+                 * Dashboard itself will NEVER
+                 * automatically redirect.
+                 */
+
+                window.location.href =
+                    "student-profile.html";
+            }
+        );
+
+
+        /* ================================
+           LOGOUT
+        ================================= */
+
+        document
+            .getElementById("logoutButton")
+            .addEventListener(
+                "click",
+                async function (event) {
+
+                    event.preventDefault();
+
+
+                    const {
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signOut();
+
+
+                    if (error) {
+
+                        console.error(
+                            "Logout error:",
+                            error
+                        );
+
+
+                        alert(
+                            "Unable to logout."
+                        );
+
+                        return;
+                    }
+
+
+                    window.location.href =
+                        "../auth.html";
+                }
+            );
+
+
+        /* ================================
+           PAGE LOAD
+        ================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            async function () {
+
+                const user =
+                    await getCurrentUser();
+
+
+                if (!user) {
+
+                    window.location.href =
+                        "../auth.html";
+
+                    return;
+                }
+
+
+                /*
+                 * IMPORTANT:
+                 * These functions only load data.
+                 * None of them redirects to Profile.
+                 */
+
+                await loadStudentProfile(user);
+
+                await loadApplicationStats(user);
+
+                await loadRecommendedJobs();
+
+                await checkStudentVerification(user);
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>

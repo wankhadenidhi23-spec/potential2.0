@@ -2456,4 +2456,165 @@ body {
         padding:
             16px;
     }
+}/* =====================================================
+   PROFESSIONAL PROFILE MESSAGE
+===================================================== */
+
+.message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    min-height: 0;
+
+    margin-top: 18px;
+    padding: 0;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-6px);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease,
+        padding 0.25s ease,
+        min-height 0.25s ease,
+        visibility 0.25s ease;
+
+    box-sizing: border-box;
+}
+
+/* Message visible */
+
+.message.show {
+    min-height: 48px;
+    padding: 12px 16px;
+
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+
+/* Success */
+
+.message.success {
+    color: #176b42;
+
+    background: #ecfdf3;
+
+    border: 1px solid #b7ebce;
+}
+
+
+/* Error */
+
+.message.error {
+    color: #b42318;
+
+    background: #fff1f0;
+
+    border: 1px solid #f5c2c0;
+}
+
+
+/* Info */
+
+.message.info {
+    color: #2454a6;
+
+    background: #eff6ff;
+
+    border: 1px solid #bfdbfe;
+}/* =====================================================
+   PROFESSIONAL PROFILE MESSAGE
+===================================================== */
+
+.message {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    min-height: 0;
+
+    margin-top: 18px;
+    padding: 0;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.5;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-6px);
+
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease,
+        padding 0.25s ease,
+        min-height 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.message.show {
+    min-height: 48px;
+    padding: 12px 16px;
+
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+.message.success {
+    color: #176b42;
+    background: #ecfdf3;
+    border: 1px solid #b7ebce;
+}
+
+.message.error {
+    color: #b42318;
+    background: #fff1f0;
+    border: 1px solid #f5c2c0;
+}
+
+.message.info {
+    color: #2454a6;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+}
+
+.message-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    border-radius: 50%;
+
+    flex-shrink: 0;
+
+    font-size: 13px;
+    font-weight: 800;
+
+    background: rgba(255, 255, 255, 0.75);
+}
+
+.message-text {
+    flex: 1;
 }

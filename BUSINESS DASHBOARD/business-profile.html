@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
 
     <title>POTential | Business Profile</title>
 
-    <link rel="stylesheet" href="business-profile.css">
+    <link
+        rel="stylesheet"
+        href="business-profile.css">
+
 </head>
 
+
 <body>
+
 
 <!-- =====================================================
      NAVBAR
@@ -17,26 +27,39 @@
 
 <header class="navbar">
 
-    <a href="business-dashboard.html" class="logo">
+    <a
+        href="business-dashboard.html"
+        class="logo">
+
         POTential
+
     </a>
+
 
     <div class="nav-right">
 
-        <span id="businessNameTop" class="business-name">
+        <span
+            id="businessNameTop"
+            class="business-name">
+
             Business
+
         </span>
+
 
         <button
             type="button"
             id="logoutBtn"
             class="logout-btn">
+
             Logout
+
         </button>
 
     </div>
 
 </header>
+
 
 
 <!-- =====================================================
@@ -45,12 +68,19 @@
 
 <main class="profile-page">
 
-    <!-- Back -->
+
+    <!-- =================================================
+         BACK TO DASHBOARD
+    ================================================== -->
+
     <a
         href="business-dashboard.html"
         class="back-link">
+
         ← Back to Dashboard
+
     </a>
+
 
 
     <!-- =================================================
@@ -61,39 +91,56 @@
 
         <div class="hero-left">
 
-            <!-- Business Logo / Profile Photo -->
+
+            <!-- PROFILE AVATAR -->
 
             <div class="profile-photo-wrapper">
 
                 <div
                     id="profileAvatar"
                     class="avatar">
+
                     B
+
                 </div>
+
 
                 <button
                     type="button"
                     id="changePhotoBtn"
                     class="change-photo-btn">
+
                     ✎
+
                 </button>
 
             </div>
 
 
+
+            <!-- HERO TEXT -->
+
             <div>
 
                 <p class="eyebrow">
+
                     BUSINESS PROFILE
+
                 </p>
 
+
                 <h1 id="heroBusinessName">
+
                     Business Profile
+
                 </h1>
 
+
                 <p>
+
                     Manage your business information,
                     profile and verification.
+
                 </p>
 
             </div>
@@ -101,7 +148,8 @@
         </div>
 
 
-        <!-- Active Status -->
+
+        <!-- ACTIVE STATUS -->
 
         <div class="active-badge">
 
@@ -121,35 +169,49 @@
 
     <section class="profile-card photo-card">
 
+
         <div class="card-header">
 
             <h2>
+
                 Business Profile Photo
+
             </h2>
 
+
             <p>
+
                 Add your business logo or a professional
                 business profile image.
+
             </p>
 
         </div>
 
 
+
         <div class="profile-photo-section">
 
+
+            <!-- PHOTO PREVIEW -->
+
             <div class="large-profile-preview">
+
 
                 <img
                     id="profilePhotoPreview"
                     class="profile-photo-image hidden"
                     alt="Business profile photo">
 
+
                 <div
                     id="profilePhotoPlaceholder"
                     class="profile-photo-placeholder">
 
                     <span id="profilePhotoInitial">
+
                         B
+
                     </span>
 
                 </div>
@@ -157,23 +219,37 @@
             </div>
 
 
+
+            <!-- PHOTO UPLOAD -->
+
             <div class="photo-upload-content">
 
+
                 <h3>
+
                     Make your profile professional
+
                 </h3>
 
+
                 <p>
+
                     Upload your business logo or a clear
                     business-related image.
+
                 </p>
 
+
                 <p class="upload-hint">
+
                     JPG, PNG or WEBP · Maximum 2 MB
+
                 </p>
+
 
 
                 <div class="photo-actions">
+
 
                     <input
                         type="file"
@@ -181,25 +257,33 @@
                         accept="image/jpeg,image/png,image/webp"
                         hidden>
 
+
                     <button
                         type="button"
                         id="selectPhotoBtn"
                         class="secondary-btn">
+
                         Choose Photo
+
                     </button>
+
 
                     <button
                         type="button"
                         id="uploadPhotoBtn"
                         class="primary-small-btn">
+
                         Upload Photo
+
                     </button>
 
                 </div>
 
+
                 <div
                     id="profilePhotoMessage"
                     class="upload-message">
+
                 </div>
 
             </div>
@@ -216,20 +300,29 @@
 
     <section class="profile-card">
 
+
         <div class="card-header">
 
             <h2>
+
                 Business Information
+
             </h2>
 
+
             <p>
+
                 Update your existing business information.
+
             </p>
 
         </div>
 
 
-        <!-- Loading -->
+
+        <!-- =================================================
+             LOADING
+        ================================================== -->
 
         <div
             id="loadingBox"
@@ -240,7 +333,10 @@
         </div>
 
 
-        <!-- Form -->
+
+        <!-- =================================================
+             BUSINESS FORM
+        ================================================== -->
 
         <form
             id="profileForm"
@@ -250,13 +346,16 @@
             <div class="form-grid">
 
 
-                <!-- Business Name -->
+                <!-- BUSINESS NAME -->
 
                 <div class="form-group">
 
                     <label for="businessName">
+
                         Business Name
+
                     </label>
+
 
                     <input
                         type="text"
@@ -267,85 +366,119 @@
                 </div>
 
 
-                <!-- Business Type -->
+
+                <!-- BUSINESS TYPE -->
 
                 <div class="form-group">
 
                     <label for="businessType">
+
                         Business Type
+
                     </label>
+
 
                     <input
                         type="text"
                         id="businessType"
-                        placeholder="Example: Teaching">
+                        placeholder="Example: Teaching"
+                        required>
 
                 </div>
 
 
-                <!-- City -->
+
+                <!-- CITY -->
 
                 <div class="form-group">
 
                     <label for="city">
+
                         City
+
                     </label>
+
 
                     <input
                         type="text"
                         id="city"
-                        placeholder="Example: Amravati">
+                        placeholder="Example: Amravati"
+                        required>
 
                 </div>
 
 
-                <!-- Phone -->
+
+                <!-- PHONE -->
 
                 <div class="form-group">
 
                     <label for="phone">
+
                         Phone
+
                     </label>
+
 
                     <input
                         type="tel"
                         id="phone"
-                        placeholder="Enter phone number">
+                        placeholder="Enter phone number"
+                        required>
 
                 </div>
 
             </div>
 
 
-            <!-- Message -->
+
+            <!-- =================================================
+                 PROFESSIONAL MESSAGE
+            ================================================== -->
 
             <div
                 id="profileMessage"
-                class="message">
+                class="message"
+                role="alert"
+                aria-live="polite">
+
             </div>
 
 
-            <!-- Actions -->
+
+            <!-- =================================================
+                 FORM ACTIONS
+            ================================================== -->
 
             <div class="actions">
+
 
                 <a
                     href="business-dashboard.html"
                     class="cancel-btn">
+
                     Cancel
+
                 </a>
+
 
                 <button
                     type="submit"
                     id="saveBtn"
                     class="save-btn">
 
+
                     <span id="saveText">
+
                         Save Changes
+
                     </span>
 
+
                     <span>
+
                         →
+
                     </span>
 
                 </button>
@@ -355,11 +488,15 @@
         </form>
 
 
-        <!-- Error -->
+
+        <!-- =================================================
+             ERROR
+        ================================================== -->
 
         <div
             id="errorBox"
             class="error-box hidden">
+
         </div>
 
     </section>
@@ -375,23 +512,31 @@
 
         <div class="card-header">
 
+
             <div class="verification-heading">
+
 
                 <div>
 
                     <h2>
+
                         Business Verification
+
                     </h2>
 
+
                     <p>
+
                         Submit a valid identity or business
                         document to build trust with students.
+
                     </p>
 
                 </div>
 
 
-                <!-- Verification Status -->
+
+                <!-- VERIFICATION STATUS -->
 
                 <div
                     id="businessVerificationStatus"
@@ -413,19 +558,28 @@
 
         <div class="verification-intro">
 
+
             <div class="verification-icon">
+
                 ✓
+
             </div>
+
 
             <div>
 
                 <h3>
+
                     Get your business verified
+
                 </h3>
 
+
                 <p>
+
                     Verified businesses can build more trust
                     with students looking for opportunities.
+
                 </p>
 
             </div>
@@ -435,31 +589,43 @@
 
 
         <!-- =================================================
-             DOCUMENT TYPE
+             VERIFICATION FORM
         ================================================== -->
 
         <div class="verification-form">
 
 
+            <!-- DOCUMENT CATEGORY -->
+
             <div class="form-group">
 
                 <label for="verificationCategory">
+
                     Document Category
+
                 </label>
 
-                <select
-                    id="verificationCategory">
+
+                <select id="verificationCategory">
 
                     <option value="">
+
                         Select document category
+
                     </option>
+
 
                     <option value="identity">
+
                         Identity Proof
+
                     </option>
 
+
                     <option value="business">
+
                         Business Registration Proof
+
                     </option>
 
                 </select>
@@ -468,41 +634,60 @@
 
 
 
-            <!-- Identity Documents -->
+            <!-- IDENTITY DOCUMENT -->
 
             <div
                 class="form-group"
                 id="identityDocumentGroup">
 
                 <label for="identityDocumentType">
+
                     Identity Proof Type
+
                 </label>
 
-                <select
-                    id="identityDocumentType">
+
+                <select id="identityDocumentType">
 
                     <option value="">
+
                         Select identity proof
+
                     </option>
+
 
                     <option value="aadhaar">
+
                         Aadhaar Card
+
                     </option>
+
 
                     <option value="pan">
+
                         PAN Card
+
                     </option>
+
 
                     <option value="voter_id">
+
                         Voter ID
+
                     </option>
+
 
                     <option value="driving_license">
+
                         Driving Licence
+
                     </option>
 
+
                     <option value="passport">
+
                         Passport
+
                     </option>
 
                 </select>
@@ -511,41 +696,60 @@
 
 
 
-            <!-- Business Documents -->
+            <!-- BUSINESS DOCUMENT -->
 
             <div
                 class="form-group"
                 id="businessDocumentGroup">
 
                 <label for="businessDocumentType">
+
                     Business Proof Type
+
                 </label>
 
-                <select
-                    id="businessDocumentType">
+
+                <select id="businessDocumentType">
 
                     <option value="">
+
                         Select business proof
+
                     </option>
+
 
                     <option value="gst">
+
                         GST Certificate
+
                     </option>
+
 
                     <option value="udyam">
+
                         Udyam / MSME Certificate
+
                     </option>
+
 
                     <option value="shop_establishment">
+
                         Shop & Establishment Certificate
+
                     </option>
+
 
                     <option value="trade_license">
+
                         Trade Licence
+
                     </option>
 
+
                     <option value="business_registration">
+
                         Business Registration Certificate
+
                     </option>
 
                 </select>
@@ -554,9 +758,7 @@
 
 
 
-            <!-- =================================================
-                 DOCUMENT NUMBER
-            ================================================== -->
+            <!-- DOCUMENT NUMBER -->
 
             <div
                 class="form-group"
@@ -567,55 +769,72 @@
                     Document Number
 
                     <span class="optional-label">
+
                         Optional
+
                     </span>
 
                 </label>
+
 
                 <input
                     type="text"
                     id="documentNumber"
                     placeholder="Enter document number">
 
+
                 <small class="field-help">
-                    Enter the number exactly as shown on your document.
+
+                    Enter the number exactly as shown on
+                    your document.
+
                 </small>
 
             </div>
 
 
 
-            <!-- =================================================
-                 DOCUMENT UPLOAD
-            ================================================== -->
+            <!-- DOCUMENT UPLOAD -->
 
             <div class="document-upload-box">
 
 
                 <div class="document-upload-icon">
+
                     📄
+
                 </div>
 
 
                 <div class="document-upload-content">
 
                     <h3>
+
                         Upload Document
+
                     </h3>
 
+
                     <p>
+
                         Upload a clear and readable copy of
                         your selected document.
+
                     </p>
 
+
                     <small>
+
                         PDF, JPG or PNG · Maximum 5 MB
+
                     </small>
 
                 </div>
 
 
+
                 <div class="document-file-area">
+
 
                     <input
                         type="file"
@@ -648,19 +867,21 @@
 
 
 
-            <!-- =================================================
-                 DOCUMENT PREVIEW
-            ================================================== -->
+            <!-- DOCUMENT PREVIEW -->
 
             <div
                 id="documentPreview"
                 class="document-preview hidden">
 
+
                 <div class="preview-header">
 
                     <span>
+
                         Document Preview
+
                     </span>
+
 
                     <button
                         type="button"
@@ -676,6 +897,7 @@
 
                 <div class="preview-body">
 
+
                     <img
                         id="documentImagePreview"
                         class="document-image-preview hidden"
@@ -687,11 +909,16 @@
                         class="document-pdf-preview hidden">
 
                         <span>
+
                             📄
+
                         </span>
 
+
                         <p>
+
                             PDF document selected
+
                         </p>
 
                     </div>
@@ -702,28 +929,32 @@
 
 
 
-            <!-- =================================================
-                 PRIVACY NOTE
-            ================================================== -->
+            <!-- PRIVACY NOTE -->
 
             <div class="privacy-note">
 
+
                 <span class="privacy-icon">
+
                     🔒
+
                 </span>
 
+
                 <p>
+
                     Your verification document is securely
                     submitted for admin review. Upload only
                     valid documents belonging to the business
                     or authorized business owner.
+
                 </p>
 
             </div>
 
 
 
-            <!-- Upload Button -->
+            <!-- SUBMIT VERIFICATION -->
 
             <button
                 type="button"
@@ -735,14 +966,17 @@
             </button>
 
 
-            <!-- Message -->
+
+            <!-- VERIFICATION MESSAGE -->
 
             <div
                 id="businessVerificationMessage"
                 class="verification-message">
+
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -751,9 +985,13 @@
 
         <div class="verification-info">
 
+
             <h3>
+
                 What happens after submission?
+
             </h3>
+
 
             <div class="verification-steps">
 
@@ -761,17 +999,25 @@
                 <div class="verification-step">
 
                     <div class="step-number">
+
                         1
+
                     </div>
+
 
                     <div>
 
                         <strong>
+
                             Document Submitted
+
                         </strong>
 
+
                         <p>
+
                             Your document is securely uploaded.
+
                         </p>
 
                     </div>
@@ -779,20 +1025,30 @@
                 </div>
 
 
+
                 <div class="verification-step">
 
                     <div class="step-number">
+
                         2
+
                     </div>
+
 
                     <div>
 
                         <strong>
+
                             Admin Review
+
                         </strong>
 
+
                         <p>
-                            The POTEntial admin reviews your document.
+
+                            The POTEntial admin reviews your
+                            document.
+
                         </p>
 
                     </div>
@@ -800,32 +1056,39 @@
                 </div>
 
 
+
                 <div class="verification-step">
 
                     <div class="step-number">
+
                         3
+
                     </div>
+
 
                     <div>
 
                         <strong>
+
                             Verification Result
+
                         </strong>
 
+
                         <p>
+
                             Your profile will show the latest
                             verification status.
+
                         </p>
 
                     </div>
 
                 </div>
-
 
             </div>
 
         </div>
-
 
     </section>
 
@@ -837,40 +1100,57 @@
 
     <section class="profile-card completeness-card">
 
+
         <div class="card-header">
 
             <h2>
+
                 Profile Strength
+
             </h2>
 
+
             <p>
+
                 Complete your profile to make your business
                 look more professional to students.
+
             </p>
 
         </div>
 
 
+
         <div class="completion-top">
+
 
             <div>
 
                 <strong id="profileCompletionText">
+
                     60% Complete
+
                 </strong>
 
+
                 <p>
+
                     Add your business photo and verification
                     details to improve your profile.
+
                 </p>
 
             </div>
 
+
             <span id="profileCompletionPercent">
+
                 60%
+
             </span>
 
         </div>
+
 
 
         <div class="progress-bar">
@@ -879,23 +1159,34 @@
                 id="profileCompletionBar"
                 class="progress-fill"
                 style="width: 60%;">
+
             </div>
 
         </div>
 
 
+
         <div class="completion-items">
 
+
             <span id="completionBusiness">
+
                 ✓ Business Information
+
             </span>
+
 
             <span id="completionPhoto">
+
                 ○ Business Photo
+
             </span>
 
+
             <span id="completionVerification">
+
                 ○ Verification
+
             </span>
 
         </div>
@@ -925,10 +1216,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="../supabase-config.js"></script>
+<script src="supabase-config.js?v=2"></script>
 
-<script src="business-profile.js"></script>
+<script src="business-profile.js?v=2"></script>
 
 
 </body>
+
 </html>

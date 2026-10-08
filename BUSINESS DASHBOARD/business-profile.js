@@ -2,10 +2,16 @@
 // POTential - Business Profile
 // =========================================================
 
+
+// =========================================================
+// SUPABASE CLIENT
+// =========================================================
+
 const supabaseClient = window.supabase.createClient(
     SUPABASE_URL,
     SUPABASE_ANON_KEY
 );
+
 
 // =========================================================
 // GLOBAL VARIABLES
@@ -13,6 +19,7 @@ const supabaseClient = window.supabase.createClient(
 
 let currentUser = null;
 let currentBusiness = null;
+
 
 // =========================================================
 // HELPER
@@ -22,6 +29,7 @@ function $(id) {
     return document.getElementById(id);
 }
 
+
 // =========================================================
 // MESSAGE
 // =========================================================
@@ -30,16 +38,21 @@ function showMessage(message, type = "success") {
 
     const messageBox = $("message");
 
-    if (!messageBox) return;
+    if (!messageBox) {
+        return;
+    }
 
     messageBox.textContent = message;
     messageBox.className = `message ${type}`;
 
     setTimeout(() => {
+
         messageBox.textContent = "";
         messageBox.className = "message";
+
     }, 4000);
 }
+
 
 // =========================================================
 // UPDATE HEADER
@@ -50,10 +63,12 @@ function updateHeader(businessName) {
     const headerName = $("businessNameTop");
 
     if (headerName) {
+
         headerName.textContent =
             businessName || "Business";
     }
 }
+
 
 // =========================================================
 // LOAD LOGGED-IN USER
@@ -61,27 +76,55 @@ function updateHeader(businessName) {
 
 async function loadCurrentUser() {
 
-    const {
-        data: { user },
-        error
-    } = await supabaseClient.auth.getUser();
+    try {
 
-    if (error) {
-        console.error("User error:", error);
-        throw error;
-    }
+        const {
+            data: { user },
+            error
+        } = await supabaseClient.auth.getUser();
 
-    if (!user) {
+        if (error) {
 
-        window.location.href = "auth.html";
+            console.error(
+                "User error:",
+                error
+            );
+
+            throw error;
+        }
+
+        if (!user) {
+
+            window.location.href = "auth.html";
+
+            return null;
+        }
+
+        currentUser = user;
+
+        console.log(
+            "Logged-in user:",
+            currentUser.id
+        );
+
+        return user;
+
+    } catch (error) {
+
+        console.error(
+            "loadCurrentUser() error:",
+            error
+        );
+
+        showMessage(
+            "Unable to verify logged-in user.",
+            "error"
+        );
 
         return null;
     }
-
-    currentUser = user;
-
-    return user;
 }
+
 
 // =========================================================
 // LOAD BUSINESS PROFILE
@@ -90,109 +133,176 @@ async function loadCurrentUser() {
 async function loadBusinessProfile() {
 
     if (!currentUser) {
+
+        console.error(
+            "Current user is not available."
+        );
+
         return;
     }
 
-    const {
-        data: business,
-        error
-    } = await supabaseClient
-        .from("businesses")
-        .select(`
-            id,
-            owner_id,
-            business_name,
-            business_type,
-            city,
-            phone,
-            profile_photo_url
-        `)
-        .eq("owner_id", currentUser.id)
-        .maybeSingle();
+    try {
 
-    if (error) {
+        const {
+            data: business,
+            error
+        } = await supabaseClient
+            .from("businesses")
+            .select(`
+                id,
+                owner_id,
+                business_name,
+                business_type,
+                city,
+                phone
+            `)
+            .eq(
+                "owner_id",
+                currentUser.id
+            )
+            .maybeSingle();
+
+
+        // =================================================
+        // DATABASE ERROR
+        // =================================================
+
+        if (error) {
+
+            console.error(
+                "Business profile load error:",
+                error
+            );
+
+            showMessage(
+                "Business profile load nahi ho paya: " +
+                error.message,
+                "error"
+            );
+
+            return;
+        }
+
+
+        // =================================================
+        // BUSINESS NOT FOUND
+        // =================================================
+
+        if (!business) {
+
+            console.error(
+                "No business found for owner_id:",
+                currentUser.id
+            );
+
+            showMessage(
+                "Business profile nahi mila.",
+                "error"
+            );
+
+            return;
+        }
+
+
+        // =================================================
+        // STORE BUSINESS
+        // =================================================
+
+        currentBusiness = business;
+
+
+        // =================================================
+        // FILL BUSINESS NAME
+        // =================================================
+
+        const businessNameInput =
+            $("businessName");
+
+        if (businessNameInput) {
+
+            businessNameInput.value =
+                business.business_name || "";
+        }
+
+
+        // =================================================
+        // FILL BUSINESS TYPE
+        // =================================================
+
+        const businessTypeInput =
+            $("businessType");
+
+        if (businessTypeInput) {
+
+            businessTypeInput.value =
+                business.business_type || "";
+        }
+
+
+        // =================================================
+        // FILL CITY
+        // =================================================
+
+        const cityInput =
+            $("city");
+
+        if (cityInput) {
+
+            cityInput.value =
+                business.city || "";
+        }
+
+
+        // =================================================
+        // FILL PHONE
+        // =================================================
+
+        const phoneInput =
+            $("phone");
+
+        if (phoneInput) {
+
+            phoneInput.value =
+                business.phone || "";
+        }
+
+
+        // =================================================
+        // UPDATE HEADER
+        // =================================================
+
+        updateHeader(
+            business.business_name
+        );
+
+
+        // =================================================
+        // UPDATE PROFILE COMPLETION
+        // =================================================
+
+        updateProfileCompletion();
+
+
+        console.log(
+            "Business profile loaded successfully:",
+            business
+        );
+
+    } catch (error) {
 
         console.error(
-            "Business profile load error:",
+            "loadBusinessProfile() error:",
             error
         );
 
         showMessage(
-            "Business profile load nahi ho paya.",
+            "Business profile load nahi ho paya: " +
+            error.message,
             "error"
         );
-
-        return;
     }
-
-    if (!business) {
-
-        showMessage(
-            "Business profile nahi mila.",
-            "error"
-        );
-
-        return;
-    }
-
-    currentBusiness = business;
-
-    // =====================================================
-    // FILL FORM
-    // =====================================================
-
-    if ($("businessName")) {
-        $("businessName").value =
-            business.business_name || "";
-    }
-
-    if ($("businessType")) {
-        $("businessType").value =
-            business.business_type || "";
-    }
-
-    if ($("city")) {
-        $("city").value =
-            business.city || "";
-    }
-
-    if ($("phone")) {
-        $("phone").value =
-            business.phone || "";
-    }
-
-    // =====================================================
-    // UPDATE HEADER
-    // =====================================================
-
-    updateHeader(
-        business.business_name
-    );
-
-    // =====================================================
-    // LOAD PROFILE PHOTO
-    // =====================================================
-
-    const profilePhoto = $("profilePhoto");
-
-    if (
-        profilePhoto &&
-        business.profile_photo_url
-    ) {
-
-        profilePhoto.src =
-            business.profile_photo_url;
-
-        profilePhoto.style.display =
-            "block";
-    }
-
-    // =====================================================
-    // UPDATE COMPLETION
-    // =====================================================
-
-    updateProfileCompletion();
 }
+
 
 // =========================================================
 // UPDATE PROFILE COMPLETION
@@ -204,12 +314,19 @@ function updateProfileCompletion() {
         return;
     }
 
+
     const fields = [
+
         currentBusiness.business_name,
+
         currentBusiness.business_type,
+
         currentBusiness.city,
+
         currentBusiness.phone
+
     ];
+
 
     const completed =
         fields.filter(
@@ -218,27 +335,41 @@ function updateProfileCompletion() {
                 value.toString().trim() !== ""
         ).length;
 
+
     const percentage =
         Math.round(
             (completed / fields.length) * 100
         );
 
+
+    // =====================================================
+    // PROGRESS BAR
+    // =====================================================
+
     const progressBar =
         $("profileProgress");
 
-    const progressText =
-        $("profileProgressText");
-
     if (progressBar) {
+
         progressBar.style.width =
             `${percentage}%`;
     }
 
+
+    // =====================================================
+    // PROGRESS TEXT
+    // =====================================================
+
+    const progressText =
+        $("profileProgressText");
+
     if (progressText) {
+
         progressText.textContent =
             `${percentage}% Complete`;
     }
 }
+
 
 // =========================================================
 // SAVE BUSINESS PROFILE
@@ -247,6 +378,11 @@ function updateProfileCompletion() {
 async function saveBusinessProfile(event) {
 
     event.preventDefault();
+
+
+    // =====================================================
+    // CHECK USER + BUSINESS
+    // =====================================================
 
     if (
         !currentUser ||
@@ -261,6 +397,11 @@ async function saveBusinessProfile(event) {
         return;
     }
 
+
+    // =====================================================
+    // GET FORM VALUES
+    // =====================================================
+
     const businessName =
         $("businessName")?.value.trim() || "";
 
@@ -273,8 +414,9 @@ async function saveBusinessProfile(event) {
     const phone =
         $("phone")?.value.trim() || "";
 
+
     // =====================================================
-    // VALIDATION
+    // VALIDATION - BUSINESS NAME
     // =====================================================
 
     if (!businessName) {
@@ -289,6 +431,11 @@ async function saveBusinessProfile(event) {
         return;
     }
 
+
+    // =====================================================
+    // VALIDATION - BUSINESS TYPE
+    // =====================================================
+
     if (!businessType) {
 
         showMessage(
@@ -300,6 +447,11 @@ async function saveBusinessProfile(event) {
 
         return;
     }
+
+
+    // =====================================================
+    // VALIDATION - CITY
+    // =====================================================
 
     if (!city) {
 
@@ -313,6 +465,11 @@ async function saveBusinessProfile(event) {
         return;
     }
 
+
+    // =====================================================
+    // VALIDATION - PHONE
+    // =====================================================
+
     if (!phone) {
 
         showMessage(
@@ -325,10 +482,36 @@ async function saveBusinessProfile(event) {
         return;
     }
 
+
+    // =====================================================
+    // PHONE VALIDATION
+    // =====================================================
+
+    const cleanPhone =
+        phone.replace(/\D/g, "");
+
+    if (cleanPhone.length < 10) {
+
+        showMessage(
+            "Please enter a valid phone number.",
+            "error"
+        );
+
+        $("phone")?.focus();
+
+        return;
+    }
+
+
+    // =====================================================
+    // SAVE BUTTON
+    // =====================================================
+
     const saveButton =
         $("saveProfileBtn") ||
         $("saveBtn") ||
         $("saveChangesBtn");
+
 
     if (saveButton) {
 
@@ -338,6 +521,11 @@ async function saveBusinessProfile(event) {
             "Saving...";
     }
 
+
+    // =====================================================
+    // UPDATE DATABASE
+    // =====================================================
+
     try {
 
         const {
@@ -346,10 +534,19 @@ async function saveBusinessProfile(event) {
         } = await supabaseClient
             .from("businesses")
             .update({
-                business_name: businessName,
-                business_type: businessType,
-                city: city,
-                phone: phone
+
+                business_name:
+                    businessName,
+
+                business_type:
+                    businessType,
+
+                city:
+                    city,
+
+                phone:
+                    phone
+
             })
             .eq(
                 "id",
@@ -365,14 +562,29 @@ async function saveBusinessProfile(event) {
                 business_name,
                 business_type,
                 city,
-                phone,
-                profile_photo_url
+                phone
             `)
             .single();
 
+
+        // =================================================
+        // DATABASE ERROR
+        // =================================================
+
         if (error) {
+
+            console.error(
+                "Business profile update error:",
+                error
+            );
+
             throw error;
         }
+
+
+        // =================================================
+        // NO UPDATED DATA
+        // =================================================
 
         if (!updatedBusiness) {
 
@@ -381,42 +593,76 @@ async function saveBusinessProfile(event) {
             );
         }
 
+
+        // =================================================
+        // UPDATE GLOBAL DATA
+        // =================================================
+
         currentBusiness =
             updatedBusiness;
 
+
         // =================================================
-        // UPDATE UI
+        // UPDATE FORM
         // =================================================
 
         if ($("businessName")) {
+
             $("businessName").value =
                 updatedBusiness.business_name || "";
         }
 
+
         if ($("businessType")) {
+
             $("businessType").value =
                 updatedBusiness.business_type || "";
         }
 
+
         if ($("city")) {
+
             $("city").value =
                 updatedBusiness.city || "";
         }
 
+
         if ($("phone")) {
+
             $("phone").value =
                 updatedBusiness.phone || "";
         }
+
+
+        // =================================================
+        // UPDATE HEADER
+        // =================================================
 
         updateHeader(
             updatedBusiness.business_name
         );
 
+
+        // =================================================
+        // UPDATE COMPLETION
+        // =================================================
+
         updateProfileCompletion();
+
+
+        // =================================================
+        // SUCCESS MESSAGE
+        // =================================================
 
         showMessage(
             "✓ Changes successfully save ho gaye!",
             "success"
+        );
+
+
+        console.log(
+            "Business profile updated successfully:",
+            updatedBusiness
         );
 
     } catch (error) {
@@ -434,6 +680,10 @@ async function saveBusinessProfile(event) {
 
     } finally {
 
+        // =================================================
+        // RESTORE SAVE BUTTON
+        // =================================================
+
         if (saveButton) {
 
             saveButton.disabled = false;
@@ -444,228 +694,6 @@ async function saveBusinessProfile(event) {
     }
 }
 
-// =========================================================
-// PROFILE PHOTO UPLOAD
-// =========================================================
-
-async function uploadProfilePhoto(event) {
-
-    const file =
-        event.target.files?.[0];
-
-    if (
-        !file ||
-        !currentBusiness ||
-        !currentUser
-    ) {
-        return;
-    }
-
-    // =====================================================
-    // VALIDATION
-    // =====================================================
-
-    if (!file.type.startsWith("image/")) {
-
-        showMessage(
-            "Please select a valid image file.",
-            "error"
-        );
-
-        event.target.value = "";
-
-        return;
-    }
-
-    const maxSize =
-        5 * 1024 * 1024;
-
-    if (file.size > maxSize) {
-
-        showMessage(
-            "Image size 5MB se kam honi chahiye.",
-            "error"
-        );
-
-        event.target.value = "";
-
-        return;
-    }
-
-    const uploadButton =
-        $("uploadPhotoBtn");
-
-    if (uploadButton) {
-
-        uploadButton.disabled = true;
-
-        uploadButton.textContent =
-            "Uploading...";
-    }
-
-    try {
-
-        const extension =
-            file.name
-                .split(".")
-                .pop()
-                .toLowerCase();
-
-        const fileName =
-            `${Date.now()}.${extension}`;
-
-        /*
-        -----------------------------------------------------
-        IMPORTANT
-
-        Store the user's ID as the first folder.
-
-        Result:
-
-        business-profiles/
-            USER_ID/
-                123456789.jpg
-        -----------------------------------------------------
-        */
-
-        const filePath =
-            `${currentUser.id}/${fileName}`;
-
-        const {
-            error: uploadError
-        } = await supabaseClient
-            .storage
-            .from("business-profiles")
-            .upload(
-                filePath,
-                file,
-                {
-                    upsert: false,
-                    contentType: file.type,
-                    cacheControl: "3600"
-                }
-            );
-
-        if (uploadError) {
-            throw uploadError;
-        }
-
-        // =================================================
-        // GET PUBLIC URL
-        // =================================================
-
-        const {
-            data: publicUrlData
-        } =
-            supabaseClient
-                .storage
-                .from("business-profiles")
-                .getPublicUrl(filePath);
-
-        const publicUrl =
-            publicUrlData?.publicUrl;
-
-        if (!publicUrl) {
-
-            throw new Error(
-                "Profile photo URL generate nahi hua."
-            );
-        }
-
-        // =================================================
-        // SAVE URL IN BUSINESSES
-        // =================================================
-
-        const {
-            data: updatedBusiness,
-            error: updateError
-        } =
-            await supabaseClient
-                .from("businesses")
-                .update({
-                    profile_photo_url:
-                        publicUrl
-                })
-                .eq(
-                    "id",
-                    currentBusiness.id
-                )
-                .eq(
-                    "owner_id",
-                    currentUser.id
-                )
-                .select(`
-                    id,
-                    owner_id,
-                    business_name,
-                    business_type,
-                    city,
-                    phone,
-                    profile_photo_url
-                `)
-                .single();
-
-        if (updateError) {
-            throw updateError;
-        }
-
-        if (!updatedBusiness) {
-
-            throw new Error(
-                "Profile photo database me save nahi hui."
-            );
-        }
-
-        currentBusiness =
-            updatedBusiness;
-
-        // =================================================
-        // SHOW PHOTO
-        // =================================================
-
-        const profilePhoto =
-            $("profilePhoto");
-
-        if (profilePhoto) {
-
-            profilePhoto.src =
-                updatedBusiness.profile_photo_url;
-
-            profilePhoto.style.display =
-                "block";
-        }
-
-        showMessage(
-            "✓ Profile photo successfully updated!",
-            "success"
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Profile photo upload error:",
-            error
-        );
-
-        showMessage(
-            error.message ||
-            "Profile photo upload nahi ho payi.",
-            "error"
-        );
-
-    } finally {
-
-        if (uploadButton) {
-
-            uploadButton.disabled = false;
-
-            uploadButton.textContent =
-                "Upload Photo";
-        }
-
-        event.target.value = "";
-    }
-}
 
 // =========================================================
 // LOGOUT
@@ -677,14 +705,16 @@ async function logout() {
 
         const {
             error
-        } =
-            await supabaseClient
-                .auth
-                .signOut();
+        } = await supabaseClient
+            .auth
+            .signOut();
+
 
         if (error) {
+
             throw error;
         }
+
 
         window.location.href =
             "auth.html";
@@ -703,8 +733,9 @@ async function logout() {
     }
 }
 
+
 // =========================================================
-// INITIALIZE
+// INITIALIZE BUSINESS PROFILE
 // =========================================================
 
 async function startBusinessProfile() {
@@ -714,9 +745,12 @@ async function startBusinessProfile() {
         const user =
             await loadCurrentUser();
 
+
         if (!user) {
+
             return;
         }
+
 
         await loadBusinessProfile();
 
@@ -734,6 +768,7 @@ async function startBusinessProfile() {
     }
 }
 
+
 // =========================================================
 // EVENT LISTENERS
 // =========================================================
@@ -742,9 +777,15 @@ document.addEventListener(
     "DOMContentLoaded",
     () => {
 
+
+        // =================================================
+        // PROFILE FORM
+        // =================================================
+
         const profileForm =
             $("businessProfileForm") ||
             $("profileForm");
+
 
         if (profileForm) {
 
@@ -754,20 +795,14 @@ document.addEventListener(
             );
         }
 
-        const photoInput =
-            $("profilePhotoInput") ||
-            $("photoInput");
 
-        if (photoInput) {
-
-            photoInput.addEventListener(
-                "change",
-                uploadProfilePhoto
-            );
-        }
+        // =================================================
+        // LOGOUT BUTTON
+        // =================================================
 
         const logoutBtn =
             $("logoutBtn");
+
 
         if (logoutBtn) {
 
@@ -777,8 +812,14 @@ document.addEventListener(
             );
         }
 
+
+        // =================================================
+        // SIDEBAR LOGOUT
+        // =================================================
+
         const sidebarLogout =
             $("sidebarLogout");
+
 
         if (sidebarLogout) {
 
@@ -793,6 +834,12 @@ document.addEventListener(
             );
         }
 
+
+        // =================================================
+        // START
+        // =================================================
+
         startBusinessProfile();
+
     }
 );

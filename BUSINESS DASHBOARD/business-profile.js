@@ -2,6 +2,7 @@
    POTEntial - BUSINESS PROFILE
    ========================================================= */
 
+
 /* -----------------------------
    SUPABASE CLIENT
 ----------------------------- */
@@ -21,8 +22,6 @@ let currentBusiness = null;
 
 let selectedPhotoFile = null;
 let currentPhotoUrl = null;
-
-const PHOTO_BUCKET = "business-profiles";
 
 
 /* -----------------------------
@@ -205,9 +204,9 @@ async function loadBusinessProfile() {
 
         /* ---------------------------------------------
            GET BUSINESS FROM SUPABASE
-           
-           IMPORTANT:
-           businesses.owner_id = logged-in user id
+
+           businesses.owner_id =
+           logged-in user id
         --------------------------------------------- */
 
         const {
@@ -354,9 +353,13 @@ async function loadBusinessProfile() {
 
         /* =================================================
            LOAD PROFILE PHOTO
+           
+           IMPORTANT:
+           Photo is loaded ONLY from browser localStorage.
+           Nothing is loaded from Supabase Storage.
         ================================================= */
 
-        await loadProfilePhoto();
+        loadProfilePhoto();
 
 
         /* =================================================
@@ -438,84 +441,65 @@ function updateBusinessInitial(name) {
 
 
 /* =========================================================
-   PROFILE PHOTO PATH
+   BROWSER PHOTO STORAGE KEY
 ========================================================= */
 
-function getProfilePhotoPath() {
+function getPhotoStorageKey() {
 
     if (!currentUser) {
         return null;
     }
 
-    return `${currentUser.id}/profile.jpg`;
+    return `potential_business_profile_photo_${currentUser.id}`;
 }
 
 
 /* =========================================================
    LOAD PROFILE PHOTO
+   FROM BROWSER ONLY
 ========================================================= */
 
-async function loadProfilePhoto() {
+function loadProfilePhoto() {
 
-    if (!currentUser) {
-        return;
-    }
-
-
-    const photoPath =
-        getProfilePhotoPath();
+    const key =
+        getPhotoStorageKey();
 
 
-    if (!photoPath) {
+    if (!key) {
         return;
     }
 
 
     try {
 
-        const {
-            data,
-            error
-        } = await supabaseClient
-            .storage
-            .from(PHOTO_BUCKET)
-            .createSignedUrl(
-                photoPath,
-                3600
+        const savedPhoto =
+            localStorage.getItem(key);
+
+
+        if (savedPhoto) {
+
+            currentPhotoUrl =
+                savedPhoto;
+
+            showProfilePhoto(
+                savedPhoto
             );
 
-
-        if (
-            error ||
-            !data ||
-            !data.signedUrl
-        ) {
-
-            console.log(
-                "No profile photo uploaded yet."
-            );
+        } else {
 
             currentPhotoUrl = null;
 
             showPhotoPlaceholder();
-
-            return;
         }
 
 
-        currentPhotoUrl =
-            data.signedUrl;
-
-
-        showProfilePhoto(
-            currentPhotoUrl
-        );
+        updateProfileCompletion();
 
 
     } catch (error) {
 
-        console.warn(
-            "Profile photo loading failed:",
+        console.error(
+            "Browser photo load error:",
             error
         );
 
@@ -598,9 +582,6 @@ function showProfilePhoto(url) {
             avatar.textContent = "";
         }
     }
-
-
-    updateProfileCompletion();
 }
 
 
@@ -708,16 +689,16 @@ function handlePhotoSelection(event) {
     }
 
 
-    /* Maximum 5 MB */
+    /* Maximum 2 MB */
 
     const maxSize =
-        5 * 1024 * 1024;
+        2 * 1024 * 1024;
 
 
     if (file.size > maxSize) {
 
         showPhotoMessage(
-            "Image size must be less than 5 MB.",
+            "Image size must be less than 2 MB.",
             "error"
         );
 
@@ -730,52 +711,59 @@ function handlePhotoSelection(event) {
     selectedPhotoFile = file;
 
 
-    /* Preview */
+    /* Convert image to Base64 */
 
-    const previewUrl =
-        URL.createObjectURL(file);
-
-
-    showProfilePhoto(
-        previewUrl
-    );
+    const reader =
+        new FileReader();
 
 
-    /* Enable upload */
+    reader.onload = function () {
 
-    const uploadButton =
-        $("uploadPhotoBtn");
-
-
-    if (uploadButton) {
-
-        uploadButton.disabled = false;
-    }
+        currentPhotoUrl =
+            reader.result;
 
 
-    showPhotoMessage(
-        "Photo selected. Click Upload Photo.",
-        "info"
-    );
+        /* Show preview */
+
+        showProfilePhoto(
+            currentPhotoUrl
+        );
+
+
+        updateProfileCompletion();
+
+
+        showPhotoMessage(
+            "Photo selected. Click Upload Photo.",
+            "info"
+        );
+    };
+
+
+    reader.onerror = function () {
+
+        showPhotoMessage(
+            "Unable to read the selected photo.",
+            "error"
+        );
+    };
+
+
+    reader.readAsDataURL(file);
 }
 
 
 /* =========================================================
-   UPLOAD PROFILE PHOTO
+   SAVE PROFILE PHOTO
+   BROWSER ONLY
+
+   IMPORTANT:
+   NO SUPABASE STORAGE
+   NO SQL
+   NO DATABASE COLUMN
 ========================================================= */
 
-async function uploadProfilePhoto() {
-
-    if (!currentUser) {
-
-        showPhotoMessage(
-            "Please login again.",
-            "error"
-        );
-
-        return;
-    }
-
+function uploadProfilePhoto() {
 
     if (!selectedPhotoFile) {
 
@@ -788,113 +776,47 @@ async function uploadProfilePhoto() {
     }
 
 
-    const uploadButton =
-        $("uploadPhotoBtn");
+    if (!currentPhotoUrl) {
+
+        showPhotoMessage(
+            "Photo preview is not available.",
+            "error"
+        );
+
+        return;
+    }
+
+
+    const key =
+        getPhotoStorageKey();
+
+
+    if (!key) {
+
+        showPhotoMessage(
+            "User information is not available.",
+            "error"
+        );
+
+        return;
+    }
 
 
     try {
 
-        if (uploadButton) {
+        /* ---------------------------------------------
+           SAVE ONLY IN BROWSER
 
-            uploadButton.disabled = true;
+           Nothing is sent to Supabase.
+        --------------------------------------------- */
 
-            uploadButton.textContent =
-                "Uploading...";
-        }
-
-
-        showPhotoMessage(
-            "Uploading profile photo...",
-            "info"
-        );
-
-
-        const photoPath =
-            getProfilePhotoPath();
-
-
-        /* Upload / replace */
-
-        const {
-            error
-        } = await supabaseClient
-            .storage
-            .from(PHOTO_BUCKET)
-            .upload(
-                photoPath,
-                selectedPhotoFile,
-                {
-                    cacheControl: "3600",
-                    contentType:
-                        selectedPhotoFile.type,
-                    upsert: true
-                }
-            );
-
-
-        if (error) {
-
-            console.error(
-                "Photo upload error:",
-                error
-            );
-
-            showPhotoMessage(
-                "Photo upload failed: " +
-                error.message,
-                "error"
-            );
-
-            return;
-        }
-
-
-        /* Get fresh URL */
-
-        const {
-            data,
-            error: urlError
-        } = await supabaseClient
-            .storage
-            .from(PHOTO_BUCKET)
-            .createSignedUrl(
-                photoPath,
-                3600
-            );
-
-
-        if (
-            urlError ||
-            !data ||
-            !data.signedUrl
-        ) {
-
-            console.error(
-                "Photo URL error:",
-                urlError
-            );
-
-            showPhotoMessage(
-                "Photo uploaded but preview could not be loaded.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        currentPhotoUrl =
-            data.signedUrl;
-
-
-        /* Display */
-
-        showProfilePhoto(
+        localStorage.setItem(
+            key,
             currentPhotoUrl
         );
 
 
-        /* Clear selection */
+        /* Photo successfully saved */
 
         selectedPhotoFile = null;
 
@@ -904,7 +826,21 @@ async function uploadProfilePhoto() {
 
 
         if (fileInput) {
+
             fileInput.value = "";
+        }
+
+
+        const uploadButton =
+            $("uploadPhotoBtn");
+
+
+        if (uploadButton) {
+
+            uploadButton.disabled = true;
+
+            uploadButton.textContent =
+                "Upload Photo";
         }
 
 
@@ -912,35 +848,28 @@ async function uploadProfilePhoto() {
 
 
         showPhotoMessage(
-            "✓ Profile photo uploaded successfully.",
+            "✓ Profile photo saved successfully.",
             "success"
+        );
+
+
+        console.log(
+            "Profile photo saved in browser localStorage."
         );
 
 
     } catch (error) {
 
         console.error(
-            "uploadProfilePhoto() error:",
+            "Browser photo save error:",
             error
         );
 
+
         showPhotoMessage(
-            "Unable to upload photo: " +
-            error.message,
+            "Unable to save photo in this browser.",
             "error"
         );
-
-
-    } finally {
-
-        if (uploadButton) {
-
-            uploadButton.textContent =
-                "Upload Photo";
-
-            uploadButton.disabled =
-                !selectedPhotoFile;
-        }
     }
 }
 
@@ -1046,7 +975,8 @@ async function saveBusinessProfile(event) {
 
 
         if (saveText) {
-            saveText.textContent = "Saving...";
+            saveText.textContent =
+                "Saving...";
         }
 
 

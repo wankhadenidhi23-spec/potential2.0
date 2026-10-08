@@ -1,1139 +1,464 @@
-/*
-=========================================================
-POTEntial - BUSINESS DASHBOARD
-=========================================================
-Existing:
-- Business information
-- Post Opportunity
-- My Opportunities
-- Applicants
-- Business Verification
-- Verification popup
-- Time Slot for all Job Types
-=========================================================
-*/
+// =========================================================
+// POTential - Business Dashboard
+// =========================================================
 
+// =========================================================
+// SUPABASE SETUP
+// =========================================================
 
-/* =====================================================
-   SUPABASE
-===================================================== */
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
 
-const supabaseClient =
-    window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-    );
+// =========================================================
+// HELPER
+// =========================================================
 
+function $(id) {
+    return document.getElementById(id);
+}
+
+// =========================================================
+// GLOBAL VARIABLES
+// =========================================================
 
 let currentUser = null;
-
 let currentBusiness = null;
 
-let businessVerificationStatus =
-    "not_submitted";
-
-
-const $ = (id) =>
-    document.getElementById(id);
-
-
-
-/* =====================================================
-   GENERAL HELPERS
-===================================================== */
-
-function showMessage(
-    text,
-    type = ""
-) {
-
-    const element =
-        $("message");
-
-    if (!element) {
-        return;
-    }
-
-    element.textContent =
-        text;
-
-    element.className =
-        "message " + type;
-}
-
-
-
-function escapeHtml(value) {
-
-    return String(value ?? "")
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-}
-
-
-
-/* =====================================================
-   LOAD BUSINESS
-   SUPABASE READ
-===================================================== */
+// =========================================================
+// LOAD BUSINESS
+// =========================================================
 
 async function loadBusiness() {
 
     const {
-        data: {
-            user
-        },
+        data: { user },
         error: userError
-    } =
-        await supabaseClient
-            .auth
-            .getUser();
+    } = await supabaseClient.auth.getUser();
 
-
-    if (
-        userError ||
-        !user
-    ) {
-
-        window.location.href =
-            "auth.html";
-
-        return false;
+    if (userError || !user) {
+        window.location.href = "auth.html";
+        return;
     }
 
+    currentUser = user;
 
-    currentUser =
-        user;
-
-
-    /*
-    -----------------------------------------------------
-    SUPABASE READ
-    Existing businesses table
-    -----------------------------------------------------
-    */
+    // =====================================================
+    // SUPABASE READ
+    // Get business belonging to logged-in user.
+    // =====================================================
 
     const {
         data: business,
         error
-    } =
-        await supabaseClient
-            .from("businesses")
-            .select("*")
-            .eq(
-                "owner_id",
-                user.id
-            )
-            .single();
-
-
-    if (
-        error ||
-        !business
-    ) {
-
-        console.error(error);
-
-        showMessage(
-            "Business profile not found.",
-            "error"
-        );
-
-        return false;
-    }
-
-
-    currentBusiness =
-        business;
-
-
-    if ($("businessNameTop")) {
-
-        $("businessNameTop")
-            .textContent =
-            business.business_name ||
-            "Business";
-
-    }
-
-
-    if ($("businessName")) {
-
-        $("businessName")
-            .textContent =
-            business.business_name ||
-            "Not provided";
-
-    }
-
-
-    if ($("businessType")) {
-
-        $("businessType")
-            .textContent =
-            business.business_type ||
-            "Not provided";
-
-    }
-
-
-    if ($("businessCity")) {
-
-        $("businessCity")
-            .textContent =
-            business.city ||
-            "Not provided";
-
-    }
-
-
-    if ($("businessPhone")) {
-
-        $("businessPhone")
-            .textContent =
-            business.phone ||
-            "Not provided";
-
-    }
-
-
-    if ($("welcomeText")) {
-
-        $("welcomeText")
-            .textContent =
-            `Welcome, ${
-                business.business_name ||
-                "Business"
-            }! Manage your opportunities here.`;
-
-    }
-
-
-    return true;
-}
-
-
-
-/* =====================================================
-   BUSINESS VERIFICATION STATUS
-   SUPABASE READ
-===================================================== */
-
-async function getBusinessVerificationStatus() {
-
-    if (!currentUser) {
-
-        return "not_submitted";
-    }
-
-
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-            .from(
-                "verification_documents"
-            )
-            .select(
-                "id, status, uploaded_at"
-            )
-            .eq(
-                "user_id",
-                currentUser.id
-            )
-            .eq(
-                "role",
-                "business"
-            )
-            .order(
-                "uploaded_at",
-                {
-                    ascending: false
-                }
-            )
-            .limit(1)
-            .maybeSingle();
-
+    } = await supabaseClient
+        .from("businesses")
+        .select("*")
+        .eq("owner_id", user.id)
+        .single();
 
     if (error) {
+        console.error("Business load error:", error);
 
-        console.error(
-            "Verification status error:",
-            error
-        );
-
-        return "not_submitted";
-    }
-
-
-    if (!data) {
-
-        return "not_submitted";
-    }
-
-
-    return (
-        data.status ||
-        "pending"
-    )
-        .toLowerCase()
-        .trim();
-}
-
-
-
-/* =====================================================
-   UPDATE POSTING ACCESS
-===================================================== */
-
-function updatePostingAccess(
-    status
-) {
-
-    const form =
-        $("opportunityForm");
-
-    if (!form) {
-        return;
-    }
-
-
-    const controls =
-        form.querySelectorAll(
-            "input, textarea, select, button"
-        );
-
-
-    const postButton =
-        $("postBtn");
-
-
-    if (
-        status ===
-        "approved"
-    ) {
-
-        controls.forEach(
-            (control) => {
-
-                control.disabled =
-                    false;
-
-            }
-        );
-
-
-        if (postButton) {
-
-            postButton.disabled =
-                false;
-
+        if ($("message")) {
+            $("message").textContent =
+                "Business information load nahi ho payi.";
         }
 
-
         return;
     }
 
+    currentBusiness = business;
 
-    controls.forEach(
-        (control) => {
+    // =====================================================
+    // BUSINESS INFORMATION
+    // =====================================================
 
-            control.disabled =
-                true;
-
-        }
-    );
-
-
-    if (postButton) {
-
-        postButton.disabled =
-            true;
-
+    if ($("businessName")) {
+        $("businessName").textContent =
+            business.business_name || "Not provided";
     }
 
-
-    if (
-        status ===
-        "not_submitted"
-    ) {
-
-        showMessage(
-            "🔒 Please complete your business verification before posting an opportunity.",
-            "error"
-        );
-
+    if ($("businessType")) {
+        $("businessType").textContent =
+            business.business_type || "Not provided";
     }
 
-
-    else if (
-        status ===
-        "pending"
-    ) {
-
-        showMessage(
-            "⏳ Your business verification is pending admin approval. You can post opportunities after approval.",
-            "error"
-        );
-
+    if ($("businessCity")) {
+        $("businessCity").textContent =
+            business.city || "Not provided";
     }
 
-
-    else if (
-        status ===
-        "rejected"
-    ) {
-
-        showMessage(
-            "❌ Your business verification was rejected. Please update your verification from Business Profile.",
-            "error"
-        );
-
+    if ($("businessPhone")) {
+        $("businessPhone").textContent =
+            business.phone || "Not provided";
     }
 
+    if ($("businessNameTop")) {
+        $("businessNameTop").textContent =
+            business.business_name || "Business";
+    }
+
+    if ($("welcomeText")) {
+        $("welcomeText").textContent =
+            `Welcome, ${business.business_name || "Business"}!`;
+    }
 }
 
-
-
-/* =====================================================
-   VERIFICATION POPUP
-===================================================== */
-
-function showVerificationPopup() {
-
-    const popup =
-        $("verificationPopup");
-
-    if (!popup) {
-        return;
-    }
-
-    popup.classList.add(
-        "show"
-    );
-}
-
-
-
-function hideVerificationPopup() {
-
-    const popup =
-        $("verificationPopup");
-
-    if (!popup) {
-        return;
-    }
-
-    popup.classList.remove(
-        "show"
-    );
-}
-
-
-
-/* =====================================================
-   CHECK BUSINESS VERIFICATION
-===================================================== */
+// =========================================================
+// BUSINESS VERIFICATION STATUS
+// =========================================================
 
 async function checkBusinessVerification() {
 
-    businessVerificationStatus =
-        await getBusinessVerificationStatus();
+    if (!currentUser) return;
 
+    try {
 
-    updatePostingAccess(
-        businessVerificationStatus
-    );
+        const {
+            data: verification,
+            error
+        } = await supabaseClient
+            .from("verification_documents")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .eq("status", "approved")
+            .limit(1)
+            .maybeSingle();
 
-
-    if (
-        businessVerificationStatus ===
-        "approved"
-    ) {
-
-        hideVerificationPopup();
-
-        return;
-    }
-
-
-    showVerificationPopup();
-}
-
-
-
-/* =====================================================
-   TIME SLOT
-   TIME SLOT APPEARS FOR ALL JOB TYPES
-===================================================== */
-
-function setupPartTimeSchedule() {
-
-    const jobType =
-        $("jobType");
-
-    const scheduleGroup =
-        $("partTimeScheduleGroup");
-
-    const period =
-        $("partTimePeriod");
-
-    const startTime =
-        $("partTimeStart");
-
-    const endTime =
-        $("partTimeEnd");
-
-    const preview =
-        $("partTimeSchedulePreview");
-
-
-    if (
-        !jobType ||
-        !scheduleGroup ||
-        !period ||
-        !startTime ||
-        !endTime
-    ) {
-
-        return;
-    }
-
-
-
-    function formatTime(
-        time
-    ) {
-
-        if (!time) {
-            return "";
-        }
-
-
-        const parts =
-            time.split(":");
-
-
-        const hours =
-            Number(parts[0]);
-
-
-        const minutes =
-            parts[1];
-
-
-        const suffix =
-            hours >= 12
-                ? "PM"
-                : "AM";
-
-
-        const displayHour =
-            hours % 12 || 12;
-
-
-        return (
-            String(displayHour)
-                .padStart(2, "0") +
-            ":" +
-            minutes +
-            " " +
-            suffix
-        );
-    }
-
-
-
-    function updatePreview() {
-
-        if (
-            !jobType.value
-        ) {
-
-            if (preview) {
-
-                preview.style.display =
-                    "none";
-
-                preview.textContent =
-                    "";
-
-            }
-
+        if (error) {
+            console.error(
+                "Verification status error:",
+                error
+            );
             return;
         }
 
+        const popup = $("verificationPopup");
+
+        if (!popup) return;
+
+        if (!verification) {
+            popup.style.display = "flex";
+        } else {
+            popup.style.display = "none";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Verification check error:",
+            error
+        );
+    }
+}
+
+// =========================================================
+// PART-TIME SCHEDULE SETUP
+// =========================================================
+// IMPORTANT:
+// Shift/time slot is required ONLY for Part Time.
+// Full Time, Internship and Freelance do NOT need it.
+// =========================================================
+
+function setupPartTimeSchedule() {
+
+    const jobType = $("jobType");
+    const scheduleGroup = $("partTimeScheduleGroup");
+
+    const period = $("partTimePeriod");
+    const start = $("partTimeStart");
+    const end = $("partTimeEnd");
+    const preview = $("partTimeSchedulePreview");
+
+    if (!jobType || !scheduleGroup) {
+        return;
+    }
+
+    function updateScheduleVisibility() {
+
+        // =================================================
+        // ONLY PART TIME SHOWS SHIFT SECTION
+        // =================================================
+
+        if (jobType.value === "Part Time") {
+
+            scheduleGroup.style.display = "block";
+
+            if (period) {
+                period.required = true;
+            }
+
+            if (start) {
+                start.required = true;
+            }
+
+            if (end) {
+                end.required = true;
+            }
+
+        } else {
+
+            // =================================================
+            // ALL OTHER JOB TYPES HIDE SHIFT SECTION
+            // =================================================
+
+            scheduleGroup.style.display = "none";
+
+            if (period) {
+                period.required = false;
+                period.value = "";
+            }
+
+            if (start) {
+                start.required = false;
+                start.value = "";
+            }
+
+            if (end) {
+                end.required = false;
+                end.value = "";
+            }
+
+            if (preview) {
+                preview.style.display = "none";
+                preview.textContent = "";
+            }
+        }
+
+        updateSchedulePreview();
+    }
+
+    function updateSchedulePreview() {
+
+        if (jobType.value !== "Part Time") {
+            return;
+        }
+
+        if (!period || !start || !end || !preview) {
+            return;
+        }
 
         if (
             period.value &&
-            startTime.value &&
-            endTime.value
+            start.value &&
+            end.value
         ) {
 
-            if (preview) {
+            if (start.value >= end.value) {
 
-                preview.style.display =
-                    "block";
-
+                preview.style.display = "block";
                 preview.textContent =
-                    `Selected Time Slot: ${
-                        period.value
-                    } • ${
-                        formatTime(
-                            startTime.value
-                        )
-                    } - ${
-                        formatTime(
-                            endTime.value
-                        )
-                    }`;
+                    "End time must be after start time.";
 
+                return;
             }
 
+            const startTime =
+                formatTimeForDisplay(start.value);
+
+            const endTime =
+                formatTimeForDisplay(end.value);
+
+            preview.style.display = "block";
+
+            preview.textContent =
+                `Selected Shift: ${period.value} • ${startTime} - ${endTime}`;
+
+        } else {
+
+            preview.style.display = "none";
+            preview.textContent = "";
         }
-
-        else {
-
-            if (preview) {
-
-                preview.style.display =
-                    "none";
-
-                preview.textContent =
-                    "";
-
-            }
-
-        }
-
     }
-
-
-
-    function updateVisibility() {
-
-        const hasJobType =
-            Boolean(
-                jobType.value
-            );
-
-
-        if (hasJobType) {
-
-            scheduleGroup.style.display =
-                "block";
-
-
-            period.required =
-                true;
-
-
-            startTime.required =
-                true;
-
-
-            endTime.required =
-                true;
-
-
-            updatePreview();
-
-        }
-
-        else {
-
-            scheduleGroup.style.display =
-                "none";
-
-
-            period.required =
-                false;
-
-
-            startTime.required =
-                false;
-
-
-            endTime.required =
-                false;
-
-
-            period.value =
-                "";
-
-
-            startTime.value =
-                "";
-
-
-            endTime.value =
-                "";
-
-
-            if (preview) {
-
-                preview.style.display =
-                    "none";
-
-                preview.textContent =
-                    "";
-
-            }
-
-        }
-
-    }
-
-
 
     jobType.addEventListener(
         "change",
-        updateVisibility
+        updateScheduleVisibility
     );
 
+    if (period) {
+        period.addEventListener(
+            "change",
+            updateSchedulePreview
+        );
+    }
 
-    period.addEventListener(
-        "change",
-        updatePreview
-    );
+    if (start) {
+        start.addEventListener(
+            "change",
+            updateSchedulePreview
+        );
+    }
 
+    if (end) {
+        end.addEventListener(
+            "change",
+            updateSchedulePreview
+        );
+    }
 
-    startTime.addEventListener(
-        "change",
-        updatePreview
-    );
-
-
-    endTime.addEventListener(
-        "change",
-        updatePreview
-    );
-
-
-    updateVisibility();
-
+    updateScheduleVisibility();
 }
 
+// =========================================================
+// FORMAT TIME
+// =========================================================
 
+function formatTimeForDisplay(timeValue) {
 
-/* =====================================================
-   CREATE TIME SLOT
-   Saved in existing jobs.availability column
-===================================================== */
-
-function getAvailabilityValue() {
-
-    const jobType =
-        $("jobType");
-
-    const period =
-        $("partTimePeriod");
-
-    const start =
-        $("partTimeStart");
-
-    const end =
-        $("partTimeEnd");
-
-
-    if (
-        !jobType ||
-        !jobType.value
-    ) {
-
+    if (!timeValue) {
         return "";
     }
 
+    const [hours, minutes] =
+        timeValue.split(":").map(Number);
 
-    const periodValue =
-        period
-            ? period.value
-            : "";
+    const period =
+        hours >= 12 ? "PM" : "AM";
 
-
-    const startValue =
-        start
-            ? start.value
-            : "";
-
-
-    const endValue =
-        end
-            ? end.value
-            : "";
-
-
-
-    /*
-    -----------------------------------------------------
-    TIME SLOT VALIDATION
-    -----------------------------------------------------
-    */
-
-    if (!periodValue) {
-
-        showMessage(
-            "Please select the time period.",
-            "error"
-        );
-
-        return null;
-    }
-
-
-    if (!startValue) {
-
-        showMessage(
-            "Please select the start time.",
-            "error"
-        );
-
-        return null;
-    }
-
-
-    if (!endValue) {
-
-        showMessage(
-            "Please select the end time.",
-            "error"
-        );
-
-        return null;
-    }
-
-
-    if (
-        startValue >= endValue
-    ) {
-
-        showMessage(
-            "End time must be later than start time.",
-            "error"
-        );
-
-        return null;
-    }
-
-
-
-    const startFormatted =
-        formatTimeForDisplay(
-            startValue
-        );
-
-
-    const endFormatted =
-        formatTimeForDisplay(
-            endValue
-        );
-
-
-    return (
-        `${periodValue} • ` +
-        `${startFormatted} - ` +
-        `${endFormatted}`
-    );
-
-}
-
-
-
-/* =====================================================
-   FORMAT TIME FOR DISPLAY
-===================================================== */
-
-function formatTimeForDisplay(
-    time
-) {
-
-    const [
-        hoursString,
-        minutes
-    ] =
-        time.split(":");
-
-
-    const hours =
-        Number(hoursString);
-
-
-    const suffix =
-        hours >= 12
-            ? "PM"
-            : "AM";
-
-
-    const displayHour =
+    const displayHours =
         hours % 12 || 12;
 
-
-    return (
-        String(displayHour)
-            .padStart(2, "0") +
-        ":" +
-        minutes +
-        " " +
-        suffix
-    );
-
+    return `${displayHours}:${String(minutes).padStart(2, "0")} ${period}`;
 }
 
+// =========================================================
+// GET AVAILABILITY / SHIFT VALUE
+// =========================================================
 
+function getAvailabilityValue() {
 
-/* =====================================================
-   POST OPPORTUNITY
-   SUPABASE WRITE
-===================================================== */
+    const jobType = $("jobType");
 
-async function postOpportunity(
-    event
-) {
+    if (!jobType || !jobType.value) {
+        return "";
+    }
+
+    // =====================================================
+    // ONLY PART TIME NEEDS SHIFT
+    // =====================================================
+
+    if (jobType.value !== "Part Time") {
+        return "";
+    }
+
+    const period =
+        $("partTimePeriod")?.value || "";
+
+    const start =
+        $("partTimeStart")?.value || "";
+
+    const end =
+        $("partTimeEnd")?.value || "";
+
+    if (!period) {
+        throw new Error(
+            "Please select a time period for Part Time."
+        );
+    }
+
+    if (!start) {
+        throw new Error(
+            "Please select the start time for Part Time."
+        );
+    }
+
+    if (!end) {
+        throw new Error(
+            "Please select the end time for Part Time."
+        );
+    }
+
+    if (start >= end) {
+        throw new Error(
+            "End time must be after start time."
+        );
+    }
+
+    const startTime =
+        formatTimeForDisplay(start);
+
+    const endTime =
+        formatTimeForDisplay(end);
+
+    return `${period} • ${startTime} - ${endTime}`;
+}
+
+// =========================================================
+// POST OPPORTUNITY
+// =========================================================
+
+async function postOpportunity(event) {
 
     event.preventDefault();
 
-
-    /*
-    -----------------------------------------------------
-    Re-check verification before posting
-    -----------------------------------------------------
-    */
-
-    businessVerificationStatus =
-        await getBusinessVerificationStatus();
-
-
-    if (
-        businessVerificationStatus !==
-        "approved"
-    ) {
-
-        updatePostingAccess(
-            businessVerificationStatus
-        );
-
-        showVerificationPopup();
-
-        return;
-    }
-
-
-
-    if (!currentBusiness) {
-
+    if (!currentUser || !currentBusiness) {
         showMessage(
-            "Business not found.",
+            "Business information load nahi hui.",
             "error"
         );
-
         return;
     }
 
+    const title =
+        $("title")?.value.trim() || "";
 
+    const description =
+        $("description")?.value.trim() || "";
 
-    /*
-    -----------------------------------------------------
-    Time Slot
-    -----------------------------------------------------
-    */
+    const location =
+        $("location")?.value.trim() || "";
 
-    const availabilityValue =
-        getAvailabilityValue();
+    const jobType =
+        $("jobType")?.value || "";
 
+    const skills =
+        $("skills")?.value.trim() || "";
 
-    if (
-        availabilityValue ===
-        null
-    ) {
+    const salary =
+        $("salary")?.value || "";
 
-        return;
-    }
+    const deadline =
+        $("deadline")?.value || "";
 
-
-
-    /*
-    -----------------------------------------------------
-    JOB DATA
-    Existing jobs table
-    -----------------------------------------------------
-    */
-
-    const jobData = {
-
-        business_id:
-            currentBusiness.id,
-
-        title:
-            $("title")
-                .value
-                .trim(),
-
-        description:
-            $("description")
-                .value
-                .trim(),
-
-        required_skills:
-            $("skills")
-                .value
-                .trim(),
-
-        job_type:
-            $("jobType")
-                .value,
-
-        salary:
-            $("salary")
-                .value
-                ?
-                Number(
-                    $("salary")
-                        .value
-                )
-                :
-                null,
-
-        /*
-        Time Slot is saved inside
-        existing availability field.
-        */
-
-        availability:
-            availabilityValue,
-
-        deadline:
-            $("deadline")
-                .value ||
-            null,
-
-        status:
-            "open"
-
-    };
-
-
-
-    /*
-    -----------------------------------------------------
-    VALIDATION
-    -----------------------------------------------------
-    */
-
-    if (
-        !jobData.title ||
-        !jobData.description ||
-        !jobData.job_type
-    ) {
-
+    if (!title) {
         showMessage(
-            "Please fill all required fields.",
+            "Please enter opportunity title.",
             "error"
         );
-
         return;
     }
 
-
-
-    if (
-        !jobData.required_skills
-    ) {
-
+    if (!description) {
         showMessage(
-            "Please enter the required skills.",
+            "Please enter description.",
             "error"
         );
-
         return;
     }
 
-
-
-    if (
-        !jobData.deadline
-    ) {
-
+    if (!jobType) {
         showMessage(
-            "Please select an application deadline.",
+            "Please select job type.",
             "error"
         );
-
         return;
     }
 
+    let availabilityValue = "";
 
+    try {
 
-    /*
-    -----------------------------------------------------
-    BUTTON
-    -----------------------------------------------------
-    */
+        // =================================================
+        // PART-TIME SHIFT
+        // =================================================
 
-    const postButton =
-        $("postBtn");
+        availabilityValue =
+            getAvailabilityValue();
 
-
-    postButton.disabled =
-        true;
-
-
-    postButton.textContent =
-        "Posting...";
-
-
-
-    /*
-    -----------------------------------------------------
-    SUPABASE WRITE
-    jobs table
-    -----------------------------------------------------
-    */
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("jobs")
-            .insert(
-                jobData
-            );
-
-
-
-    postButton.disabled =
-        false;
-
-
-    postButton.textContent =
-        "Post Opportunity";
-
-
-
-    if (error) {
-
-        console.error(
-            "Post opportunity error:",
-            error
-        );
+    } catch (error) {
 
         showMessage(
             error.message,
@@ -1143,128 +468,286 @@ async function postOpportunity(
         return;
     }
 
+    const postButton = $("postBtn");
 
-
-    /*
-    -----------------------------------------------------
-    SUCCESS
-    -----------------------------------------------------
-    */
-
-    $("opportunityForm")
-        .reset();
-
-
-    /*
-    Reset Time Slot UI
-    */
-
-    const scheduleGroup =
-        $("partTimeScheduleGroup");
-
-    const preview =
-        $("partTimeSchedulePreview");
-
-    const period =
-        $("partTimePeriod");
-
-    const startTime =
-        $("partTimeStart");
-
-    const endTime =
-        $("partTimeEnd");
-
-
-    if (scheduleGroup) {
-
-        scheduleGroup.style.display =
-            "none";
-
+    if (postButton) {
+        postButton.disabled = true;
+        postButton.textContent = "Posting...";
     }
 
+    try {
 
-    if (preview) {
+        // =================================================
+        // SUPABASE WRITE
+        // Insert opportunity into existing jobs table.
+        // =================================================
 
-        preview.style.display =
-            "none";
+        const {
+            data,
+            error
+        } = await supabaseClient
+            .from("jobs")
+            .insert([
+                {
+                    business_id: currentBusiness.id,
+                    title: title,
+                    description: description,
+                    required_skills: skills,
+                    job_type: jobType,
+                    salary: salary
+                        ? Number(salary)
+                        : null,
+                    availability:
+                        availabilityValue,
+                    deadline:
+                        deadline || null,
+                    status: "open"
+                }
+            ])
+            .select()
+            .single();
 
-        preview.textContent =
-            "";
+        if (error) {
+            console.error(
+                "Post opportunity error:",
+                error
+            );
 
+            throw error;
+        }
+
+        console.log(
+            "Opportunity posted:",
+            data
+        );
+
+        showMessage(
+            "✓ Opportunity successfully posted!",
+            "success"
+        );
+
+        // =================================================
+        // RESET FORM
+        // =================================================
+
+        const form = $("opportunityForm");
+
+        if (form) {
+            form.reset();
+        }
+
+        // =================================================
+        // RESET PART-TIME SHIFT SECTION
+        // =================================================
+
+        const scheduleGroup =
+            $("partTimeScheduleGroup");
+
+        if (scheduleGroup) {
+            scheduleGroup.style.display = "none";
+        }
+
+        if ($("partTimePeriod")) {
+            $("partTimePeriod").required = false;
+            $("partTimePeriod").value = "";
+        }
+
+        if ($("partTimeStart")) {
+            $("partTimeStart").required = false;
+            $("partTimeStart").value = "";
+        }
+
+        if ($("partTimeEnd")) {
+            $("partTimeEnd").required = false;
+            $("partTimeEnd").value = "";
+        }
+
+        if ($("partTimeSchedulePreview")) {
+            $("partTimeSchedulePreview").style.display =
+                "none";
+
+            $("partTimeSchedulePreview").textContent =
+                "";
+        }
+
+        // =================================================
+        // REFRESH MY OPPORTUNITIES
+        // =================================================
+
+        await loadMyJobs();
+
+    } catch (error) {
+
+        console.error(
+            "Post opportunity error:",
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "Opportunity post nahi ho payi.",
+            "error"
+        );
+
+    } finally {
+
+        if (postButton) {
+            postButton.disabled = false;
+            postButton.textContent =
+                "Post Opportunity";
+        }
     }
-
-
-    if (period) {
-
-        period.required =
-            false;
-
-    }
-
-
-    if (startTime) {
-
-        startTime.required =
-            false;
-
-    }
-
-
-    if (endTime) {
-
-        endTime.required =
-            false;
-
-    }
-
-
-    showMessage(
-        "Opportunity posted successfully!",
-        "success"
-    );
-
-
-    await loadMyJobs();
-
 }
 
-
-
-/* =====================================================
-   LOAD MY OPPORTUNITIES
-   SUPABASE READ
-===================================================== */
+// =========================================================
+// LOAD MY OPPORTUNITIES
+// =========================================================
 
 async function loadMyJobs() {
 
-    if (!currentBusiness) {
-        return;
-    }
-
+    if (!currentBusiness) return;
 
     const container =
         $("jobsContainer");
 
-
-    if (!container) {
-        return;
-    }
-
+    if (!container) return;
 
     container.innerHTML =
-        "<p class='loading'>Loading opportunities...</p>";
+        `<p class="loading">Loading opportunities...</p>`;
 
-
+    // =====================================================
+    // SUPABASE READ
+    // =====================================================
 
     const {
         data: jobs,
         error
-    } =
-        await supabaseClient
-            .from("jobs")
-            .select("*")
+    } = await supabaseClient
+        .from("jobs")
+        .select("*")
+        .eq(
+            "business_id",
+            currentBusiness.id
+        )
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        );
+
+    if (error) {
+
+        console.error(
+            "Jobs load error:",
+            error
+        );
+
+        container.innerHTML =
+            `<p class="error-text">Unable to load opportunities.</p>`;
+
+        return;
+    }
+
+    if (!jobs || jobs.length === 0) {
+
+        container.innerHTML =
+            `<p class="loading">No opportunities posted yet.</p>`;
+
+        return;
+    }
+
+    container.innerHTML = "";
+
+    jobs.forEach(job => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "job-card";
+
+        const availability =
+            job.availability
+                ? `<p><strong>Shift:</strong> ${job.availability}</p>`
+                : "";
+
+        const salary =
+            job.salary !== null &&
+            job.salary !== undefined &&
+            job.salary !== ""
+                ? `<p><strong>Salary/Stipend:</strong> ₹${job.salary}</p>`
+                : "";
+
+        const deadline =
+            job.deadline
+                ? `<p><strong>Deadline:</strong> ${job.deadline}</p>`
+                : "";
+
+        card.innerHTML = `
+            <h3>${escapeHTML(job.title || "")}</h3>
+
+            <p>
+                ${escapeHTML(job.description || "")}
+            </p>
+
+            <p>
+                <strong>Job Type:</strong>
+                ${escapeHTML(job.job_type || "")}
+            </p>
+
+            ${salary}
+
+            ${availability}
+
+            ${deadline}
+
+            <p>
+                <strong>Status:</strong>
+                ${escapeHTML(job.status || "open")}
+            </p>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+// =========================================================
+// LOAD APPLICATIONS
+// =========================================================
+
+async function loadApplications() {
+
+    if (!currentBusiness) return;
+
+    const container =
+        $("applicationsContainer");
+
+    if (!container) return;
+
+    container.innerHTML =
+        `<p class="loading">Loading applications...</p>`;
+
+    try {
+
+        // =================================================
+        // SUPABASE READ
+        // =================================================
+
+        const {
+            data: applications,
+            error
+        } = await supabaseClient
+            .from("applications")
+            .select(`
+                *,
+                jobs (
+                    id,
+                    title,
+                    business_id
+                )
+            `)
             .eq(
-                "business_id",
+                "jobs.business_id",
                 currentBusiness.id
             )
             .order(
@@ -1274,866 +757,344 @@ async function loadMyJobs() {
                 }
             );
 
+        if (error) {
+            throw error;
+        }
 
+        if (
+            !applications ||
+            applications.length === 0
+        ) {
 
-    if (error) {
+            container.innerHTML =
+                `<p class="loading">No applications yet.</p>`;
 
-        console.error(
-            "Jobs error:",
-            error
-        );
+            return;
+        }
 
-        container.innerHTML =
-            "<p>Unable to load opportunities.</p>";
+        container.innerHTML = "";
 
-        return;
-    }
-
-
-
-    if (
-        !jobs ||
-        !jobs.length
-    ) {
-
-        container.innerHTML =
-            "<p>No opportunities posted yet.</p>";
-
-        return;
-    }
-
-
-
-    container.innerHTML =
-        "";
-
-
-
-    jobs.forEach(
-        (job) => {
+        applications.forEach(application => {
 
             const card =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             card.className =
                 "job-card";
 
-
-
             card.innerHTML = `
-
                 <h3>
-                    ${escapeHtml(
-                        job.title
+                    ${escapeHTML(
+                        application.jobs?.title ||
+                        "Opportunity"
                     )}
                 </h3>
 
-
                 <p>
-                    ${escapeHtml(
-                        job.description
+                    <strong>Status:</strong>
+                    ${escapeHTML(
+                        application.status ||
+                        "pending"
                     )}
                 </p>
 
+                <div style="margin-top:12px;">
+                    <button
+                        type="button"
+                        class="refresh-btn"
+                        onclick="updateApplicationStatus('${application.id}', 'accepted')"
+                    >
+                        Accept
+                    </button>
 
-                <div class="job-details">
-
-                    <span>
-                        💼
-                        ${escapeHtml(
-                            job.job_type
-                        )}
-                    </span>
-
-
-                    <span>
-                        💰
-                        ₹${job.salary ?? "Not specified"}
-                    </span>
-
-
-                    <span>
-                        👥
-                        ${escapeHtml(
-                            job.availability ||
-                            "Not specified"
-                        )}
-                    </span>
-
-
-                    <span>
-                        📅
-                        ${escapeHtml(
-                            job.deadline ||
-                            "Not specified"
-                        )}
-                    </span>
-
-
-                    <span>
-                        Status:
-                        ${escapeHtml(
-                            job.status
-                        )}
-                    </span>
-
+                    <button
+                        type="button"
+                        class="refresh-btn"
+                        onclick="updateApplicationStatus('${application.id}', 'rejected')"
+                    >
+                        Reject
+                    </button>
                 </div>
-
             `;
 
+            container.appendChild(card);
+        });
 
-            container.appendChild(
-                card
-            );
+    } catch (error) {
 
-        }
-    );
+        console.error(
+            "Applications load error:",
+            error
+        );
 
+        container.innerHTML =
+            `<p class="error-text">Unable to load applications.</p>`;
+    }
 }
 
+// =========================================================
+// UPDATE APPLICATION STATUS
+// =========================================================
 
+async function updateApplicationStatus(
+    applicationId,
+    status
+) {
 
-/* =====================================================
-   LOAD APPLICATIONS
-   SUPABASE READ
-===================================================== */
+    try {
 
-async function loadApplications() {
+        // =================================================
+        // SUPABASE WRITE
+        // =================================================
 
-    const container =
-        $("applicationsContainer");
+        const {
+            error
+        } = await supabaseClient
+            .from("applications")
+            .update({
+                status: status
+            })
+            .eq(
+                "id",
+                applicationId
+            );
 
+        if (error) {
+            throw error;
+        }
 
-    if (!container) {
-        return;
+        showMessage(
+            `Application ${status}.`,
+            "success"
+        );
+
+        await loadApplications();
+
+    } catch (error) {
+
+        console.error(
+            "Application status error:",
+            error
+        );
+
+        showMessage(
+            error.message ||
+            "Application status update nahi hua.",
+            "error"
+        );
     }
+}
 
+// =========================================================
+// ESCAPE HTML
+// =========================================================
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+// =========================================================
+// MESSAGE
+// =========================================================
+
+function showMessage(
+    message,
+    type = "success"
+) {
+
+    const messageBox =
+        $("message");
+
+    if (!messageBox) return;
+
+    messageBox.textContent =
+        message;
+
+    messageBox.className =
+        `message ${type}`;
+
+    setTimeout(() => {
+
+        messageBox.textContent =
+            "";
+
+        messageBox.className =
+            "message";
+
+    }, 4000);
+}
+
+// =========================================================
+// LOGOUT
+// =========================================================
+
+async function logout() {
+
+    try {
+
+        const {
+            error
+        } = await supabaseClient.auth.signOut();
+
+        if (error) {
+            throw error;
+        }
+
+        window.location.href =
+            "auth.html";
+
+    } catch (error) {
+
+        console.error(
+            "Logout error:",
+            error
+        );
+
+        showMessage(
+            "Logout nahi ho paya.",
+            "error"
+        );
+    }
+}
+
+// =========================================================
+// START DASHBOARD
+// =========================================================
+
+async function startDashboard() {
+
+    await loadBusiness();
 
     if (!currentBusiness) {
         return;
     }
 
-
-    container.innerHTML =
-        "<p class='loading'>Loading applications...</p>";
-
-
-
-    /*
-    -----------------------------------------------------
-    GET BUSINESS JOBS
-    -----------------------------------------------------
-    */
-
-    const {
-        data: jobs,
-        error: jobsError
-    } =
-        await supabaseClient
-            .from("jobs")
-            .select(
-                "id,title"
-            )
-            .eq(
-                "business_id",
-                currentBusiness.id
-            );
-
-
-
-    if (jobsError) {
-
-        console.error(
-            jobsError
-        );
-
-        container.innerHTML =
-            "<p>Unable to load opportunities.</p>";
-
-        return;
-    }
-
-
-
-    if (
-        !jobs ||
-        !jobs.length
-    ) {
-
-        container.innerHTML =
-            "<p>No opportunities posted yet.</p>";
-
-        return;
-    }
-
-
-
-    const jobIds =
-        jobs.map(
-            (job) =>
-                job.id
-        );
-
-
-
-    /*
-    -----------------------------------------------------
-    GET APPLICATIONS
-    -----------------------------------------------------
-    */
-
-    const {
-        data: applications,
-        error: applicationsError
-    } =
-        await supabaseClient
-            .from("applications")
-            .select("*")
-            .in(
-                "job_id",
-                jobIds
-            )
-            .order(
-                "applied_at",
-                {
-                    ascending: false
-                }
-            );
-
-
-
-    if (applicationsError) {
-
-        console.error(
-            applicationsError
-        );
-
-        container.innerHTML =
-            "<p>Unable to load applications.</p>";
-
-        return;
-    }
-
-
-
-    if (
-        !applications ||
-        !applications.length
-    ) {
-
-        container.innerHTML =
-            "<p>No students have applied yet.</p>";
-
-        return;
-    }
-
-
-
-    /*
-    -----------------------------------------------------
-    GET STUDENT IDS
-    -----------------------------------------------------
-    */
-
-    const studentIds =
-        applications.map(
-            (app) =>
-                app.student_id
-        );
-
-
-
-    /*
-    -----------------------------------------------------
-    GET STUDENT PROFILES
-    -----------------------------------------------------
-    */
-
-    const {
-        data: students,
-        error: studentsError
-    } =
-        await supabaseClient
-            .from("profiles")
-            .select(
-                "user_id, full_name"
-            )
-            .in(
-                "user_id",
-                studentIds
-            );
-
-
-
-    if (studentsError) {
-
-        console.error(
-            "Student profile error:",
-            studentsError
-        );
-    }
-
-
-
-    container.innerHTML =
-        "";
-
-
-
-    /*
-    -----------------------------------------------------
-    DISPLAY APPLICATIONS
-    -----------------------------------------------------
-    */
-
-    applications.forEach(
-        (app) => {
-
-            const job =
-                jobs.find(
-                    (j) =>
-                        j.id ===
-                        app.job_id
-                );
-
-
-            const student =
-                students?.find(
-                    (s) =>
-                        s.user_id ===
-                        app.student_id
-                );
-
-
-            const studentName =
-                student?.full_name ||
-                "Student";
-
-
-            const status =
-                (
-                    app.status ||
-                    "pending"
-                )
-                    .toLowerCase();
-
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "job-card";
-
-
-            let actionButtons =
-                "";
-
-
-
-            if (
-                status ===
-                "pending"
-            ) {
-
-                actionButtons = `
-
-                    <div class="job-actions">
-
-                        <button
-                            class="post-btn"
-                            onclick="
-                                updateApplicationStatus(
-                                    '${app.id}',
-                                    'accepted'
-                                )
-                            ">
-
-                            Accept
-
-                        </button>
-
-
-                        <button
-                            class="logout-btn"
-                            onclick="
-                                updateApplicationStatus(
-                                    '${app.id}',
-                                    'rejected'
-                                )
-                            ">
-
-                            Reject
-
-                        </button>
-
-                    </div>
-
-                `;
-
-            }
-
-
-
-            else if (
-                status ===
-                "accepted"
-            ) {
-
-                actionButtons = `
-
-                    <div class="job-actions">
-
-                        <button
-                            class="post-btn"
-                            disabled>
-
-                            Accepted
-
-                        </button>
-
-                    </div>
-
-                `;
-
-            }
-
-
-
-            else if (
-                status ===
-                "rejected"
-            ) {
-
-                actionButtons = `
-
-                    <div class="job-actions">
-
-                        <button
-                            class="logout-btn"
-                            disabled>
-
-                            Rejected
-
-                        </button>
-
-                    </div>
-
-                `;
-            }
-
-
-
-            card.innerHTML = `
-
-                <h3>
-                    ${escapeHtml(
-                        job?.title ||
-                        "Opportunity"
-                    )}
-                </h3>
-
-
-                <p>
-
-                    <strong>
-                        Student:
-                    </strong>
-
-                    ${escapeHtml(
-                        studentName
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    <strong>
-                        Status:
-                    </strong>
-
-                    ${escapeHtml(
-                        status
-                    )}
-
-                </p>
-
-
-                <p>
-
-                    <strong>
-                        Applied:
-                    </strong>
-
-                    ${
-                        app.applied_at
-                            ? new Date(
-                                app.applied_at
-                            ).toLocaleDateString()
-                            : "-"
-                    }
-
-                </p>
-
-
-                ${actionButtons}
-
-            `;
-
-
-            container.appendChild(
-                card
-            );
-
-        }
-    );
-
-}
-
-
-
-/* =====================================================
-   UPDATE APPLICATION STATUS
-   SUPABASE WRITE
-===================================================== */
-
-async function updateApplicationStatus(
-    id,
-    status
-) {
-
-    const confirmMessage =
-        status === "accepted"
-            ? "Are you sure you want to accept this student?"
-            : "Are you sure you want to reject this student?";
-
-
-    if (
-        !confirm(
-            confirmMessage
-        )
-    ) {
-
-        return;
-    }
-
-
-
-    const {
-        error
-    } =
-        await supabaseClient
-            .from("applications")
-            .update({
-                status:
-                    status
-            })
-            .eq(
-                "id",
-                id
-            );
-
-
-
-    if (error) {
-
-        console.error(
-            error
-        );
-
-        alert(
-            "Unable to update application: " +
-            error.message
-        );
-
-        return;
-    }
-
-
-
-    await loadApplications();
-
-}
-
-
-
-/* =====================================================
-   LOGOUT
-===================================================== */
-
-async function logout() {
-
-    await supabaseClient
-        .auth
-        .signOut();
-
-
-    window.location.href =
-        "auth.html";
-
-}
-
-
-
-/* =====================================================
-   POPUP BUTTON EVENTS
-===================================================== */
-
-document.addEventListener(
-    "click",
-    function (event) {
-
-
-        /*
-        -------------------------------------------------
-        CLOSE POPUP
-        -------------------------------------------------
-        */
-
-        const closeButton =
-            event.target.closest(
-                "#closeVerificationPopup"
-            );
-
-
-        if (closeButton) {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-            hideVerificationPopup();
-
-            return;
-        }
-
-
-
-        /*
-        -------------------------------------------------
-        GO TO BUSINESS PROFILE
-        -------------------------------------------------
-        */
-
-        const verifyButton =
-            event.target.closest(
-                "#verifyBusinessBtn"
-            );
-
-
-        if (verifyButton) {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-            window.location.href =
-                "business-profile.html";
-
-            return;
-        }
-
-
-
-        /*
-        -------------------------------------------------
-        SIDEBAR LOGOUT
-        -------------------------------------------------
-        */
-
-        const sidebarLogout =
-            event.target.closest(
-                "#sidebarLogout"
-            );
-
-
-        if (sidebarLogout) {
-
-            event.preventDefault();
-
-            logout();
-
-            return;
-        }
-
-    }
-);
-
-
-
-/* =====================================================
-   POPUP OVERLAY CLICK
-===================================================== */
-
-document.addEventListener(
-    "click",
-    function (event) {
-
-        const popup =
-            $("verificationPopup");
-
-
-        if (
-            popup &&
-            event.target === popup
-        ) {
-
-            hideVerificationPopup();
-
-        }
-
-    }
-);
-
-
-
-/* =====================================================
-   START DASHBOARD
-===================================================== */
-
-async function startDashboard() {
-
-    const loaded =
-        await loadBusiness();
-
-
-    if (!loaded) {
-        return;
-    }
-
-
-    /*
-    -----------------------------------------------------
-    Time Slot UI
-    -----------------------------------------------------
-    */
-
     setupPartTimeSchedule();
-
-
-    /*
-    -----------------------------------------------------
-    Load existing opportunities
-    -----------------------------------------------------
-    */
 
     await loadMyJobs();
 
-
-    /*
-    -----------------------------------------------------
-    Load applications
-    -----------------------------------------------------
-    */
-
     await loadApplications();
 
-
-    /*
-    -----------------------------------------------------
-    Check verification
-    -----------------------------------------------------
-    */
-
     await checkBusinessVerification();
-
 }
 
+// =========================================================
+// EVENT LISTENERS
+// =========================================================
 
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
-/* =====================================================
-   EVENT LISTENERS
-===================================================== */
+        // Opportunity form
+        const opportunityForm =
+            $("opportunityForm");
 
+        if (opportunityForm) {
 
-/*
----------------------------------------------------------
-Opportunity Form
----------------------------------------------------------
-*/
+            opportunityForm.addEventListener(
+                "submit",
+                postOpportunity
+            );
+        }
 
-if (
-    $("opportunityForm")
-) {
+        // Refresh jobs
+        const refreshJobs =
+            $("refreshJobs");
 
-    $("opportunityForm")
-        .addEventListener(
-            "submit",
-            postOpportunity
-        );
+        if (refreshJobs) {
 
-}
+            refreshJobs.addEventListener(
+                "click",
+                loadMyJobs
+            );
+        }
 
+        // Refresh applications
+        const refreshApplications =
+            $("refreshApplications");
 
+        if (refreshApplications) {
 
-/*
----------------------------------------------------------
-Refresh Jobs
----------------------------------------------------------
-*/
+            refreshApplications.addEventListener(
+                "click",
+                loadApplications
+            );
+        }
 
-if (
-    $("refreshJobs")
-) {
+        // Top logout
+        const logoutBtn =
+            $("logoutBtn");
 
-    $("refreshJobs")
-        .addEventListener(
-            "click",
-            loadMyJobs
-        );
+        if (logoutBtn) {
 
-}
+            logoutBtn.addEventListener(
+                "click",
+                logout
+            );
+        }
 
+        // Sidebar logout
+        const sidebarLogout =
+            $("sidebarLogout");
 
+        if (sidebarLogout) {
 
-/*
----------------------------------------------------------
-Refresh Applications
----------------------------------------------------------
-*/
+            sidebarLogout.addEventListener(
+                "click",
+                event => {
 
-if (
-    $("refreshApplications")
-) {
+                    event.preventDefault();
 
-    $("refreshApplications")
-        .addEventListener(
-            "click",
-            loadApplications
-        );
+                    logout();
+                }
+            );
+        }
 
-}
+        // Close verification popup
+        const closePopup =
+            $("closeVerificationPopup");
 
+        if (closePopup) {
 
+            closePopup.addEventListener(
+                "click",
+                () => {
 
-/*
----------------------------------------------------------
-Navbar Logout
----------------------------------------------------------
-*/
+                    const popup =
+                        $("verificationPopup");
 
-if (
-    $("logoutBtn")
-) {
+                    if (popup) {
+                        popup.style.display =
+                            "none";
+                    }
+                }
+            );
+        }
 
-    $("logoutBtn")
-        .addEventListener(
-            "click",
-            logout
-        );
+        // Verification button
+        const verifyButton =
+            $("verifyBusinessBtn");
 
-}
+        if (verifyButton) {
 
+            verifyButton.addEventListener(
+                "click",
+                () => {
 
+                    window.location.href =
+                        "business-profile.html";
+                }
+            );
+        }
 
-/* =====================================================
-   RUN
-===================================================== */
-
-startDashboard();
+        // Start dashboard
+        startDashboard();
+    }
+);

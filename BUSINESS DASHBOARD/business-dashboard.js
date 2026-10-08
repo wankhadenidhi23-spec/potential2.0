@@ -9,7 +9,7 @@ Existing:
 - Applicants
 - Business Verification
 - Verification popup
-- Part-Time Time Slot
+- Time Slot for all Job Types
 =========================================================
 */
 
@@ -482,7 +482,8 @@ async function checkBusinessVerification() {
 
 
 /* =====================================================
-   PART-TIME TIME SLOT
+   TIME SLOT
+   TIME SLOT APPEARS FOR ALL JOB TYPES
 ===================================================== */
 
 function setupPartTimeSchedule() {
@@ -502,9 +503,6 @@ function setupPartTimeSchedule() {
     const endTime =
         $("partTimeEnd");
 
-    const availability =
-        $("availability");
-
     const preview =
         $("partTimeSchedulePreview");
 
@@ -518,22 +516,6 @@ function setupPartTimeSchedule() {
     ) {
 
         return;
-    }
-
-
-
-    function isPartTime() {
-
-        const value =
-            jobType.value
-                .toLowerCase()
-                .trim();
-
-
-        return (
-            value === "part time" ||
-            value === "part-time"
-        );
     }
 
 
@@ -571,7 +553,7 @@ function setupPartTimeSchedule() {
 
         return (
             String(displayHour)
-            .padStart(2, "0") +
+                .padStart(2, "0") +
             ":" +
             minutes +
             " " +
@@ -584,7 +566,7 @@ function setupPartTimeSchedule() {
     function updatePreview() {
 
         if (
-            !isPartTime()
+            !jobType.value
         ) {
 
             if (preview) {
@@ -613,7 +595,7 @@ function setupPartTimeSchedule() {
                     "block";
 
                 preview.textContent =
-                    `Selected Schedule: ${
+                    `Selected Time Slot: ${
                         period.value
                     } • ${
                         formatTime(
@@ -636,6 +618,9 @@ function setupPartTimeSchedule() {
                 preview.style.display =
                     "none";
 
+                preview.textContent =
+                    "";
+
             }
 
         }
@@ -646,9 +631,13 @@ function setupPartTimeSchedule() {
 
     function updateVisibility() {
 
-        if (
-            isPartTime()
-        ) {
+        const hasJobType =
+            Boolean(
+                jobType.value
+            );
+
+
+        if (hasJobType) {
 
             scheduleGroup.style.display =
                 "block";
@@ -657,22 +646,13 @@ function setupPartTimeSchedule() {
             period.required =
                 true;
 
+
             startTime.required =
                 true;
 
+
             endTime.required =
                 true;
-
-
-            if (availability) {
-
-                availability.disabled =
-                    true;
-
-                availability.placeholder =
-                    "Time slot will be generated automatically";
-
-            }
 
 
             updatePreview();
@@ -688,8 +668,10 @@ function setupPartTimeSchedule() {
             period.required =
                 false;
 
+
             startTime.required =
                 false;
+
 
             endTime.required =
                 false;
@@ -698,22 +680,13 @@ function setupPartTimeSchedule() {
             period.value =
                 "";
 
+
             startTime.value =
                 "";
 
+
             endTime.value =
                 "";
-
-
-            if (availability) {
-
-                availability.disabled =
-                    false;
-
-                availability.placeholder =
-                    "Example: Monday to Friday";
-
-            }
 
 
             if (preview) {
@@ -763,102 +736,131 @@ function setupPartTimeSchedule() {
 
 
 /* =====================================================
-   CREATE PART-TIME AVAILABILITY
+   CREATE TIME SLOT
+   Saved in existing jobs.availability column
 ===================================================== */
 
 function getAvailabilityValue() {
 
     const jobType =
-        $("jobType").value
-            .toLowerCase()
-            .trim();
+        $("jobType");
+
+    const period =
+        $("partTimePeriod");
+
+    const start =
+        $("partTimeStart");
+
+    const end =
+        $("partTimeEnd");
 
 
-    const isPartTime =
-        jobType === "part time" ||
-        jobType === "part-time";
+    if (
+        !jobType ||
+        !jobType.value
+    ) {
 
-
-    /*
-    -----------------------------------------------------
-    PART TIME
-    -----------------------------------------------------
-    */
-
-    if (isPartTime) {
-
-        const period =
-            $("partTimePeriod").value;
-
-        const start =
-            $("partTimeStart").value;
-
-        const end =
-            $("partTimeEnd").value;
-
-
-        if (
-            !period ||
-            !start ||
-            !end
-        ) {
-
-            showMessage(
-                "Please select the time period, start time and end time for the part-time opportunity.",
-                "error"
-            );
-
-            return null;
-        }
-
-
-        if (
-            start >= end
-        ) {
-
-            showMessage(
-                "End time must be later than start time.",
-                "error"
-            );
-
-            return null;
-        }
-
-
-        const startFormatted =
-            formatTimeForDisplay(
-                start
-            );
-
-
-        const endFormatted =
-            formatTimeForDisplay(
-                end
-            );
-
-
-        return (
-            `${period} • ` +
-            `${startFormatted} - ` +
-            `${endFormatted}`
-        );
+        return "";
     }
 
 
+    const periodValue =
+        period
+            ? period.value
+            : "";
+
+
+    const startValue =
+        start
+            ? start.value
+            : "";
+
+
+    const endValue =
+        end
+            ? end.value
+            : "";
+
+
+
     /*
     -----------------------------------------------------
-    FULL TIME / OTHER
+    TIME SLOT VALIDATION
     -----------------------------------------------------
     */
 
+    if (!periodValue) {
+
+        showMessage(
+            "Please select the time period.",
+            "error"
+        );
+
+        return null;
+    }
+
+
+    if (!startValue) {
+
+        showMessage(
+            "Please select the start time.",
+            "error"
+        );
+
+        return null;
+    }
+
+
+    if (!endValue) {
+
+        showMessage(
+            "Please select the end time.",
+            "error"
+        );
+
+        return null;
+    }
+
+
+    if (
+        startValue >= endValue
+    ) {
+
+        showMessage(
+            "End time must be later than start time.",
+            "error"
+        );
+
+        return null;
+    }
+
+
+
+    const startFormatted =
+        formatTimeForDisplay(
+            startValue
+        );
+
+
+    const endFormatted =
+        formatTimeForDisplay(
+            endValue
+        );
+
+
     return (
-        $("availability")
-            .value
-            .trim()
+        `${periodValue} • ` +
+        `${startFormatted} - ` +
+        `${endFormatted}`
     );
+
 }
 
 
+
+/* =====================================================
+   FORMAT TIME FOR DISPLAY
+===================================================== */
 
 function formatTimeForDisplay(
     time
@@ -893,6 +895,7 @@ function formatTimeForDisplay(
         " " +
         suffix
     );
+
 }
 
 
@@ -949,7 +952,7 @@ async function postOpportunity(
 
     /*
     -----------------------------------------------------
-    Availability
+    Time Slot
     -----------------------------------------------------
     */
 
@@ -1001,15 +1004,17 @@ async function postOpportunity(
         salary:
             $("salary")
                 .value
-                ? Number(
+                ?
+                Number(
                     $("salary")
                         .value
                 )
-                : null,
+                :
+                null,
 
         /*
-        Part-time schedule is saved
-        inside existing availability field.
+        Time Slot is saved inside
+        existing availability field.
         */
 
         availability:
@@ -1151,15 +1156,23 @@ async function postOpportunity(
 
 
     /*
-    Reset Part-Time UI
+    Reset Time Slot UI
     */
 
     const scheduleGroup =
         $("partTimeScheduleGroup");
 
-
     const preview =
         $("partTimeSchedulePreview");
+
+    const period =
+        $("partTimePeriod");
+
+    const startTime =
+        $("partTimeStart");
+
+    const endTime =
+        $("partTimeEnd");
 
 
     if (scheduleGroup) {
@@ -1181,15 +1194,26 @@ async function postOpportunity(
     }
 
 
-    if ($("availability")) {
+    if (period) {
 
-        $("availability")
-            .disabled =
+        period.required =
             false;
 
-        $("availability")
-            .placeholder =
-            "Example: Monday to Friday";
+    }
+
+
+    if (startTime) {
+
+        startTime.required =
+            false;
+
+    }
+
+
+    if (endTime) {
+
+        endTime.required =
+            false;
 
     }
 
@@ -1986,7 +2010,7 @@ async function startDashboard() {
 
     /*
     -----------------------------------------------------
-    Part-Time UI
+    Time Slot UI
     -----------------------------------------------------
     */
 

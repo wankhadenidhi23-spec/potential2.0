@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-
   workflow_dispatch:
 
 permissions:
@@ -21,37 +20,35 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup GitHub Pages
+      - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Prepare website
         run: |
           mkdir -p _site
-
           cp -R "landing page"/. _site/
 
-          cp "auth.html" "_site/auth.html"
-
-          cp "supabase-client.js" "_site/supabase-client.js"
-          cp "supabase-config.js" "_site/supabase-config.js"
+          cp auth.html _site/
+          cp supabase-client.js _site/
+          cp supabase-config.js _site/
 
           cp -R "student dashboard" "_site/student dashboard"
-
           cp -R "BUSINESS DASHBOARD" "_site/BUSINESS DASHBOARD"
-
           cp -R "Admin" "_site/Admin"
 
-          echo "FILES BEING DEPLOYED:"
-          find _site -maxdepth 3 -type f | sort
+          echo "===== DEPLOYED FILES ====="
+          find _site -maxdepth 2 -type f | sort
+
+          echo "===== CHECK INDEX ====="
+          ls -la _site/index.html
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v4
         with:
-          path: "_site"
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment

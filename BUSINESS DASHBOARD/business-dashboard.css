@@ -357,4 +357,77 @@ input:focus, textarea:focus, select:focus { border-color: #8b82ef; box-shadow: 0
     font-size: 13px;
   }
 
+}/* =========================================================
+   PART-TIME OPPORTUNITY TIME SLOT
+   ========================================================= */
+
+#partTimeScheduleGroup {
+  width: 100%;
+  margin-top: 4px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f7f5ff, #f1f6ff);
+  border: 1px solid #ddd9f5;
+  border-radius: 14px;
+  box-sizing: border-box;
+}
+
+#partTimeScheduleGroup > label {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+#partTimeScheduleGroup small {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+#partTimeScheduleGroup .form-group {
+  margin-bottom: 14px;
+}
+
+#partTimeScheduleGroup input,
+#partTimeScheduleGroup select {
+  background: #fff;
+}
+
+
+/* Start Time + End Time */
+
+#partTimeScheduleGroup
+> div[style*="grid-template-columns"] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+
+/* Selected schedule preview */
+
+#partTimeSchedulePreview {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-top: 8px !important;
+  padding: 10px 13px !important;
+
+  color: #5147c8 !important;
+  background: #9b89ec !important;
+
+  border: 1px solid #6d61b0;
+  border-radius: 9px;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* Mobile */
+@media (max-width: 650px) {
+
+  #partTimeScheduleGroup
+  > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
 }
